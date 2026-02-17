@@ -4,6 +4,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "types.h"
+
 /**
  * @class Image
  * @brief A simple image class for handling 2D, single-channel (grayscale) images with float precision.
@@ -18,7 +20,7 @@ public:
      * @param rows Number of rows (default: 0).
      * @param cols Number of columns (default: 0).
      */
-    Image(int rows = 0, int cols = 0);
+    Image(PixelIdx rows = 0, PixelIdx cols = 0);
 
     /**
      * @brief Constructs an image by loading from a file (grayscale).
@@ -41,13 +43,13 @@ public:
      * @brief Returns the number of rows in the image.
      * @return Number of rows.
      */
-    inline int getRows() const { return rows; }
+    inline PixelIdx getRows() const { return rows; }
 
     /**
      * @brief Returns the number of columns in the image.
      * @return Number of columns.
      */
-    inline int getCols() const { return cols; }
+    inline PixelIdx getCols() const { return cols; }
 
     /**
      * @brief Assignment operator.
@@ -62,7 +64,7 @@ public:
      * @param col Column index.
      * @return Reference to the pixel value at (row, col).
      */
-    float& operator()(int row, int col);
+    PixelValue& operator()(PixelIdx row, PixelIdx col);
 
     /**
      * @brief Accesses a pixel value (const).
@@ -70,7 +72,7 @@ public:
      * @param col Column index.
      * @return Const reference to the pixel value at (row, col).
      */
-    const float& operator()(int row, int col) const;
+    const PixelValue& operator()(PixelIdx row, PixelIdx col) const;
 
     /**
      * @brief Saves the image to a file.
@@ -83,6 +85,8 @@ public:
      */
     bool save(const std::string& path) const;
 
+    void clear();
+
     /**
      * @brief Returns a pointer to the underlying memory of the flattened image.
      *
@@ -92,7 +96,7 @@ public:
      *
      * @return Pointer to the first element of the image data buffer.
      */
-    inline float* data() { return image; }
+    inline PixelValue* data() { return image; }
 
     /**
      * @brief Returns a const pointer to the underlying memory of the flattened image.
@@ -103,12 +107,12 @@ public:
      *
      * @return Const pointer to the first element of the image data buffer.
      */
-    inline const float* data() const { return image; }
+    inline const PixelValue* data() const { return image; }
 
 private:
-    int rows;
-    int cols;
-    float* image;
+    PixelIdx rows;
+    PixelIdx cols;
+    PixelValue* image;
 };
 
 #endif // IMAGE_H

@@ -3,16 +3,19 @@
 
 #include "Image.h"
 
-class Context {
-public:
-    Context(const Image& image) : originalImage(image), processedImage(image) {}
+namespace components {
+    class Context {
+    public:
+        Context(Image& image) : originalImage(image), processedImage(image) {}
 
-    const Image& getOriginalImage() const { return originalImage; }
-    Image& getProcessedImage() { return processedImage; }
+        const Image& getOriginalImage() const { return originalImage; }
 
-private:
-    Image originalImage;
-    Image processedImage;
-};
+        const Image& getProcessedImage() const { return processedImage; }
+        Image& getProcessedImage() { return processedImage; }
+    private:
+        const Image originalImage;
+        Image processedImage;
+    };
+} // components
 
 #endif // CONTEXT_H

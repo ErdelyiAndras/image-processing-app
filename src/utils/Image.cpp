@@ -5,20 +5,19 @@
 #include "stb_image_write.h"
 
 #include "Image.h"
+#include "types.h"
 
+#include <cstdint>
 #include <algorithm>
 #include <cstring>
 #include <vector>
 
-Image::Image(int rows, int cols) : rows(rows), cols(cols), image(nullptr) {
-    if (rows < 0 || cols < 0) {
-        throw std::invalid_argument("Rows and columns must be non-negative.");
-    }
+Image::Image(PixelIdx rows, PixelIdx cols) : rows(rows), cols(cols), image(nullptr) {
     if (rows == 0 || cols == 0) {
         return;
     }
-    image = new float[rows * cols];
-    std::memset(image, 0, sizeof(float) * rows * cols);
+    image = new PixelValue[rows * cols];
+    std::memset(image, 0, sizeof(PixelValue) * rows * cols);
 }
 
 Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
@@ -28,12 +27,12 @@ Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
         throw std::runtime_error("Failed to load image from path: " + path);
     }
 
-    rows = h;
-    cols = w;
-    image = new float[rows * cols];
+    rows = static_cast<PixelIdx>(h);
+    cols = static_cast<PixelIdx>(w);
+    image = new PixelValue[rows * cols];
 
-    for (int i = 0; i < rows * cols; ++i) {
-        image[i] = static_cast<float>(raw[i]) / 255.0f;
+    for (uint64_t i = 0; i < rows * cols; ++i) {
+        image[i] = static_cast<PixelValue>(raw[i]) / 255.0f;
     }
 
     stbi_image_free(raw);
@@ -46,8 +45,8 @@ Image::Image(const Image& other) : rows(0), cols(0), image(nullptr) {
 
     rows = other.rows;
     cols = other.cols;
-    image = new float[rows * cols];
-    std::memcpy(image, other.image, sizeof(float) * rows * cols);
+    image = new PixelValue[rows * cols];
+    std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
 }
 
 Image::~Image() {
@@ -67,18 +66,18 @@ Image& Image::operator=(const Image& other) {
     cols = other.cols;
 
     if (other.image) {
-        image = new float[rows * cols];
-        std::memcpy(image, other.image, sizeof(float) * rows * cols);
+        image = new PixelValue[rows * cols];
+        std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
     }
 
     return *this;
 }
 
-float& Image::operator()(int row, int col) {
+PixelValue& Image::operator()(PixelIdx row, PixelIdx col) {
     return image[row * cols + col];
 }
 
-const float& Image::operator()(int row, int col) const {
+const PixelValue& Image::operator()(PixelIdx row, PixelIdx col) const {
     return image[row * cols + col];
 }
 
@@ -88,10 +87,10 @@ bool Image::save(const std::string& path) const {
     }
 
     // Convert float [0.0, 1.0] to uint8 [0, 255]
-    std::vector<unsigned char> output(rows * cols);
-    for (int i = 0; i < rows * cols; ++i) {
-        float val = std::clamp(image[i], 0.0f, 1.0f);
-        output[i] = static_cast<unsigned char>(val * 255.0f + 0.5f);
+    std::vector<uint8_t> output(rows * cols);
+    for (uint64_t i = 0; i < rows * cols; ++i) {
+        PixelValue val = std::clamp(image[i], 0.0f, 1.0f);
+        output[i] = static_cast<uint8_t>(val * 255.0f + 0.5f);
     }
 
     // Determine format from extension
@@ -112,4 +111,10 @@ bool Image::save(const std::string& path) const {
     }
 
     return false;
+}
+
+void Image::clear() {
+    if (image) {
+        std::memset(image, 0, sizeof(PixelValue) * rows * cols);
+    }
 }

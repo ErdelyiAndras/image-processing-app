@@ -1,4 +1,5 @@
 add_library(denoising
+    DenoisingComponent.cpp
     tv-denoising/gpu/TVDenoisingGPU.cpp
     tv-denoising/cpu/TVDenoisingCPU.cpp
 )
@@ -11,4 +12,5 @@ target_include_directories(denoising PUBLIC
 
 target_link_libraries(denoising PUBLIC
     core
+    config
 )

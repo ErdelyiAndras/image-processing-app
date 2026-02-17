@@ -6,8 +6,11 @@
 #include <chrono>
 
 #include "Image.h"
-#include "TVDenoisingGPU.h"
+// #include "TVDenoisingGPU.h"
 #include "TVDenoisingCPU.h"
+
+#include "Component.h"
+#include "Context.h"
 
 int main(int argc, char** argv) {
     if (argc != 7) {
@@ -54,31 +57,36 @@ int main(int argc, char** argv) {
         float step_size = std::stof(argv[4]);
         float tol = std::stof(argv[5]);
 
+        std::cout << strength << " " << step_size << " " << tol << std::endl;
+
+        std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>(strength, step_size, tol);
+        components::Context processing_context{ image };
+
         auto start = std::chrono::high_resolution_clock::now();
 
-        Image denoisedImage_gpu = tv_denoise_gradient_descent(context, queue, program, image, strength, step_size, tol, suppress_log);
+        denoiser->process(processing_context);
         
         auto end = std::chrono::high_resolution_clock::now();
         
         std::chrono::duration<float> elapsed = end - start;
-        std::cout << "GPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
-        
-        start = std::chrono::high_resolution_clock::now();
-
-        Image denoisedImage_cpu = tv_denoise_gradient_descent(image, strength, step_size, tol, suppress_log);
-        
-        end = std::chrono::high_resolution_clock::now();
-
-        elapsed = end - start;
         std::cout << "CPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
+        
+        // start = std::chrono::high_resolution_clock::now();
+
+        // Image denoisedImage_cpu = tv_denoise_gradient_descent(image, strength, step_size, tol, suppress_log);
+        
+        // end = std::chrono::high_resolution_clock::now();
+
+        // elapsed = end - start;
+        // std::cout << "CPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
         
         std::string output_path = argv[2];
         size_t dot_pos = output_path.find_last_of('.');
         std::string base = (dot_pos == std::string::npos) ? output_path : output_path.substr(0, dot_pos);
         std::string ext = (dot_pos == std::string::npos) ? "" : output_path.substr(dot_pos);
 
-        denoisedImage_gpu.save(base + "_gpu" + ext);
-        denoisedImage_cpu.save(base + "_cpu" + ext);
+        // denoisedImage_gpu.save(base + "_gpu" + ext);
+        processing_context.getProcessedImage().save(base + "_cpu" + ext);
     }
     catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

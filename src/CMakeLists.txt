@@ -1,6 +1,7 @@
 add_subdirectory(utils)
 add_subdirectory(core)
 add_subdirectory(components)
+add_subdirectory(config)
 
 set(DENOISING_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/kernels/denoising/TVDenoising.cl")
 
@@ -9,6 +10,7 @@ target_link_libraries(image_processing_lib INTERFACE
     utils
     core
     components
+    config
 )
 
 target_compile_definitions(image_processing_lib INTERFACE

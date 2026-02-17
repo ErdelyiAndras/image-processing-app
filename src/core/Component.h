@@ -1,11 +1,15 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-class Component {
-public:
-    virtual ~Component() = default;
+#include "Context.h"
 
-    virtual void process() = 0;
-};
+namespace components {
+    class Component {
+    public:
+        virtual ~Component() = default;
+
+        virtual void process(Context& context) = 0;
+    };
+} // components
 
 #endif // COMPONENT_H
