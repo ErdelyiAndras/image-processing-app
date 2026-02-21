@@ -4,6 +4,8 @@
 #include "denoising-config.h"
 #include "types.h"
 #include "Component.h"
+#include "Parameters.h"
+#include "DenoisingParameters.h"
 
 namespace components {
     namespace denoising {
@@ -18,7 +20,7 @@ namespace components {
             inline float getStepSize() const { return step_size; }
             inline float getTolerance() const { return tolerance; }
 
-            void setParameters(float strength, float step_size, float tolerance);
+            void setParameters(const Parameters& params) override;
             void process(Context& context) override;
 
         protected:
@@ -46,6 +48,9 @@ namespace components {
             virtual void  evalMomentumAndUpdateImage(const uint64_t counter) = 0;
 
             virtual void processContext(const Context& context);
+
+        private:
+            using ParamType = DenoisingParameters;
         };
     } // denoising
 } // components

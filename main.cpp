@@ -6,8 +6,11 @@
 #include <chrono>
 
 #include "Image.h"
+
 #include "TVDenoisingGPU.h"
 #include "TVDenoisingCPU.h"
+
+#include "DenoisingParameters.h"
 
 #include "Component.h"
 #include "Context.h"
@@ -31,7 +34,10 @@ int main(int argc, char** argv) {
         float step_size = std::stof(argv[4]);
         float tol = std::stof(argv[5]);
 
-        std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>(strength, step_size, tol);
+        components::denoising::DenoisingParameters params{ strength, step_size, tol };
+
+        std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>();
+        denoiser->setParameters(params);
         components::Context cpu_processing_context{ image };
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -44,7 +50,8 @@ int main(int argc, char** argv) {
         std::cout << "CPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
 
 
-        denoiser = std::make_unique<components::denoising::TVDenoisingGPU>(strength, step_size, tol);
+        denoiser = std::make_unique<components::denoising::TVDenoisingGPU>();
+        denoiser->setParameters(params);
         components::Context gpu_processing_context{ image };
 
         start = std::chrono::high_resolution_clock::now();

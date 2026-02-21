@@ -1,5 +1,7 @@
 #include "DenoisingComponent.h"
 #include "denoising-config.h"
+#include "Parameters.h"
+#include "DenoisingParameters.h"
 
 #include <iostream>
 #include <cmath>
@@ -33,11 +35,12 @@ namespace components {
             , gradient()
             , momentum() {}
 
-        void DenoisingComponent::setParameters(float strength, float step_size, float tolerance) {
-            this->strength  = strength;
-            this->step_size = step_size;
-            this->tolerance = tolerance;
-            this->step      = step_size / (strength + 1);
+        void DenoisingComponent::setParameters(const Parameters& params) {
+            ParamType denoisingParams{ dynamic_cast<const ParamType&>(params) };
+            strength  = denoisingParams.strength;
+            step_size = denoisingParams.step_size;
+            tolerance = denoisingParams.tolerance;
+            step      = step_size / (strength + 1);
         }
 
         void DenoisingComponent::process(Context& context) {
