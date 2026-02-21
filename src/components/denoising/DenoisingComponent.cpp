@@ -41,15 +41,7 @@ namespace components {
         }
 
         void DenoisingComponent::process(Context& context) {
-            startImage     = context.getProcessedImage();
-            processedImage = startImage;
-            height         = startImage.getRows();
-            width          = startImage.getCols();
-
-            tv_gradient = Image(height, width);
-            l2_gradient = Image(height, width);
-            gradient    = Image(height, width);
-            momentum    = Image(height, width);
+            processContext(context);
 
             float loss_smoothed{ 0.0f };
 
@@ -76,6 +68,19 @@ namespace components {
             }
 
             context.getProcessedImage() = processedImage;
+        }
+
+        void DenoisingComponent::processContext(const Context& context) {
+            startImage     = context.getProcessedImage();
+            processedImage = startImage;
+
+            height         = startImage.getRows();
+            width          = startImage.getCols();
+
+            tv_gradient = Image(height, width);
+            l2_gradient = Image(height, width);
+            gradient    = Image(height, width);
+            momentum    = Image(height, width);
         }
     } // denoising
 } // components

@@ -300,3 +300,37 @@ inline void oclPrintError(const cl::Error &error)
 }
 
 #pragma endregion
+
+inline bool oclSetup(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const std::string& kernel_path) {
+    if (!oclCreateContextBy(context)) {
+        if (ENABLE_LOGGING) {
+            std::cerr << "Failed to create OpenCL context" << std::endl;
+        }
+        return false;
+    }
+
+    #ifdef __NO_STD_VECTOR
+        cl::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+    #else
+        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+    #endif
+
+    queue = cl::CommandQueue(context, devices[0], CL_QUEUE_PROFILING_ENABLE);
+
+    std::string source_code = oclReadSourcesFromFile(kernel_path);
+    program = cl::Program(context, source_code);
+
+    try {
+        program.build(devices);
+    }
+    catch (cl::Error error) {
+        oclPrintError(error);
+        if (ENABLE_LOGGING) {
+            std::cerr << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
+            std::cerr << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(devices[0]) << std::endl;
+            std::cerr << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0]) << std::endl;
+        }
+        return false;
+    }
+    return true;
+}

@@ -44,6 +44,8 @@ namespace components {
             virtual float l2NormAndGrad() = 0;
             virtual float evalLossAndGrad() = 0;
             virtual void  evalMomentumAndUpdateImage(const uint64_t counter) = 0;
+
+            virtual void processContext(const Context& context);
         };
     } // denoising
 } // components

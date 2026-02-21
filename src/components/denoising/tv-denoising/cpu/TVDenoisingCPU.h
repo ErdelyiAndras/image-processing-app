@@ -10,6 +10,7 @@ namespace components {
             TVDenoisingCPU();
             TVDenoisingCPU(float strength, float step_size, float tolerance);
 
+        private:
             float tvNormAndGrad() override;
             float l2NormAndGrad() override;
             float evalLossAndGrad() override;
