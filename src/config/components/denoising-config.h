@@ -3,6 +3,7 @@
 
 namespace components {
     namespace denoising {
+        // TV denoising defaults
         static constexpr const float default_strength  = 0.1f;
         static constexpr const float default_step_size = 1e-2f;
         static constexpr const float default_tolerance = 3.2e-3f;

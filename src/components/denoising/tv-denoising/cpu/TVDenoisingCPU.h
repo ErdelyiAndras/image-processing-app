@@ -1,11 +1,12 @@
 #ifndef TV_DENOISING_CPU_H
 #define TV_DENOISING_CPU_H
 
-#include "DenoisingComponent.h"
+#include "TVDenoisingComponent.h"
+#include "types.h"
 
 namespace components {
     namespace denoising {
-        class TVDenoisingCPU : public DenoisingComponent {
+        class TVDenoisingCPU : public TVDenoisingComponent {
         public:
             TVDenoisingCPU();
             TVDenoisingCPU(float strength, float step_size, float tolerance);

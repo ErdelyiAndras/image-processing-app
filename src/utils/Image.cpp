@@ -7,7 +7,6 @@
 #include "Image.h"
 #include "types.h"
 
-#include <cstdint>
 #include <algorithm>
 #include <cstring>
 #include <vector>

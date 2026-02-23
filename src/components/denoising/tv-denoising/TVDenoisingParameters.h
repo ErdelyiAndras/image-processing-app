@@ -1,19 +1,19 @@
-#ifndef DENOISING_PARAMETERS_H
-#define DENOISING_PARAMETERS_H
+#ifndef TV_DENOISING_PARAMETERS_H
+#define TV_DENOISING_PARAMETERS_H
 
 #include "Parameters.h"
 
 namespace components {
     namespace denoising {
-        struct DenoisingParameters : public Parameters {
+        struct TVDenoisingParameters : public Parameters {
             float strength;
             float step_size;
             float tolerance;
 
-            DenoisingParameters(float strength, float step_size, float tolerance)
+            TVDenoisingParameters(float strength, float step_size, float tolerance)
                 : strength(strength), step_size(step_size), tolerance(tolerance) {}
         };
     }
 }
 
-#endif // DENOISING_PARAMETERS_H
+#endif // TV_DENOISING_PARAMETERS_H

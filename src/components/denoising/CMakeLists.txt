@@ -1,16 +1,17 @@
-add_library(denoising
-    DenoisingComponent.cpp
-    tv-denoising/gpu/TVDenoisingGPU.cpp
-    tv-denoising/cpu/TVDenoisingCPU.cpp
-)
+add_subdirectory(tv-denoising)
+
+add_library(denoising STATIC)
 
 target_include_directories(denoising PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/tv-denoising/gpu
-    ${CMAKE_CURRENT_SOURCE_DIR}/tv-denoising/cpu
 )
 
 target_link_libraries(denoising PUBLIC
     core
     config
+    tv_denoising
+)
+
+target_sources(denoising PRIVATE
+    DenoisingComponent.cpp
 )

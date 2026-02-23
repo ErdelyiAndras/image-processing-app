@@ -10,7 +10,7 @@
 #include "TVDenoisingGPU.h"
 #include "TVDenoisingCPU.h"
 
-#include "DenoisingParameters.h"
+#include "TVDenoisingParameters.h"
 
 #include "Component.h"
 #include "Context.h"
@@ -34,7 +34,8 @@ int main(int argc, char** argv) {
         float step_size = std::stof(argv[4]);
         float tol = std::stof(argv[5]);
 
-        components::denoising::DenoisingParameters params{ strength, step_size, tol };
+        // --- TV Denoising ---
+        components::denoising::TVDenoisingParameters params{ strength, step_size, tol };
 
         std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>();
         denoiser->setParameters(params);
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
         auto end = std::chrono::high_resolution_clock::now();
 
         std::chrono::duration<float> elapsed = end - start;
-        std::cout << "CPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
+        std::cout << "CPU_TVDenoising took: " << elapsed.count() << " seconds" << std::endl;
 
 
         denoiser = std::make_unique<components::denoising::TVDenoisingGPU>();
@@ -61,15 +62,15 @@ int main(int argc, char** argv) {
         end = std::chrono::high_resolution_clock::now();
 
         elapsed = end - start;
-        std::cout << "GPU_Denoising took: " << elapsed.count() << " seconds" << std::endl;
+        std::cout << "GPU_TVDenoising took: " << elapsed.count() << " seconds" << std::endl;
 
         std::string output_path = argv[2];
         size_t dot_pos = output_path.find_last_of('.');
         std::string base = (dot_pos == std::string::npos) ? output_path : output_path.substr(0, dot_pos);
         std::string ext = (dot_pos == std::string::npos) ? "" : output_path.substr(dot_pos);
 
-        cpu_processing_context.getProcessedImage().save(base + "_cpu" + ext);
-        gpu_processing_context.getProcessedImage().save(base + "_gpu" + ext);
+        cpu_processing_context.getProcessedImage().save(base + "_tv_cpu" + ext);
+        gpu_processing_context.getProcessedImage().save(base + "_tv_gpu" + ext);
     }
     catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

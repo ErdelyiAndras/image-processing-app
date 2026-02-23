@@ -1,13 +1,12 @@
 #ifndef TV_DENOISING_GPU_H
 #define TV_DENOISING_GPU_H
 
-#include "DenoisingComponent.h"
-
-#include <CL/opencl.hpp>
+#include "TVDenoisingComponent.h"
+#include "GPUComponent.h"
 
 namespace components {
     namespace denoising {
-        class TVDenoisingGPU : public DenoisingComponent {
+        class TVDenoisingGPU : public TVDenoisingComponent, protected GPUComponent {
         public:
             TVDenoisingGPU();
             TVDenoisingGPU(float strength, float step_size, float tolerance);
@@ -17,11 +16,6 @@ namespace components {
             float l2NormAndGrad() override;
             float evalLossAndGrad() override;
             void  evalMomentumAndUpdateImage(const uint64_t counter) override;
-
-            PixelIdx img_size;
-            cl::Context context;
-            cl::CommandQueue queue;
-            cl::Program program;
 
             void computeTvNormAndDyDyMtxs(Image& tv_norm_mtx, Image& dx_mtx, Image& dy_mtx);
             void computeGradientFromDxDyMtxs(Image& dx_mtx, Image& dy_mtx);
