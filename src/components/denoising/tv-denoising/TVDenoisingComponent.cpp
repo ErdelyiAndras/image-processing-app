@@ -40,9 +40,17 @@ namespace components {
             step      = step_size / (strength + 1);
         }
 
-        void TVDenoisingComponent::process(Context& context) {
-            processContext(context);
+        void TVDenoisingComponent::processContext(const Context& context) {
+            DenoisingComponent::processContext(context);
+            outputImage = inputImage;
 
+            tv_gradient = Image(height, width);
+            l2_gradient = Image(height, width);
+            gradient    = Image(height, width);
+            momentum    = Image(height, width);
+        }
+
+        void TVDenoisingComponent::applyDenoising() {
             float loss_smoothed{ 0.0f };
 
             uint64_t counter { 1U };
@@ -66,18 +74,6 @@ namespace components {
 
                 ++counter;
             }
-
-            context.getProcessedImage() = outputImage;
-        }
-
-        void TVDenoisingComponent::processContext(const Context& context) {
-            DenoisingComponent::processContext(context);
-            outputImage = inputImage;
-
-            tv_gradient = Image(height, width);
-            l2_gradient = Image(height, width);
-            gradient    = Image(height, width);
-            momentum    = Image(height, width);
         }
     } // denoising
 } // components

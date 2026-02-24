@@ -18,27 +18,7 @@ namespace components {
             initOpenCL(GAUSSIAN_BLUR_KERNEL_PATH);
         }
 
-        void GaussianBlurGPU::applyGaussianBlur() {
-            int half{ kernel_size / 2 };
-
-            // Generate 2D Gaussian kernel on host
-            int kernel_total{ kernel_size * kernel_size };
-            std::vector<float> kernel_data(kernel_total);
-            float sum{ 0.0f };
-            for (int i{ -half }; i <= half; ++i) {
-                for (int j{ -half }; j <= half; ++j) {
-                    float val{
-                        std::exp(-(static_cast<float>(i * i + j * j)) /
-                        (2.0f * sigma * sigma))
-                    };
-                    kernel_data[(i + half) * kernel_size + (j + half)] = val;
-                    sum += val;
-                }
-            }
-            for (float& v : kernel_data) {
-                v /= sum;
-            }
-
+        void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {
             cl::Buffer img_buf(clContext, CL_MEM_READ_ONLY, img_size * sizeof(float));
             queue.enqueueWriteBuffer(img_buf, CL_TRUE, 0, img_size * sizeof(float), inputImage.data());
             queue.finish();
@@ -47,8 +27,8 @@ namespace components {
             queue.enqueueWriteBuffer(out_buf, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
             queue.finish();
 
-            cl::Buffer kernel_buf(clContext, CL_MEM_READ_ONLY, kernel_total * sizeof(float));
-            queue.enqueueWriteBuffer(kernel_buf, CL_TRUE, 0, kernel_total * sizeof(float), kernel_data.data());
+            cl::Buffer kernel_buf(clContext, CL_MEM_READ_ONLY, kernel.size() * sizeof(float));
+            queue.enqueueWriteBuffer(kernel_buf, CL_TRUE, 0, kernel.size() * sizeof(float), kernel.data());
             queue.finish();
 
             cl::Kernel gpu_kernel(program, "gaussian_blur");

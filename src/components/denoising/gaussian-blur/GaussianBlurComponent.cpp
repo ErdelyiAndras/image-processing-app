@@ -4,6 +4,9 @@
 #include "Parameters.h"
 #include "denoising-config.h"
 
+#include <vector>
+#include <cmath>
+
 namespace components {
     namespace denoising {
         GaussianBlurComponent::GaussianBlurComponent()
@@ -22,12 +25,26 @@ namespace components {
             sigma       = gaussianBlurParams.sigma;
         }
 
-        void GaussianBlurComponent::process(Context& context) {
-            processContext(context);
+        void GaussianBlurComponent::applyDenoising() {
+            const int half{ kernel_size / 2 };
 
-            applyGaussianBlur();
+            std::vector<float> kernel(kernel_size * kernel_size);
+            float sum{ 0.0f };
+            for (int i{ -half }; i <= half; ++i) {
+                for (int j{ -half }; j <= half; ++j) {
+                    float val{
+                        std::exp(-(static_cast<float>(i * i + j * j)) /
+                        (2.0f * sigma * sigma))
+                    };
+                    kernel[(i + half) * kernel_size + (j + half)] = val;
+                    sum += val;
+                }
+            }
+            for (float& v : kernel) {
+                v /= sum;
+            }
 
-            context.getProcessedImage() = outputImage;
+            computeConvolution(kernel);
         }
     } // denoising
 } // components

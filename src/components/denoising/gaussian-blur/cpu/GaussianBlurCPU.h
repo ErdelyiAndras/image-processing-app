@@ -3,6 +3,8 @@
 
 #include "GaussianBlurComponent.h"
 
+#include <vector>
+
 namespace components {
     namespace denoising {
         class GaussianBlurCPU : public GaussianBlurComponent {
@@ -11,7 +13,7 @@ namespace components {
             GaussianBlurCPU(int kernel_size, float sigma);
 
         private:
-            void applyGaussianBlur() override;
+            void computeConvolution(const std::vector<float>& kernel) override;
         };
     } // denoising
 } // components

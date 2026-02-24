@@ -20,7 +20,6 @@ namespace components {
             inline float getTolerance() const { return tolerance; }
 
             void setParameters(const Parameters& params) override;
-            void process(Context& context) override;
 
         protected:
             float strength;
@@ -45,6 +44,8 @@ namespace components {
 
         private:
             using ParamType = TVDenoisingParameters;
+
+            void applyDenoising() override;
         };
     } // denoising
 } // components

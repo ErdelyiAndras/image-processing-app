@@ -2,6 +2,7 @@
 #define DENOISING_COMPONENT_H
 
 #include "Component.h"
+#include "Context.h"
 
 namespace components {
     namespace denoising {
@@ -9,6 +10,12 @@ namespace components {
         public:
             DenoisingComponent();
             virtual ~DenoisingComponent() = default;
+
+            void process(Context& context) override;
+
+        protected:
+            virtual void applyDenoising() = 0;
+
         };
     } // denoising
 } // components

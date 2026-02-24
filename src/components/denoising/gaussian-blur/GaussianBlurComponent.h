@@ -5,6 +5,8 @@
 #include "DenoisingComponent.h"
 #include "GaussianBlurParameters.h"
 
+#include <vector>
+
 namespace components {
     namespace denoising {
         class GaussianBlurComponent : public DenoisingComponent {
@@ -18,16 +20,17 @@ namespace components {
             inline float getSigma() const { return sigma; }
 
             void setParameters(const Parameters& params) override;
-            void process(Context& context) override;
 
         protected:
             int kernel_size;
             float sigma;
 
-            virtual void applyGaussianBlur() = 0;
+            virtual void computeConvolution(const std::vector<float>& kernel) = 0;
 
         private:
             using ParamType = GaussianBlurParameters;
+
+            void applyDenoising() override;
         };
     } // denoising
 } // components

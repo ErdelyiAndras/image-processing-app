@@ -4,6 +4,8 @@
 #include "GaussianBlurComponent.h"
 #include "GPUComponent.h"
 
+#include <vector>
+
 namespace components {
     namespace denoising {
         class GaussianBlurGPU : public GaussianBlurComponent, protected GPUComponent {
@@ -12,7 +14,7 @@ namespace components {
             GaussianBlurGPU(int kernel_size, float sigma);
 
         private:
-            void applyGaussianBlur() override;
+            void computeConvolution(const std::vector<float>& kernel) override;
 
             void processContext(const Context& context) override;
         };

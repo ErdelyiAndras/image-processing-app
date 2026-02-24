@@ -13,24 +13,8 @@ namespace components {
         GaussianBlurCPU::GaussianBlurCPU(int kernel_size, float sigma)
             : GaussianBlurComponent(kernel_size, sigma) {}
 
-        void GaussianBlurCPU::applyGaussianBlur() {
-            const int half{ kernel_size / 2 };
-
-            std::vector<float> kernel(kernel_size * kernel_size);
-            float sum{ 0.0f };
-            for (int i{ -half }; i <= half; ++i) {
-                for (int j{ -half }; j <= half; ++j) {
-                    float val{
-                        std::exp(-(static_cast<float>(i * i + j * j)) /
-                        (2.0f * sigma * sigma))
-                    };
-                    kernel[(i + half) * kernel_size + (j + half)] = val;
-                    sum += val;
-                }
-            }
-            for (float& v : kernel) {
-                v /= sum;
-            }
+        void GaussianBlurCPU::computeConvolution(const std::vector<float>& kernel) {
+            const int half = kernel_size / 2;
 
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
