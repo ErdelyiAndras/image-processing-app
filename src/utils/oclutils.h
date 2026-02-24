@@ -74,7 +74,7 @@ inline bool oclCreateContextByRegex(cl::Context &context, std::regex platform_na
             if (numDevices > 0)
                 return true;
         }
-        catch (cl::Error error) {
+        catch (const cl::Error&) {
             continue;
         }
     }
@@ -99,8 +99,8 @@ inline cl_uint oclZeroCopyPtrAlignment (cl::Device device)
 inline cl_uint oclZeroCopySizeAlignment (cl_uint requiredSize, cl::Device device)
 {
     // The following statement rounds requiredSize up to the next CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE-byte boundary
-    return requiredSize + (~requiredSize + 1) % device.getInfo<CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE>();  
-} 
+    return requiredSize + (~requiredSize + 1) % device.getInfo<CL_DEVICE_MIN_DATA_TYPE_ALIGN_SIZE>();
+}
 
 #pragma endregion
 
@@ -111,7 +111,9 @@ inline cl_int oclGetTimeStats(cl_event event, cl_ulong &execStart, cl_ulong &exe
     cl_int err = CL_SUCCESS;
 
     if(event == NULL) {
-        std::cerr << "No event object returned!" << std::endl;
+        if (ENABLE_LOGGING) {
+            std::cerr << "No event object returned!" << std::endl;
+        }
     } else {
         clWaitForEvents(1, &event);
     }
@@ -127,9 +129,11 @@ inline cl_int oclPrintTimeStats(cl_event event)
     cl_ulong execStart, execEnd;
     cl_int err = oclGetTimeStats(event, execStart, execEnd);
 
-    std::cout << "[start] " << execStart <<
-        " [end] "   << execEnd <<
-        " [time] "  << (execEnd - execStart) / 1e+06 << "ms." << std::endl;
+    if (ENABLE_LOGGING) {
+        std::cout << "[start] " << execStart <<
+            " [end] "   << execEnd <<
+            " [time] "  << (execEnd - execStart) / 1e+06 << "ms." << std::endl;
+    }
 
     return err;
 }
@@ -209,7 +213,7 @@ inline const char* oclDeviceTypeString(cl_uint devType)
     case CL_DEVICE_TYPE_ALL: return "CL_DEVICE_TYPE_ALL";
     default:
         return "error!";
-    }       
+    }
 }
 
 // Helper function to get OpenCL error string from constant
@@ -282,7 +286,7 @@ inline const char* oclErrorString(cl_int error)
         "CL_INVALID_MIP_LEVEL",
         "CL_INVALID_GLOBAL_WORK_SIZE",
     };
-  
+
     const int errorCount = sizeof(errorString) / sizeof(errorString[0]);
 
     const int index = -error;
@@ -296,7 +300,9 @@ inline const char* oclErrorString(cl_int error)
 
 inline void oclPrintError(const cl::Error &error)
 {
-    std::cout << error.what() << "(" << error.err() << " == " << oclErrorString(error.err()) << ")" << std::endl;
+    if (ENABLE_LOGGING) {
+        std::cout << error.what() << "(" << error.err() << " == " << oclErrorString(error.err()) << ")" << std::endl;
+    }
 }
 
 #pragma endregion
@@ -323,7 +329,7 @@ inline bool oclSetup(cl::Context& context, cl::CommandQueue& queue, cl::Program&
     try {
         program.build(devices);
     }
-    catch (cl::Error error) {
+    catch (const cl::Error& error) {
         oclPrintError(error);
         if (ENABLE_LOGGING) {
             std::cerr << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(devices[0]) << std::endl;
