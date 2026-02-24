@@ -6,6 +6,7 @@ target_include_directories(config INTERFACE
 )
 
 set(TV_DENOISING_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/denoising/TVDenoising.cl")
+set(GAUSSIAN_BLUR_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/denoising/GaussianBlur.cl")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(config INTERFACE
@@ -19,4 +20,5 @@ endif()
 
 target_compile_definitions(config INTERFACE
     TV_DENOISING_KERNEL_PATH="${TV_DENOISING_KERNEL_PATH}"
+    GAUSSIAN_BLUR_KERNEL_PATH="${GAUSSIAN_BLUR_KERNEL_PATH}"
 )

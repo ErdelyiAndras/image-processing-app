@@ -12,20 +12,20 @@
 
 #include "TVDenoisingParameters.h"
 
+#include "GaussianBlurCPU.h"
+#include "GaussianBlurGPU.h"
+
+#include "GaussianBlurParameters.h"
+
 #include "Component.h"
 #include "Context.h"
 
 int main(int argc, char** argv) {
-    if (argc != 7) {
+    if (argc != 6) {
         std::cerr << "Usage: " << argv[0] 
-                  << " <input_image_path> <output_image_path> <strength> <step_size> <tol> <suppress_log>" 
+                  << " <input_image_path> <output_image_path> <strength> <step_size> <tol>"
                   << std::endl;
         return -1;
-    }
-    std::string suppress_log_str = argv[6];
-    bool suppress_log = true;
-    if (suppress_log_str == "false" || suppress_log_str == "0") {
-        suppress_log = false;
     }
 
     try {
@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
         float step_size = std::stof(argv[4]);
         float tol = std::stof(argv[5]);
 
-        // --- TV Denoising ---
+
+        #pragma region TV Denoising
+
         components::denoising::TVDenoisingParameters params{ strength, step_size, tol };
 
         std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>();
@@ -71,6 +73,44 @@ int main(int argc, char** argv) {
 
         cpu_processing_context.getProcessedImage().save(base + "_tv_cpu" + ext);
         gpu_processing_context.getProcessedImage().save(base + "_tv_gpu" + ext);
+
+        #pragma endregion
+
+
+        #pragma region Gaussian Blur
+
+        components::denoising::GaussianBlurParameters gauss_params{ 5, 16.0f };
+
+        std::unique_ptr<components::Component> blur = std::make_unique<components::denoising::GaussianBlurCPU>();
+        blur->setParameters(gauss_params);
+        components::Context cpu_gauss_context{ image };
+
+        start = std::chrono::high_resolution_clock::now();
+
+        blur->process(cpu_gauss_context);
+
+        end = std::chrono::high_resolution_clock::now();
+
+        elapsed = end - start;
+        std::cout << "CPU_GaussianBlur took: " << elapsed.count() << " seconds" << std::endl;
+
+        blur = std::make_unique<components::denoising::GaussianBlurGPU>();
+        blur->setParameters(gauss_params);
+        components::Context gpu_gauss_context{ image };
+
+        start = std::chrono::high_resolution_clock::now();
+
+        blur->process(gpu_gauss_context);
+
+        end = std::chrono::high_resolution_clock::now();
+
+        elapsed = end - start;
+        std::cout << "GPU_GaussianBlur took: " << elapsed.count() << " seconds" << std::endl;
+
+        cpu_gauss_context.getProcessedImage().save(base + "_gauss_cpu" + ext);
+        gpu_gauss_context.getProcessedImage().save(base + "_gauss_gpu" + ext);
+
+        #pragma endregion
     }
     catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

@@ -10,6 +10,10 @@ namespace components {
 
         static constexpr const float momentum_beta = 0.9f;
         static constexpr const float loss_smoothing_beta = 0.9f;
+
+        // Gaussian blur defaults
+        static constexpr const int default_kernel_size = 5;
+        static constexpr const float default_sigma = 1.0f;
     } // denoising
 } // components
 
