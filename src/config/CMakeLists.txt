@@ -7,6 +7,7 @@ target_include_directories(config INTERFACE
 
 set(TV_DENOISING_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/denoising/TVDenoising.cl")
 set(GAUSSIAN_BLUR_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/denoising/GaussianBlur.cl")
+set(SOBEL_EDGE_DETECTION_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/edge-detection/SobelEdgeDetection.cl")
 
 target_compile_definitions(config INTERFACE
     $<IF:$<CONFIG:Debug>,ENABLE_LOGGING=1,ENABLE_LOGGING=0>
@@ -15,4 +16,5 @@ target_compile_definitions(config INTERFACE
 target_compile_definitions(config INTERFACE
     TV_DENOISING_KERNEL_PATH="${TV_DENOISING_KERNEL_PATH}"
     GAUSSIAN_BLUR_KERNEL_PATH="${GAUSSIAN_BLUR_KERNEL_PATH}"
+    SOBEL_EDGE_DETECTION_KERNEL_PATH="${SOBEL_EDGE_DETECTION_KERNEL_PATH}"
 )
