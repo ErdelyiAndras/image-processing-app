@@ -2,6 +2,7 @@
 #define EDGE_DETECTION_COMPONENT_H
 
 #include "Component.h"
+#include "Context.h"
 
 namespace components {
     namespace edge_detection {
@@ -14,7 +15,6 @@ namespace components {
 
         protected:
             virtual void applyEdgeDetection() = 0;
-
         };
     } // edge_detection
 } // components

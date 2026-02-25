@@ -6,15 +6,15 @@
 
 namespace components {
     namespace edge_detection {
-        class SobelEdgeDetectionGPU : public SobelEdgeDetectionComponent, protected GPUComponent {
+        class SobelEdgeDetectionGPU final : public SobelEdgeDetectionComponent, protected GPUComponent {
         public:
             SobelEdgeDetectionGPU();
             SobelEdgeDetectionGPU(float threshold);
 
         private:
-            void applySobelFilter() override final;
+            void applySobelFilter() override;
 
-            void processContext(const Context& context) override final;
+            void processContext(const Context& context) override;
         };
     } // edge_detection
 } // components

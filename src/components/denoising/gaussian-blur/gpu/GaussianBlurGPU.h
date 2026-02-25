@@ -8,7 +8,7 @@
 
 namespace components {
     namespace denoising {
-        class GaussianBlurGPU : public GaussianBlurComponent, protected GPUComponent {
+        class GaussianBlurGPU final : public GaussianBlurComponent, protected GPUComponent {
         public:
             GaussianBlurGPU();
             GaussianBlurGPU(int kernel_size, float sigma);

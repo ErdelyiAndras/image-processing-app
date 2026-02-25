@@ -11,11 +11,10 @@ namespace components {
             DenoisingComponent();
             virtual ~DenoisingComponent() = default;
 
-            void process(Context& context) override;
+            void process(Context& context) override final;
 
         protected:
             virtual void applyDenoising() = 0;
-
         };
     } // denoising
 } // components

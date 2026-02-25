@@ -19,7 +19,7 @@ namespace components {
             inline float getStepSize() const { return step_size; }
             inline float getTolerance() const { return tolerance; }
 
-            void setParameters(const Parameters& params) override;
+            void setParameters(const Parameters& params) override final;
 
         protected:
             float strength;
@@ -45,7 +45,7 @@ namespace components {
         private:
             using ParamType = TVDenoisingParameters;
 
-            void applyDenoising() override;
+            void applyDenoising() override final;
         };
     } // denoising
 } // components

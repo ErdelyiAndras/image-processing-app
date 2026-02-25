@@ -5,13 +5,13 @@
 
 namespace components {
     namespace edge_detection {
-        class SobelEdgeDetectionCPU : public SobelEdgeDetectionComponent {
+        class SobelEdgeDetectionCPU final : public SobelEdgeDetectionComponent {
         public:
             SobelEdgeDetectionCPU();
             SobelEdgeDetectionCPU(float threshold);
 
         private:
-            void applySobelFilter() override final;
+            void applySobelFilter() override;
         };
     } // edge_detection
 } // components

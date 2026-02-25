@@ -6,7 +6,7 @@
 
 namespace components {
     namespace denoising {
-        class TVDenoisingGPU : public TVDenoisingComponent, protected GPUComponent {
+        class TVDenoisingGPU final : public TVDenoisingComponent, protected GPUComponent {
         public:
             TVDenoisingGPU();
             TVDenoisingGPU(float strength, float step_size, float tolerance);

@@ -19,7 +19,7 @@ namespace components {
             inline int getKernelSize() const { return kernel_size; }
             inline float getSigma() const { return sigma; }
 
-            void setParameters(const Parameters& params) override;
+            void setParameters(const Parameters& params) override final;
 
         protected:
             int kernel_size;
@@ -30,7 +30,7 @@ namespace components {
         private:
             using ParamType = GaussianBlurParameters;
 
-            void applyDenoising() override;
+            void applyDenoising() override final;
         };
     } // denoising
 } // components
