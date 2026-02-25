@@ -30,15 +30,11 @@ namespace components {
             static constexpr float momentum_beta       = components::denoising::momentum_beta;
             static constexpr float loss_smoothing_beta = components::denoising::loss_smoothing_beta;
 
-            Image tv_gradient;
-            Image l2_gradient;
-            Image gradient;
-            Image momentum;
-
             virtual float tvNormAndGrad() = 0;
             virtual float l2NormAndGrad() = 0;
             virtual float evalLossAndGrad() = 0;
             virtual void  evalMomentumAndUpdateImage(const uint64_t counter) = 0;
+            virtual void  postProcessing() = 0;
 
             void processContext(const Context& context) override;
 

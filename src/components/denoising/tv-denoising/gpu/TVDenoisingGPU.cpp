@@ -7,35 +7,79 @@
 namespace components {
     namespace denoising {
         TVDenoisingGPU::TVDenoisingGPU()
-            : TVDenoisingComponent() {
+            : TVDenoisingComponent()
+            , inputImageBuffer()
+            , outputImageBuffer()
+            , tvGradientBuffer()
+            , l2GradientBuffer()
+            , gradientBuffer()
+            , momentumBuffer()
+            , tvNormMtxBuffer()
+            , dxMtxBuffer()
+            , dyMtxBuffer()
+            , l2NormMtxBuffer() {
             initOpenCL(TV_DENOISING_KERNEL_PATH);
         }
 
         TVDenoisingGPU::TVDenoisingGPU(float strength, float step_size, float tolerance)
-            : TVDenoisingComponent(strength, step_size, tolerance) {
+            : TVDenoisingComponent(strength, step_size, tolerance)
+            , inputImageBuffer()
+            , outputImageBuffer()
+            , tvGradientBuffer()
+            , l2GradientBuffer()
+            , gradientBuffer()
+            , momentumBuffer()
+            , tvNormMtxBuffer()
+            , dxMtxBuffer()
+            , dyMtxBuffer()
+            , l2NormMtxBuffer() {
             initOpenCL(TV_DENOISING_KERNEL_PATH);
         }
 
         float TVDenoisingGPU::tvNormAndGrad() {
-            Image tv_norm_mtx(height, width);
-            Image dx_mtx(height, width);
-            Image dy_mtx(height, width);
+            queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dxMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dyMtxBuffer, 0.0f, 0, img_size * sizeof(float));
 
-            computeTvNormAndDyDyMtxs(tv_norm_mtx, dx_mtx, dy_mtx);
+            cl::Kernel kernel{ program, "tv_norm_mtx_and_dx_dy" };
+            kernel.setArg(0, outputImageBuffer);
+            kernel.setArg(1, tvNormMtxBuffer);
+            kernel.setArg(2, dxMtxBuffer);
+            kernel.setArg(3, dyMtxBuffer);
+            kernel.setArg(4, height);
+            kernel.setArg(5, width);
+            kernel.setArg(6, epsilon);
 
-            float tv_norm{ sum(clContext, queue, program, tv_norm_mtx.data(), img_size) };
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
-            computeGradientFromDxDyMtxs(dx_mtx, dy_mtx);
+            float tv_norm{ sum<float>(cl_context, queue, program, tvNormMtxBuffer, img_size) };
+
+            for (int i{ 1 }; i <= 3; ++i) {
+                std::string kernel_name{ "grad_from_dx_dy_step" + std::to_string(i) };
+                cl::Kernel grad_kernel{ program, kernel_name.c_str() };
+                grad_kernel.setArg(0, dxMtxBuffer);
+                grad_kernel.setArg(1, dyMtxBuffer);
+                grad_kernel.setArg(2, tvGradientBuffer);
+                grad_kernel.setArg(3, height);
+                grad_kernel.setArg(4, width);
+                queue.enqueueNDRangeKernel(grad_kernel, cl::NullRange, img_size, cl::NullRange);
+            }
 
             return tv_norm;
         }
 
         float TVDenoisingGPU::l2NormAndGrad() {
-            Image l2_norm_mtx(height, width);
+            cl::Kernel kernel{ program, "l2_norm_mtx_and_grad" };
+            kernel.setArg(0, outputImageBuffer);
+            kernel.setArg(1, inputImageBuffer);
+            kernel.setArg(2, l2NormMtxBuffer);
+            kernel.setArg(3, l2GradientBuffer);
+            kernel.setArg(4, height);
+            kernel.setArg(5, width);
 
-            computeL2NormMtxAndGrad(l2_norm_mtx);
+            queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
-            float l2_norm{ sum(clContext, queue, program, l2_norm_mtx.data(), img_size) };
+            float l2_norm{ sum<float>(cl_context, queue, program, l2NormMtxBuffer, img_size) };
 
             return 0.5f * l2_norm;
         }
@@ -43,174 +87,69 @@ namespace components {
         float TVDenoisingGPU::evalLossAndGrad() {
             const float tv_norm{ tvNormAndGrad() };
 
-            cl::Kernel kernel(program, "eval_loss_and_grad");
+            queue.enqueueFillBuffer(gradientBuffer, 0.0f, 0, img_size * sizeof(float));
 
-            cl::Buffer grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
-            queue.finish();
-
-            cl::Buffer tv_grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(tv_grad_buffer, CL_TRUE, 0, img_size * sizeof(float), tv_gradient.data());
-            queue.finish();
-
-            kernel.setArg(0, grad_buffer);
-            kernel.setArg(1, tv_grad_buffer);
+            cl::Kernel kernel{ program, "eval_loss_and_grad" };
+            kernel.setArg(0, gradientBuffer);
+            kernel.setArg(1, tvGradientBuffer);
             kernel.setArg(2, strength);
-
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
             const float l2_norm{ l2NormAndGrad() };
 
-            cl::Buffer l2_grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(l2_grad_buffer, CL_TRUE, 0, img_size * sizeof(float), l2_gradient.data());
-            queue.finish();
-
-            kernel.setArg(1, l2_grad_buffer);
+            kernel.setArg(1, l2GradientBuffer);
             kernel.setArg(2, 1.0f);
-
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
-
-            queue.enqueueReadBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), gradient.data());
 
             return strength * tv_norm + l2_norm;
         }
 
         void TVDenoisingGPU::evalMomentumAndUpdateImage(const uint64_t counter) {
-            cl::Kernel momentum_kernel(program, "eval_momentum");
-
-            cl::Buffer momentum_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(momentum_buffer, CL_TRUE, 0, img_size * sizeof(float), momentum.data());
-            queue.finish();
-
-            cl::Buffer grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), gradient.data());
-            queue.finish();
-
-            momentum_kernel.setArg(0, momentum_buffer);
-            momentum_kernel.setArg(1, grad_buffer);
+            cl::Kernel momentum_kernel{ program, "eval_momentum" };
+            momentum_kernel.setArg(0, momentumBuffer);
+            momentum_kernel.setArg(1, gradientBuffer);
             momentum_kernel.setArg(2, momentum_beta);
-
             queue.enqueueNDRangeKernel(momentum_kernel, cl::NullRange, img_size, cl::NullRange);
 
-            queue.enqueueReadBuffer(momentum_buffer, CL_TRUE, 0, img_size * sizeof(float), momentum.data());
-
-            cl::Kernel update_kernel(program, "update_img");
-
-            cl::Buffer img_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(img_buffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
-            queue.finish();
-
-            cl::Buffer momentum_buffer2(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(momentum_buffer2, CL_TRUE, 0, img_size * sizeof(float), momentum.data());
-            queue.finish();
-
-            update_kernel.setArg(0, img_buffer);
-            update_kernel.setArg(1, momentum_buffer2);
+            cl::Kernel update_kernel{ program, "update_img" };
+            update_kernel.setArg(0, outputImageBuffer);
+            update_kernel.setArg(1, momentumBuffer);
             update_kernel.setArg(2, step);
             update_kernel.setArg(3, momentum_beta);
-            update_kernel.setArg(4, counter);
-
+            update_kernel.setArg(4, static_cast<cl_int>(counter));
             queue.enqueueNDRangeKernel(update_kernel, cl::NullRange, img_size, cl::NullRange);
-
-            queue.enqueueReadBuffer(img_buffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
         }
 
-        void TVDenoisingGPU::computeTvNormAndDyDyMtxs(Image& tv_norm_mtx, Image& dx_mtx, Image& dy_mtx) {
-            cl::Kernel kernel(program, "tv_norm_mtx_and_dx_dy");
-
-            cl::Buffer img_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(img_buffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
-            queue.finish();
-
-            cl::Buffer tv_norm_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(tv_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), tv_norm_mtx.data());
-            queue.finish();
-
-            cl::Buffer dx_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dx_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dx_mtx.data());
-            queue.finish();
-
-            cl::Buffer dy_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dy_mtx.data());
-            queue.finish();
-
-            kernel.setArg(0, img_buffer);
-            kernel.setArg(1, tv_norm_mtx_buffer);
-            kernel.setArg(2, dx_mtx_buffer);
-            kernel.setArg(3, dy_mtx_buffer);
-            kernel.setArg(4, height);
-            kernel.setArg(5, width);
-            kernel.setArg(6, epsilon);
-
-            queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
-
-            queue.enqueueReadBuffer(tv_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), tv_norm_mtx.data());
-            queue.enqueueReadBuffer(dx_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dx_mtx.data());
-            queue.enqueueReadBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dy_mtx.data());
-        }
-
-        void TVDenoisingGPU::computeGradientFromDxDyMtxs(Image& dx_mtx, Image& dy_mtx) {
-            cl::Buffer dx_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dx_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dx_mtx.data());
-            queue.finish();
-
-            cl::Buffer dy_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dy_mtx.data());
-            queue.finish();
-
-            cl::Buffer grad_buffer(clContext, CL_MEM_WRITE_ONLY, img_size * sizeof(float));
-
-            for (int i = 1; i <= 3; ++i) {
-                std::string kernel_name = "grad_from_dx_dy_step" + std::to_string(i);
-                cl::Kernel kernel(program, kernel_name.c_str());
-
-                kernel.setArg(0, dx_mtx_buffer);
-                kernel.setArg(1, dy_mtx_buffer);
-                kernel.setArg(2, grad_buffer);
-                kernel.setArg(3, height);
-                kernel.setArg(4, width);
-
-                queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
-                queue.finish();
-            }
-            queue.enqueueReadBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), tv_gradient.data());
-        }
-
-        void TVDenoisingGPU::computeL2NormMtxAndGrad(Image& l2_norm_mtx) {
-            cl::Kernel kernel(program, "l2_norm_mtx_and_grad");
-
-            cl::Buffer img_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(img_buffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
-            queue.finish();
-
-            cl::Buffer orig_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(orig_buffer, CL_TRUE, 0, img_size * sizeof(float), inputImage.data());
-            queue.finish();
-
-            cl::Buffer l2_norm_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(l2_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), l2_norm_mtx.data());
-            queue.finish();
-
-            cl::Buffer grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), l2_gradient.data());
-            queue.finish();
-
-            kernel.setArg(0, img_buffer);
-            kernel.setArg(1, orig_buffer);
-            kernel.setArg(2, l2_norm_mtx_buffer);
-            kernel.setArg(3, grad_buffer);
-            kernel.setArg(4, height);
-            kernel.setArg(5, width);
-
-            queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
-
-            queue.enqueueReadBuffer(l2_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), l2_norm_mtx.data());
-            queue.enqueueReadBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), l2_gradient.data());
+        void TVDenoisingGPU::postProcessing() {
+            queue.enqueueReadBuffer(outputImageBuffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
         }
 
         void TVDenoisingGPU::processContext(const Context& context) {
             TVDenoisingComponent::processContext(context);
             img_size = width * height;
+
+            inputImageBuffer  = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  img_size * sizeof(float) };
+            outputImageBuffer = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            tvGradientBuffer  = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            l2GradientBuffer  = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            gradientBuffer    = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            momentumBuffer    = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            tvNormMtxBuffer   = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            dxMtxBuffer       = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            dyMtxBuffer       = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            l2NormMtxBuffer   = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+
+            queue.enqueueWriteBuffer(inputImageBuffer, CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
+            queue.enqueueWriteBuffer(outputImageBuffer, CL_FALSE, 0, img_size * sizeof(float), outputImage.data());
+
+            queue.enqueueFillBuffer(tvGradientBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(l2GradientBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(gradientBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(momentumBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dxMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dyMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(l2NormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
         }
     } // denoising
 } // components

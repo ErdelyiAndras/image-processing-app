@@ -4,13 +4,23 @@
 #include "config.h"
 
 #include <cmath>
+#include <algorithm>
 
 namespace components {
     namespace denoising {
-        TVDenoisingCPU::TVDenoisingCPU() : TVDenoisingComponent() {}
+        TVDenoisingCPU::TVDenoisingCPU()
+            : TVDenoisingComponent()
+            , tv_gradient()
+            , l2_gradient()
+            , gradient()
+            , momentum() {}
 
         TVDenoisingCPU::TVDenoisingCPU(float strength, float step_size, float tolerance)
-            : TVDenoisingComponent(strength, step_size, tolerance) {}
+            : TVDenoisingComponent(strength, step_size, tolerance)
+            , tv_gradient()
+            , l2_gradient()
+            , gradient()
+            , momentum() {}
 
         float TVDenoisingCPU::tvNormAndGrad() {
             float tv_norm{ 0.0f };
@@ -65,13 +75,26 @@ namespace components {
         }
 
         void TVDenoisingCPU::evalMomentumAndUpdateImage(const uint64_t counter) {
-            for (PixelIdx i = 0; i < height; ++i) {
-                for (PixelIdx j = 0; j < width; ++j) {
+            for (PixelIdx i{ 0U }; i < height; ++i) {
+                for (PixelIdx j{ 0U }; j < width; ++j) {
                     momentum(i, j) *= momentum_beta;
                     momentum(i, j) += gradient(i, j) * (1.0f - momentum_beta);
                     outputImage(i, j) -= step / (1.0f - static_cast<float>(std::pow(momentum_beta, counter))) * momentum(i, j);
                 }
             }
+        }
+
+        void TVDenoisingCPU::postProcessing() {
+            // No post-processing needed for CPU implementation
+        }
+
+        void TVDenoisingCPU::processContext(const Context& context) {
+            TVDenoisingComponent::processContext(context);
+
+            tv_gradient = Image{ height, width };
+            l2_gradient = Image{ height, width };
+            gradient    = Image{ height, width };
+            momentum    = Image{ height, width };
         }
     } // denoising
 } // components

@@ -12,14 +12,22 @@ namespace components {
             TVDenoisingGPU(float strength, float step_size, float tolerance);
 
         private:
+            cl::Buffer inputImageBuffer;
+            cl::Buffer outputImageBuffer;
+            cl::Buffer tvGradientBuffer;
+            cl::Buffer l2GradientBuffer;
+            cl::Buffer gradientBuffer;
+            cl::Buffer momentumBuffer;
+            cl::Buffer tvNormMtxBuffer;
+            cl::Buffer dxMtxBuffer;
+            cl::Buffer dyMtxBuffer;
+            cl::Buffer l2NormMtxBuffer;
+
             float tvNormAndGrad() override;
             float l2NormAndGrad() override;
             float evalLossAndGrad() override;
             void  evalMomentumAndUpdateImage(const uint64_t counter) override;
-
-            void computeTvNormAndDyDyMtxs(Image& tv_norm_mtx, Image& dx_mtx, Image& dy_mtx);
-            void computeGradientFromDxDyMtxs(Image& dx_mtx, Image& dy_mtx);
-            void computeL2NormMtxAndGrad(Image& l2_norm_mtx);
+            void  postProcessing() override;
 
             void processContext(const Context& context) override;
         };
