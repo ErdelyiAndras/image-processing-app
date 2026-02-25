@@ -123,15 +123,15 @@ namespace components {
             queue.finish();
 
             cl::Buffer tv_norm_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(tv_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
+            queue.enqueueWriteBuffer(tv_norm_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), tv_norm_mtx.data());
             queue.finish();
 
             cl::Buffer dx_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dx_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
+            queue.enqueueWriteBuffer(dx_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dx_mtx.data());
             queue.finish();
 
             cl::Buffer dy_mtx_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
+            queue.enqueueWriteBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dy_mtx.data());
             queue.finish();
 
             kernel.setArg(0, img_buffer);
@@ -158,9 +158,7 @@ namespace components {
             queue.enqueueWriteBuffer(dy_mtx_buffer, CL_TRUE, 0, img_size * sizeof(float), dy_mtx.data());
             queue.finish();
 
-            cl::Buffer grad_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(grad_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
-            queue.finish();
+            cl::Buffer grad_buffer(clContext, CL_MEM_WRITE_ONLY, img_size * sizeof(float));
 
             for (int i = 1; i <= 3; ++i) {
                 std::string kernel_name = "grad_from_dx_dy_step" + std::to_string(i);

@@ -24,8 +24,6 @@ namespace components {
             queue.finish();
 
             cl::Buffer out_buf(clContext, CL_MEM_WRITE_ONLY, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(out_buf, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
-            queue.finish();
 
             cl::Buffer kernel_buf(clContext, CL_MEM_READ_ONLY, kernel.size() * sizeof(float));
             queue.enqueueWriteBuffer(kernel_buf, CL_TRUE, 0, kernel.size() * sizeof(float), kernel.data());

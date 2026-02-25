@@ -16,14 +16,14 @@ namespace components {
         }
 
         void SobelEdgeDetectionGPU::applySobelFilter() {
-            cl::Kernel kernel(program, "sobel_edge_detection");
+            cl::Kernel kernel{ program, "sobel_edge_detection" };
 
-            cl::Buffer img_buffer(clContext, CL_MEM_READ_ONLY, img_size * sizeof(float));
+            cl::Buffer img_buffer{ clContext, CL_MEM_READ_ONLY, img_size * sizeof(float) };
             queue.enqueueWriteBuffer(img_buffer, CL_TRUE, 0, img_size * sizeof(float), inputImage.data());
             queue.finish();
 
-            cl::Buffer out_buffer(clContext, CL_MEM_READ_WRITE, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(out_buffer, CL_TRUE, 0, img_size * sizeof(float), std::vector<float>(img_size, 0.0f).data());
+            cl::Buffer out_buffer{ clContext, CL_MEM_READ_WRITE, img_size * sizeof(float) };
+            queue.enqueueWriteBuffer(out_buffer, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
             queue.finish();
 
             kernel.setArg(0, img_buffer);
@@ -34,7 +34,7 @@ namespace components {
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
             queue.finish();
 
-            cl::Kernel thresh_kernel(program, "sobel_threshold");
+            cl::Kernel thresh_kernel{ program, "sobel_threshold" };
             thresh_kernel.setArg(0, out_buffer);
             thresh_kernel.setArg(1, threshold);
             thresh_kernel.setArg(2, static_cast<int>(height));
