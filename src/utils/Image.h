@@ -35,6 +35,12 @@ public:
     Image(const Image& other);
 
     /**
+     * @brief Move constructor.
+     * @param other Image to move from.
+     */
+    Image(Image&& other) noexcept;
+
+    /**
      * @brief Destructor. Releases allocated memory.
      */
     ~Image();
@@ -57,6 +63,13 @@ public:
      * @return Reference to this image.
      */
     Image& operator=(const Image& other);
+
+    /**
+     * @brief Move assignment operator.
+     * @param other Image to move from.
+     * @return Reference to this image.
+     */
+    Image& operator=(Image&& other) noexcept;
 
     /**
      * @brief Accesses a pixel value (modifiable).

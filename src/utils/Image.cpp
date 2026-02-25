@@ -48,6 +48,13 @@ Image::Image(const Image& other) : rows(0), cols(0), image(nullptr) {
     std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
 }
 
+Image::Image(Image&& other) noexcept
+    : rows(other.rows), cols(other.cols), image(other.image) {
+    other.rows = 0;
+    other.cols = 0;
+    other.image = nullptr;
+}
+
 Image::~Image() {
     delete[] image;
     image = nullptr;
@@ -68,6 +75,24 @@ Image& Image::operator=(const Image& other) {
         image = new PixelValue[rows * cols];
         std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
     }
+
+    return *this;
+}
+
+Image& Image::operator=(Image&& other) noexcept {
+    if (this == &other) {
+        return *this;
+    }
+
+    delete[] image;
+
+    rows = other.rows;
+    cols = other.cols;
+    image = other.image;
+
+    other.rows = 0;
+    other.cols = 0;
+    other.image = nullptr;
 
     return *this;
 }
