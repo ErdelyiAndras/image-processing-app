@@ -19,15 +19,13 @@ namespace components {
         }
 
         void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {
-            cl::Buffer img_buf(clContext, CL_MEM_READ_ONLY, img_size * sizeof(float));
-            queue.enqueueWriteBuffer(img_buf, CL_TRUE, 0, img_size * sizeof(float), inputImage.data());
-            queue.finish();
+            cl::Buffer img_buf(cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float));
+            queue.enqueueWriteBuffer(img_buf, CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
 
-            cl::Buffer out_buf(clContext, CL_MEM_WRITE_ONLY, img_size * sizeof(float));
+            cl::Buffer out_buf(cl_context, CL_MEM_WRITE_ONLY, img_size * sizeof(float));
 
-            cl::Buffer kernel_buf(clContext, CL_MEM_READ_ONLY, kernel.size() * sizeof(float));
-            queue.enqueueWriteBuffer(kernel_buf, CL_TRUE, 0, kernel.size() * sizeof(float), kernel.data());
-            queue.finish();
+            cl::Buffer kernel_buf(cl_context, CL_MEM_READ_ONLY, kernel.size() * sizeof(float));
+            queue.enqueueWriteBuffer(kernel_buf, CL_FALSE, 0, kernel.size() * sizeof(float), kernel.data());
 
             cl::Kernel gpu_kernel(program, "gaussian_blur");
             gpu_kernel.setArg(0, img_buf);
@@ -38,7 +36,6 @@ namespace components {
             gpu_kernel.setArg(5, kernel_size);
 
             queue.enqueueNDRangeKernel(gpu_kernel, cl::NullRange, img_size, cl::NullRange);
-            queue.finish();
 
             queue.enqueueReadBuffer(out_buf, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
         }
