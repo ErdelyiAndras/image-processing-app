@@ -9,7 +9,7 @@ namespace components {
 
     void Component::processContext(const Context& context) {
         inputImage  = context.getProcessedImage();
-        outputImage = Image(inputImage.getRows(), inputImage.getCols());
+        outputImage = Image{ inputImage.getRows(), inputImage.getCols() };
 
         height = inputImage.getRows();
         width  = inputImage.getCols();
