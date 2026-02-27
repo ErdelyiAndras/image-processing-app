@@ -1,0 +1,14 @@
+add_library(canny_cpu OBJECT
+    CannyEdgeDetectionCPU.cpp
+)
+
+target_include_directories(canny_cpu PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${CMAKE_CURRENT_SOURCE_DIR}/../..
+)
+
+target_link_libraries(canny_cpu PUBLIC
+    core
+    config
+)
