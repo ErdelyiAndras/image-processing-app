@@ -87,19 +87,15 @@ namespace components {
 
         float TVDenoisingGPU::evalLossAndGrad() {
             const float tv_norm{ tvNormAndGrad() };
+            const float l2_norm{ l2NormAndGrad() };
 
             queue.enqueueFillBuffer(gradientBuffer, 0.0f, 0, img_size * sizeof(float));
 
             cl::Kernel kernel{ program, "eval_loss_and_grad" };
             kernel.setArg(0, gradientBuffer);
             kernel.setArg(1, tvGradientBuffer);
-            kernel.setArg(2, strength);
-            queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
-
-            const float l2_norm{ l2NormAndGrad() };
-
-            kernel.setArg(1, l2GradientBuffer);
-            kernel.setArg(2, 1.0f);
+            kernel.setArg(2, l2GradientBuffer);
+            kernel.setArg(3, strength);
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
             return strength * tv_norm + l2_norm;

@@ -58,16 +58,11 @@ namespace components {
 
         float TVDenoisingCPU::evalLossAndGrad() {
             const float tv_norm{ tvNormAndGrad() };
-            for (PixelIdx i{ 0U }; i < height; ++i) {
-                for (PixelIdx j{ 0U }; j < width; ++j) {
-                    gradient(i, j) = strength * tv_gradient(i, j);
-                }
-            }
-
             const float l2_norm{ l2NormAndGrad() };
+
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
-                    gradient(i, j) += l2_gradient(i, j);
+                    gradient(i, j) = strength * tv_gradient(i, j) + l2_gradient(i, j);
                 }
             }
 

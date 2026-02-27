@@ -46,8 +46,8 @@ __kernel void tv_norm_mtx_and_dx_dy(
 }
 
 __kernel void grad_from_dx_dy_step1(
-    __global const float* dx, 
-    __global const float* dy, 
+    __global const float* dx,
+    __global const float* dy,
     __global float* grad,
     int rows,
     int cols
@@ -127,11 +127,12 @@ __kernel void l2_norm_mtx_and_grad(
 
 __kernel void eval_loss_and_grad(
     __global float* grad,
-    __global const float* tv_or_l2_grad,
+    __global const float* tv_grad,
+    __global const float* l2_grad,
     float strength
 ) {
     int idx = get_global_id(0);
-    grad[idx] += strength * tv_or_l2_grad[idx];
+    grad[idx] += strength * tv_grad[idx] + l2_grad[idx];
 }
 
 __kernel void eval_momentum(
