@@ -40,6 +40,7 @@ namespace components {
             queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
             queue.enqueueFillBuffer(dxMtxBuffer, 0.0f, 0, img_size * sizeof(float));
             queue.enqueueFillBuffer(dyMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(tvGradientBuffer, 0.0f, 0, img_size * sizeof(float));
 
             cl::Kernel kernel{ program, "tv_norm_mtx_and_dx_dy" };
             kernel.setArg(0, outputImageBuffer);
