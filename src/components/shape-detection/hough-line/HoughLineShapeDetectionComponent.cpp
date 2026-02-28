@@ -45,6 +45,12 @@ namespace components {
         }
 
         void HoughLineShapeDetectionComponent::processDetectedLines() {
+            std::sort(detected_lines.begin(), detected_lines.end(),
+                [](const HoughLine& a, const HoughLine& b) {
+                    return a.votes > b.votes;
+                }
+            );
+
             std::vector<HoughLine> valid_lines;
 
             for (HoughLine& line : detected_lines) {
@@ -168,5 +174,5 @@ namespace components {
             applyHoughTransform();
             processDetectedLines();
         }
-    }
-}
+    } // shape_detection
+} // components

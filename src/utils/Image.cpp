@@ -110,14 +110,12 @@ bool Image::save(const std::string& path) const {
         return false;
     }
 
-    // Convert float [0.0, 1.0] to uint8 [0, 255]
     std::vector<uint8_t> output(rows * cols);
     for (uint64_t i = 0; i < rows * cols; ++i) {
         PixelValue val = std::clamp(image[i], 0.0f, 1.0f);
         output[i] = static_cast<uint8_t>(val * 255.0f + 0.5f);
     }
 
-    // Determine format from extension
     std::string ext;
     size_t dot = path.find_last_of('.');
     if (dot != std::string::npos) {

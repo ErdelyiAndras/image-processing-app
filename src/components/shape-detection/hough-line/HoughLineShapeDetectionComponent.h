@@ -54,7 +54,7 @@ namespace components {
 
         private:
             using ParamType = HoughLineShapeDetectionParameters;
-            using Pixel = std::pair<PixelIdx, PixelIdx>;
+            using Pixel     = std::pair<PixelIdx, PixelIdx>;
 
             void applyShapeDetection() override final;
         };

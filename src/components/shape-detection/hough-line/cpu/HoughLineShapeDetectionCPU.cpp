@@ -2,7 +2,6 @@
 #include "types.h"
 
 #include <cmath>
-#include <algorithm>
 
 namespace components {
     namespace shape_detection {
@@ -72,12 +71,6 @@ namespace components {
                     detected_lines.emplace_back(HoughLine{ rho, theta, votes});
                 }
             }
-
-            std::sort(detected_lines.begin(), detected_lines.end(),
-                [](const HoughLine& a, const HoughLine& b) {
-                    return a.votes > b.votes;
-                }
-            );
         }
 
         void HoughLineShapeDetectionCPU::processContext(const Context& context) {
@@ -93,4 +86,4 @@ namespace components {
             accumulator.assign(num_rho_bins * num_theta_bins, 0U);
         }
     } // shape_detection
-}
+} // components

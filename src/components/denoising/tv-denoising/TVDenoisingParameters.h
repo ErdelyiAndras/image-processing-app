@@ -13,7 +13,7 @@ namespace components {
             TVDenoisingParameters(float strength, float step_size, float tolerance)
                 : strength(strength), step_size(step_size), tolerance(tolerance) {}
         };
-    }
-}
+    } // denoising
+} // components
 
 #endif // TV_DENOISING_PARAMETERS_H

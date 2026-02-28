@@ -12,7 +12,7 @@ namespace components {
             CannyEdgeDetectionParameters(float low_threshold, float high_threshold)
                 : low_threshold(low_threshold), high_threshold(high_threshold) {}
         };
-    }
-}
+    } // edge_detection
+} // components
 
 #endif // CANNY_EDGE_DETECTION_PARAMETERS_H

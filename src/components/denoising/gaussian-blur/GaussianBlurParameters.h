@@ -12,7 +12,7 @@ namespace components {
             GaussianBlurParameters(int kernel_size, float sigma)
                 : kernel_size(kernel_size), sigma(sigma) {}
         };
-    }
-}
+    } // denoising
+} // components
 
 #endif // GAUSSIAN_BLUR_PARAMETERS_H

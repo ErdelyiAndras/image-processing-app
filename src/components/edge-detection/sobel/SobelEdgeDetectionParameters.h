@@ -11,7 +11,7 @@ namespace components {
             SobelEdgeDetectionParameters(float threshold)
                 : threshold(threshold) {}
         };
-    }
-}
+    } // edge_detection
+} // components
 
 #endif // SOBEL_EDGE_DETECTION_PARAMETERS_H

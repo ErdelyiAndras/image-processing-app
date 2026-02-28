@@ -26,7 +26,7 @@ namespace components {
                 , min_line_length(min_line_length)
                 , max_line_gap(max_line_gap) {}
         };
-    }
-}
+    } // shape_detection
+} // components
 
 #endif // HOUGH_LINE_SHAPE_DETECTION_PARAMETERS_H
