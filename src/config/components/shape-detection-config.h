@@ -12,6 +12,12 @@ namespace components {
         static constexpr const int      default_threshold        = 150;
         static constexpr const uint32_t default_min_line_length  = 30U;
         static constexpr const uint32_t default_max_line_gap     = 10U;
+
+        // Hough circle shape detection
+        static constexpr const uint32_t default_circle_vote_min_threshold = 100U;
+        static constexpr const uint32_t default_min_radius                = 10U;
+        static constexpr const uint32_t default_max_radius                = 100U;
+        static constexpr const float    default_min_dist                  = 20U;
     } // shape_detection
 } // components
 
