@@ -3,10 +3,10 @@
 
 namespace components {
     namespace edge_detection {
-        // Sobel edge detection defaults
+        // Sobel edge detection
         static constexpr const float default_threshold = 0.1f;
 
-        // Canny edge detection defaults
+        // Canny edge detection
         static constexpr const float default_low_threshold = 0.05f;
         static constexpr const float default_high_threshold = 0.15f;
 

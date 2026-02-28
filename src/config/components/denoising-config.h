@@ -3,7 +3,7 @@
 
 namespace components {
     namespace denoising {
-        // TV denoising defaults
+        // TV denoising
         static constexpr const float default_strength  = 0.1f;
         static constexpr const float default_step_size = 1e-2f;
         static constexpr const float default_tolerance = 3.2e-3f;
@@ -11,8 +11,8 @@ namespace components {
         static constexpr const float momentum_beta = 0.9f;
         static constexpr const float loss_smoothing_beta = 0.9f;
 
-        // Gaussian blur defaults
-        static constexpr const int default_kernel_size = 5;
+        // Gaussian blur
+        static constexpr const int   default_kernel_size = 5;
         static constexpr const float default_sigma = 1.0f;
     } // denoising
 } // components
