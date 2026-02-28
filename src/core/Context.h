@@ -9,19 +9,20 @@ namespace components {
         Context(Image& image)
             : originalImage(image)
             , processedImage(image)
-            , edgeImage(image.getRows(), image.getCols()) {}
+            , edgeMap(image.getRows(), image.getCols()) {}
 
         inline const Image& getOriginalImage() const { return originalImage; }
 
         inline const Image& getProcessedImage() const { return processedImage; }
         inline Image& getProcessedImage() { return processedImage; }
 
-        inline const Image& getEdgeImage() const { return edgeImage; }
-        inline Image& getEdgeImage() { return edgeImage; }
+        inline const Image& getEdgeMap() const { return edgeMap; }
+        inline Image& getEdgeMap() { return edgeMap; }
+
     private:
         const Image originalImage;
         Image processedImage;
-        Image edgeImage;
+        Image edgeMap;
     };
 } // components
 

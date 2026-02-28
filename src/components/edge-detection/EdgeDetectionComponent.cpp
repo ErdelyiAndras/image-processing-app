@@ -7,7 +7,7 @@ namespace components {
         void EdgeDetectionComponent::process(Context& context) {
             processContext(context);
             applyEdgeDetection();
-            context.getEdgeImage() = outputImage;
+            context.getEdgeMap() = outputImage;
         }
     } // edge_detection
 } // components
