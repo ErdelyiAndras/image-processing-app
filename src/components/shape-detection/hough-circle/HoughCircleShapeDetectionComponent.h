@@ -18,7 +18,8 @@ namespace components {
                 uint32_t vote_min_threshold,
                 uint32_t min_radius,
                 uint32_t max_radius,
-                float min_dist
+                float    min_dist,
+                uint32_t num_angle_steps
             );
 
             virtual ~HoughCircleShapeDetectionComponent() = default;
@@ -26,7 +27,8 @@ namespace components {
             inline uint32_t getVoteMinThreshold() const { return vote_min_threshold; }
             inline uint32_t getMinRadius() const { return min_radius; }
             inline uint32_t getMaxRadius() const { return max_radius; }
-            inline float getMinDist() const { return min_dist; }
+            inline float    getMinDist() const { return min_dist; }
+            inline uint32_t getNumAngleSteps() const { return num_angle_steps; }
 
             void setParameters(const Parameters& params) override final;
 
@@ -34,7 +36,10 @@ namespace components {
             uint32_t vote_min_threshold;
             uint32_t min_radius;
             uint32_t max_radius;
-            float min_dist;
+            float    min_dist;
+            uint32_t num_angle_steps;
+
+            uint32_t num_radii;
 
             std::vector<HoughCircle> detected_circles;
 
@@ -48,7 +53,7 @@ namespace components {
 
             void applyShapeDetection() override final;
 
-            void plot(PixelIdx x, PixelIdx y);
+            void plot(int x, int y);
         };
     } // shape_detection
 } // components

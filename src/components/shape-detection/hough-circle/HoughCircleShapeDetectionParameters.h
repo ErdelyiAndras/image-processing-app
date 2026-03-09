@@ -10,18 +10,21 @@ namespace components {
             uint32_t vote_min_threshold;
             uint32_t min_radius;
             uint32_t max_radius;
-            float min_dist;
+            float    min_dist;
+            uint32_t num_angle_steps;
 
             HoughCircleShapeDetectionParameters(
                 uint32_t vote_min_threshold,
                 uint32_t min_radius,
                 uint32_t max_radius,
-                float min_dist
+                float    min_dist,
+                uint32_t num_angle_steps
             )
                 : vote_min_threshold(vote_min_threshold)
                 , min_radius(min_radius)
                 , max_radius(max_radius)
-                , min_dist(min_dist) {}
+                , min_dist(min_dist)
+                , num_angle_steps(num_angle_steps) {}
         };
     } // shape_detection
 } // components

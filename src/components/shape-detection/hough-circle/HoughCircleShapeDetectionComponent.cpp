@@ -13,19 +13,24 @@ namespace components {
             , min_radius(default_min_radius)
             , max_radius(default_max_radius)
             , min_dist(default_min_dist)
+            , num_angle_steps(default_num_angle_steps)
+            , num_radii(default_max_radius - default_min_radius + 1U)
             , detected_circles() {}
 
         HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent(
             uint32_t vote_min_threshold,
             uint32_t min_radius,
             uint32_t max_radius,
-            float min_dist
+            float    min_dist,
+            uint32_t num_angle_steps
         )
             : ShapeDetectionComponent()
             , vote_min_threshold(vote_min_threshold)
             , min_radius(min_radius)
             , max_radius(max_radius)
             , min_dist(min_dist)
+            , num_angle_steps(num_angle_steps)
+            , num_radii(max_radius - min_radius + 1U)
             , detected_circles() {}
 
         void HoughCircleShapeDetectionComponent::setParameters(const Parameters& params) {
@@ -34,6 +39,8 @@ namespace components {
             min_radius         = shapeDetectionParams.min_radius;
             max_radius         = shapeDetectionParams.max_radius;
             min_dist           = shapeDetectionParams.min_dist;
+            num_angle_steps    = shapeDetectionParams.num_angle_steps;
+            num_radii          = max_radius - min_radius + 1U;
         }
 
         void HoughCircleShapeDetectionComponent::processDetectedCircles() {
@@ -110,8 +117,8 @@ namespace components {
             processDetectedCircles();
         }
 
-        void HoughCircleShapeDetectionComponent::plot(PixelIdx x, PixelIdx y) {
-            if (0 <= x && x < width && 0 <= y && y < height) {
+        void HoughCircleShapeDetectionComponent::plot(int x, int y) {
+            if (0 <= x && x < static_cast<int>(width) && 0 <= y && y < static_cast<int>(height)) {
                 outputImage(y, x) = 1.0f;
             }
         }

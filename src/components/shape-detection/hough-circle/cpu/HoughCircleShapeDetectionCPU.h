@@ -16,7 +16,8 @@ namespace components {
                 uint32_t vote_min_threshold,
                 uint32_t min_radius,
                 uint32_t max_radius,
-                float min_dist
+                float    min_dist,
+                uint32_t num_angle_steps
             );
 
         private:
@@ -24,8 +25,6 @@ namespace components {
 
             std::vector<float> cos_table;
             std::vector<float> sin_table;
-            uint32_t num_angle_steps;
-            uint32_t num_radii;
 
             void applyHoughTransform() override;
 
