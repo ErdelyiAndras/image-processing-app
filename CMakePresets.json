@@ -13,7 +13,7 @@
     {
       "name": "debug",
       "inherits": "default",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -24,6 +24,15 @@
       "binaryDir": "${sourceDir}/build-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "warnings-as-errors",
+      "inherits": "default",
+      "binaryDir": "${sourceDir}/build-warnings-as-errors",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "WARNINGS_AS_ERRORS": "ON"
       }
     }
   ]

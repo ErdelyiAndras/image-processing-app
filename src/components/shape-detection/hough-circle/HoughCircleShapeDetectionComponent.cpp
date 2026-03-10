@@ -77,8 +77,8 @@ namespace components {
             detected_circles = std::move(valid_circles);
 
             for (const HoughCircle& circle : detected_circles) {
-                const PixelIdx cx{ circle.center_x };
-                const PixelIdx cy{ circle.center_y };
+                const int cx{ static_cast<int>(circle.center_x) };
+                const int cy{ static_cast<int>(circle.center_y) };
                 const PixelIdx r{ circle.radius };
 
                 int x{ 0 };

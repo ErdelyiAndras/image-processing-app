@@ -24,7 +24,7 @@ namespace components {
                             int ni{ std::clamp(static_cast<int>(i) + ki, 0, static_cast<int>(height) - 1) };
                             int nj{ std::clamp(static_cast<int>(j) + kj, 0, static_cast<int>(width) - 1) };
                             val += inputImage(static_cast<PixelIdx>(ni), static_cast<PixelIdx>(nj))
-                                * kernel[(ki + half) * kernel_size + (kj + half)];
+                                * kernel[static_cast<size_t>((ki + half) * kernel_size + (kj + half))];
                         }
                     }
                     outputImage(i, j) = val;

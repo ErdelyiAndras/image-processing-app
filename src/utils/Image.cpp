@@ -1,8 +1,8 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include <stb_image_write.h>
 
 #include "Image.h"
 #include "types.h"
@@ -15,8 +15,9 @@ Image::Image(PixelIdx rows, PixelIdx cols) : rows(rows), cols(cols), image(nullp
     if (rows == 0 || cols == 0) {
         return;
     }
-    image = new PixelValue[size()];
-    std::memset(image, 0, sizeof(PixelValue) * size());
+    const size_t num_pixels = size();
+    image = new PixelValue[num_pixels];
+    std::memset(image, 0, sizeof(PixelValue) * num_pixels);
 }
 
 Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
@@ -28,9 +29,10 @@ Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
 
     rows = static_cast<PixelIdx>(h);
     cols = static_cast<PixelIdx>(w);
-    image = new PixelValue[size()];
+    const size_t num_pixels = size();
+    image = new PixelValue[num_pixels];
 
-    for (size_t i = 0; i < size(); ++i) {
+    for (size_t i = 0; i < num_pixels; ++i) {
         image[i] = static_cast<PixelValue>(raw[i]) / 255.0f;
     }
 
@@ -44,8 +46,9 @@ Image::Image(const Image& other) : rows(0), cols(0), image(nullptr) {
 
     rows = other.rows;
     cols = other.cols;
-    image = new PixelValue[size()];
-    std::memcpy(image, other.image, sizeof(PixelValue) * size());
+    const size_t num_pixels = size();
+    image = new PixelValue[num_pixels];
+    std::memcpy(image, other.image, sizeof(PixelValue) * num_pixels);
 }
 
 Image::Image(Image&& other) noexcept
@@ -72,8 +75,9 @@ Image& Image::operator=(const Image& other) {
     cols = other.cols;
 
     if (other.image) {
-        image = new PixelValue[size()];
-        std::memcpy(image, other.image, sizeof(PixelValue) * size());
+        const size_t num_pixels = size();
+        image = new PixelValue[num_pixels];
+        std::memcpy(image, other.image, sizeof(PixelValue) * num_pixels);
     }
 
     return *this;
@@ -123,13 +127,13 @@ bool Image::save(const std::string& path) const {
     }
 
     if (ext == ".png") {
-        return stbi_write_png(path.c_str(), cols, rows, 1, output.data(), cols) != 0;
+        return stbi_write_png(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data(), static_cast<int>(cols)) != 0;
     } else if (ext == ".jpg" || ext == ".jpeg") {
-        return stbi_write_jpg(path.c_str(), cols, rows, 1, output.data(), 95) != 0;
+        return stbi_write_jpg(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data(), 95) != 0;
     } else if (ext == ".bmp") {
-        return stbi_write_bmp(path.c_str(), cols, rows, 1, output.data()) != 0;
+        return stbi_write_bmp(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data()) != 0;
     } else if (ext == ".tga") {
-        return stbi_write_tga(path.c_str(), cols, rows, 1, output.data()) != 0;
+        return stbi_write_tga(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data()) != 0;
     }
 
     return false;

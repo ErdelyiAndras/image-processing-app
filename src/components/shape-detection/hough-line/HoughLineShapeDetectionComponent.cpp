@@ -100,7 +100,7 @@ namespace components {
                             if (run_length > static_cast<int>(best_run_length)) {
                                 best_run_start  = run_start;
                                 best_run_end    = static_cast<int>(k) - static_cast<int>(gap_count) - 1;
-                                best_run_length = static_cast<int>(run_length);
+                                best_run_length = static_cast<uint32_t>(run_length);
                             }
                             run_start = -1;
                             gap_count = 0U;
@@ -121,10 +121,10 @@ namespace components {
                     continue;
                 }
 
-                line.x0 = line_pixels[best_run_start].first;
-                line.y0 = line_pixels[best_run_start].second;
-                line.x1 = line_pixels[best_run_end].first;
-                line.y1 = line_pixels[best_run_end].second;
+                line.x0 = line_pixels[static_cast<size_t>(best_run_start)].first;
+                line.y0 = line_pixels[static_cast<size_t>(best_run_start)].second;
+                line.x1 = line_pixels[static_cast<size_t>(best_run_end)].first;
+                line.y1 = line_pixels[static_cast<size_t>(best_run_end)].second;
 
                 int x0{ static_cast<int>(line.x0) };
                 int y0{ static_cast<int>(line.y0) };
