@@ -69,12 +69,12 @@ namespace components {
             return strength * tv_norm + l2_norm;
         }
 
-        void TVDenoisingCPU::evalMomentumAndUpdateImage(const uint64_t counter) {
+        void TVDenoisingCPU::evalMomentumAndUpdateImage(const uint32_t counter) {
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
                     momentum(i, j) *= momentum_beta;
                     momentum(i, j) += gradient(i, j) * (1.0f - momentum_beta);
-                    outputImage(i, j) -= step / (1.0f - static_cast<float>(std::pow(momentum_beta, counter))) * momentum(i, j);
+                    outputImage(i, j) -= step / (1.0f - static_cast<float>(std::pow(momentum_beta, static_cast<float>(counter)))) * momentum(i, j);
                 }
             }
         }

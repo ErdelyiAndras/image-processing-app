@@ -32,8 +32,9 @@ namespace components {
 
                     for (uint32_t theta_idx{ 0U }; theta_idx < num_theta_bins; ++theta_idx) {
                         const float rho{ static_cast<float>(j) * cos_table[theta_idx] + static_cast<float>(i) * sin_table[theta_idx] };
-                        const uint32_t rho_idx{ static_cast<uint32_t>(std::round((rho + rho_max) / rho_resolution)) };
-                        if (rho_idx >= 0 && rho_idx < num_rho_bins) {
+                        const float rho_idx_float{ std::round((rho + rho_max) / rho_resolution) };
+                        if (0.0f <= rho_idx_float && rho_idx_float < static_cast<float>(num_rho_bins)) {
+                            const uint32_t rho_idx{ static_cast<uint32_t>(rho_idx_float) };
                             const uint32_t acc_idx{ rho_idx * num_theta_bins + theta_idx };
                             ++accumulator[acc_idx];
                         }

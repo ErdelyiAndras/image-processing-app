@@ -101,7 +101,7 @@ namespace components {
             return strength * tv_norm + l2_norm;
         }
 
-        void TVDenoisingGPU::evalMomentumAndUpdateImage(const uint64_t counter) {
+        void TVDenoisingGPU::evalMomentumAndUpdateImage(const uint32_t counter) {
             cl::Kernel momentum_kernel{ program, "eval_momentum" };
             momentum_kernel.setArg(0, momentumBuffer);
             momentum_kernel.setArg(1, gradientBuffer);
@@ -113,7 +113,7 @@ namespace components {
             update_kernel.setArg(1, momentumBuffer);
             update_kernel.setArg(2, step);
             update_kernel.setArg(3, momentum_beta);
-            update_kernel.setArg(4, static_cast<cl_int>(counter));
+            update_kernel.setArg(4, static_cast<float>(counter));
             queue.enqueueNDRangeKernel(update_kernel, cl::NullRange, img_size, cl::NullRange);
         }
 

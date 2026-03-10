@@ -87,7 +87,7 @@ namespace components {
             cl::Buffer* write_buf{ &temp_out_buffer };
 
 
-            uint64_t counter{ 1U };
+            uint32_t counter{ 1U };
             while (changed) {
                 int changed_int{ 0 };
                 queue.enqueueWriteBuffer(changed_buf, CL_FALSE, 0, sizeof(int), &changed_int);

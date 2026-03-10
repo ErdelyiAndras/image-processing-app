@@ -119,7 +119,7 @@ namespace components {
 
         void HoughCircleShapeDetectionComponent::plot(int x, int y) {
             if (0 <= x && x < static_cast<int>(width) && 0 <= y && y < static_cast<int>(height)) {
-                outputImage(y, x) = 1.0f;
+                outputImage(static_cast<PixelIdx>(y), static_cast<PixelIdx>(x)) = 1.0f;
             }
         }
     } // shape_detection

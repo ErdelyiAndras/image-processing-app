@@ -33,7 +33,7 @@ namespace components {
             virtual float tvNormAndGrad() = 0;
             virtual float l2NormAndGrad() = 0;
             virtual float evalLossAndGrad() = 0;
-            virtual void  evalMomentumAndUpdateImage(const uint64_t counter) = 0;
+            virtual void  evalMomentumAndUpdateImage(const uint32_t counter) = 0;
             virtual void  postProcessing() = 0;
 
             void processContext(const Context& context) override;

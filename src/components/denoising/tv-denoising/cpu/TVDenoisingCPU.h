@@ -20,7 +20,7 @@ namespace components {
             float tvNormAndGrad() override;
             float l2NormAndGrad() override;
             float evalLossAndGrad() override;
-            void  evalMomentumAndUpdateImage(const uint64_t counter) override;
+            void  evalMomentumAndUpdateImage(const uint32_t counter) override;
             void  postProcessing() override;
 
             void processContext(const Context& context) override;

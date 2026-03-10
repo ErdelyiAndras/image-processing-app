@@ -150,9 +150,9 @@ __kernel void update_img(
     __global const float* momentum,
     float step,
     float momentum_beta,
-    int counter
+    float counter
 ) {
     int idx = get_global_id(0);
-    float bias_correction = 1.0f - pow(momentum_beta, (float)counter);
+    float bias_correction = 1.0f - pow(momentum_beta, counter);
     img[idx] -= step / bias_correction * momentum[idx];
 }

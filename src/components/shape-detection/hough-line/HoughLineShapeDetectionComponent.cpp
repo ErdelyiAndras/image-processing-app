@@ -61,18 +61,18 @@ namespace components {
                 // horizontal-ish line
                 if (std::abs(sin_theta) > std::abs(cos_theta)) {
                     for (PixelIdx x{ 0U }; x < width; ++x) {
-                        const PixelIdx y{ static_cast<PixelIdx>(std::round((line.rho - static_cast<float>(x) * cos_theta) / sin_theta)) };
-                        if (0 <= y && y < height) {
-                            line_pixels.emplace_back(Pixel{ x, y });
+                        const float y_float{ std::round((line.rho - static_cast<float>(x) * cos_theta) / sin_theta) };
+                        if (0 <= y_float && y_float < height) {
+                            line_pixels.emplace_back(Pixel{ x, static_cast<PixelIdx>(y_float) });
                         }
                     }
                 }
                 // vertical-ish line
                 else {
                     for (PixelIdx y{ 0U }; y < height; ++y) {
-                        const PixelIdx x{ static_cast<PixelIdx>(std::round((line.rho - static_cast<float>(y) * sin_theta) / cos_theta)) };
-                        if (0 <= x && x < width) {
-                            line_pixels.emplace_back(Pixel{ x, y });
+                        const float x_float{ std::round((line.rho - static_cast<float>(y) * sin_theta) / cos_theta) };
+                        if (0 <= x_float && x_float < width) {
+                            line_pixels.emplace_back(Pixel{ static_cast<PixelIdx>(x_float), y });
                         }
                     }
                 }
@@ -83,24 +83,24 @@ namespace components {
                 int best_run_end{ -1 };
                 uint32_t best_run_length{ 0U };
 
-                for (int k{ 0U }; k < line_pixels.size(); ++k) {
+                for (uint32_t k{ 0U }; k < line_pixels.size(); ++k) {
                     const Pixel& pixel{ line_pixels.at(k) };
                     const bool on_edge{ inputImage(pixel.second, pixel.first) > 0.0f };
 
                     if (on_edge) {
                         if (run_start == -1) {
-                            run_start = k;
+                            run_start = static_cast<int>(k);
                         }
                         gap_count = 0U;
                     }
                     else if (run_start != -1) {
                         ++gap_count;
                         if (gap_count > max_line_gap) {
-                            const uint32_t run_length{ static_cast<uint32_t>(k) - static_cast<uint32_t>(run_start) - gap_count };
-                            if (run_length > best_run_length) {
+                            const int run_length{ static_cast<int>(k) - run_start - static_cast<int>(gap_count) };
+                            if (run_length > static_cast<int>(best_run_length)) {
                                 best_run_start  = run_start;
-                                best_run_end    = k - static_cast<int>(gap_count) - 1;
-                                best_run_length = run_length;
+                                best_run_end    = static_cast<int>(k) - static_cast<int>(gap_count) - 1;
+                                best_run_length = static_cast<int>(run_length);
                             }
                             run_start = -1;
                             gap_count = 0U;
@@ -109,11 +109,11 @@ namespace components {
                 }
 
                 if (run_start != -1) {
-                    const uint32_t run_length{ static_cast<uint32_t>(line_pixels.size()) - static_cast<uint32_t>(run_start) - gap_count };
-                    if (run_length > best_run_length) {
+                    const int run_length{ static_cast<int>(line_pixels.size()) - run_start - static_cast<int>(gap_count) };
+                    if (run_length > static_cast<int>(best_run_length)) {
                         best_run_start  = run_start;
                         best_run_end    = static_cast<int>(line_pixels.size()) - static_cast<int>(gap_count) - 1;
-                        best_run_length = run_length;
+                        best_run_length = static_cast<uint32_t>(run_length);
                     }
                 }
 

@@ -94,7 +94,7 @@ namespace components {
         }
 
         void CannyEdgeDetectionCPU::edgeTrackingByHysteresis() {
-            uint64_t counter{ 1U };
+            uint32_t counter{ 1U };
             while (changed) {
                 changed = false;
                 for (PixelIdx i{ 1U }; i < height - 1; ++i) {

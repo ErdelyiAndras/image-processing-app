@@ -3,6 +3,7 @@
 
 #include <CL/opencl.hpp>
 #include <string>
+#include "types.h"
 
 template <typename T>
 struct SumKernelInfo;
@@ -23,14 +24,14 @@ cl::Kernel init_sum_kernel(cl::Program& program) {
 }
 
 template <typename T>
-T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const T* array, int size) {
+T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const T* array, size_t size) {
     if (size == 0) {
         return static_cast<T>(0);
     }
 
     cl::Kernel kernel = init_sum_kernel<T>(program);
 
-    int extended_size = 1;
+    size_t extended_size = 1;
     while (extended_size < size) {
         extended_size *= 2;
     }
@@ -43,9 +44,10 @@ T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const
 
     kernel.setArg(0, array_buffer);
 
-    for (int offset = extended_size / 2; offset > 0; offset >>= 1) {
+    for (size_t offset = extended_size / 2; offset > 0; offset >>= 1) {
         kernel.setArg(1, offset);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, offset, cl::NullRange);
+        queue.finish();
     }
 
     T result;
@@ -55,14 +57,14 @@ T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const
 }
 
 template <typename T>
-T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, cl::Buffer& device_data, int size) {
+T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, cl::Buffer& device_data, size_t size) {
     if (size == 0) {
         return static_cast<T>(0);
     }
 
     cl::Kernel kernel = init_sum_kernel<T>(program);
 
-    int extended_size = 1;
+    size_t extended_size = 1;
     while (extended_size < size) {
         extended_size *= 2;
     }
@@ -77,9 +79,10 @@ T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, cl::B
 
     kernel.setArg(0, scratch);
 
-    for (int offset = extended_size / 2; offset > 0; offset >>= 1) {
+    for (size_t offset = extended_size / 2; offset > 0; offset >>= 1) {
         kernel.setArg(1, offset);
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, offset, cl::NullRange);
+        queue.finish();
     }
 
     T result;

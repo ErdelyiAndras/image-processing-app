@@ -41,7 +41,7 @@ namespace components {
         }
 
         void GaussianBlurGPU::processContext(const Context& context) {
-            DenoisingComponent::processContext(context);
+            GaussianBlurComponent::processContext(context);
             img_size = height * width;
         }
     } // denoising

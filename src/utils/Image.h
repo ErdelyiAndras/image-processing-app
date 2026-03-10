@@ -126,6 +126,8 @@ private:
     PixelIdx rows;
     PixelIdx cols;
     PixelValue* image;
+
+    inline size_t size() const { return static_cast<size_t>(rows) * static_cast<size_t>(cols); }
 };
 
 #endif // IMAGE_H

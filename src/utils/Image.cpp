@@ -15,8 +15,8 @@ Image::Image(PixelIdx rows, PixelIdx cols) : rows(rows), cols(cols), image(nullp
     if (rows == 0 || cols == 0) {
         return;
     }
-    image = new PixelValue[rows * cols];
-    std::memset(image, 0, sizeof(PixelValue) * rows * cols);
+    image = new PixelValue[size()];
+    std::memset(image, 0, sizeof(PixelValue) * size());
 }
 
 Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
@@ -28,9 +28,9 @@ Image::Image(const std::string& path) : rows(0), cols(0), image(nullptr) {
 
     rows = static_cast<PixelIdx>(h);
     cols = static_cast<PixelIdx>(w);
-    image = new PixelValue[rows * cols];
+    image = new PixelValue[size()];
 
-    for (uint64_t i = 0; i < rows * cols; ++i) {
+    for (size_t i = 0; i < size(); ++i) {
         image[i] = static_cast<PixelValue>(raw[i]) / 255.0f;
     }
 
@@ -44,8 +44,8 @@ Image::Image(const Image& other) : rows(0), cols(0), image(nullptr) {
 
     rows = other.rows;
     cols = other.cols;
-    image = new PixelValue[rows * cols];
-    std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
+    image = new PixelValue[size()];
+    std::memcpy(image, other.image, sizeof(PixelValue) * size());
 }
 
 Image::Image(Image&& other) noexcept
@@ -72,8 +72,8 @@ Image& Image::operator=(const Image& other) {
     cols = other.cols;
 
     if (other.image) {
-        image = new PixelValue[rows * cols];
-        std::memcpy(image, other.image, sizeof(PixelValue) * rows * cols);
+        image = new PixelValue[size()];
+        std::memcpy(image, other.image, sizeof(PixelValue) * size());
     }
 
     return *this;
@@ -110,8 +110,8 @@ bool Image::save(const std::string& path) const {
         return false;
     }
 
-    std::vector<uint8_t> output(rows * cols);
-    for (uint64_t i = 0; i < rows * cols; ++i) {
+    std::vector<uint8_t> output(size());
+    for (uint64_t i = 0; i < size(); ++i) {
         PixelValue val = std::clamp(image[i], 0.0f, 1.0f);
         output[i] = static_cast<uint8_t>(val * 255.0f + 0.5f);
     }
@@ -137,6 +137,6 @@ bool Image::save(const std::string& path) const {
 
 void Image::clear() {
     if (image) {
-        std::memset(image, 0, sizeof(PixelValue) * rows * cols);
+        std::memset(image, 0, sizeof(PixelValue) * size());
     }
 }
