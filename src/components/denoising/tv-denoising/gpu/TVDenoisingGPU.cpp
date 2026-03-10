@@ -53,18 +53,16 @@ namespace components {
 
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
-            float tv_norm{ sum<float>(cl_context, queue, program, tvNormMtxBuffer, img_size) };
+            float tv_norm{ sum<float>(cl_context, queue, utils_program, tvNormMtxBuffer, img_size) };
 
-            for (int i{ 1 }; i <= 3; ++i) {
-                std::string kernel_name{ "grad_from_dx_dy_step" + std::to_string(i) };
-                cl::Kernel grad_kernel{ program, kernel_name.c_str() };
-                grad_kernel.setArg(0, dxMtxBuffer);
-                grad_kernel.setArg(1, dyMtxBuffer);
-                grad_kernel.setArg(2, tvGradientBuffer);
-                grad_kernel.setArg(3, height);
-                grad_kernel.setArg(4, width);
-                queue.enqueueNDRangeKernel(grad_kernel, cl::NullRange, img_size, cl::NullRange);
-            }
+            std::string kernel_name{ "grad_from_dx_dy" };
+            cl::Kernel grad_kernel{ program, kernel_name.c_str() };
+            grad_kernel.setArg(0, dxMtxBuffer);
+            grad_kernel.setArg(1, dyMtxBuffer);
+            grad_kernel.setArg(2, tvGradientBuffer);
+            grad_kernel.setArg(3, height);
+            grad_kernel.setArg(4, width);
+            queue.enqueueNDRangeKernel(grad_kernel, cl::NullRange, img_size, cl::NullRange);
 
             return tv_norm;
         }
@@ -80,7 +78,7 @@ namespace components {
 
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
-            float l2_norm{ sum<float>(cl_context, queue, program, l2NormMtxBuffer, img_size) };
+            float l2_norm{ sum<float>(cl_context, queue, utils_program, l2NormMtxBuffer, img_size) };
 
             return 0.5f * l2_norm;
         }

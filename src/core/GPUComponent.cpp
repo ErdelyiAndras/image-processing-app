@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+cl::Program GPUComponent::utils_program;
 cl::Context GPUComponent::s_context;
 cl::CommandQueue GPUComponent::s_queue;
 std::vector<cl::Device> GPUComponent::s_devices;
@@ -19,8 +20,20 @@ bool GPUComponent::ensureInitialized() {
         return false;
     }
 
+    utils_program = cl::Program{ s_context, oclReadSourcesFromFile(UTILS_KERNEL_PATH) };
     s_devices = s_context.getInfo<CL_CONTEXT_DEVICES>();
     s_queue = cl::CommandQueue(s_context, s_devices[0], CL_QUEUE_PROFILING_ENABLE);
+    try {
+        utils_program.build(s_devices, "-cl-std=CL2.0");
+    } catch (const cl::Error& error) {
+        oclPrintError(error);
+        if (ENABLE_LOGGING) {
+            std::cerr << "Build Status: " << utils_program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(s_devices[0]) << std::endl;
+            std::cerr << "Build Options:\t" << utils_program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(s_devices[0]) << std::endl;
+            std::cerr << "Build Log:\t " << utils_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(s_devices[0]) << std::endl;
+        }
+        throw std::runtime_error("Failed to build OpenCL utils program");
+    }
     s_is_initialized = true;
     return true;
 }
@@ -34,10 +47,10 @@ void GPUComponent::initOpenCL(const std::string& kernel_path) {
     queue = s_queue;
 
     std::string source_code = oclReadSourcesFromFile(kernel_path);
-    program = cl::Program(s_context, source_code);
+    program = cl::Program{ s_context, source_code };
 
     try {
-        program.build(s_devices);
+        program.build(s_devices, "-cl-std=CL2.0");
     }
     catch (const cl::Error& error) {
         oclPrintError(error);

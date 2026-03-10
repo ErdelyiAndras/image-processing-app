@@ -90,7 +90,7 @@ namespace components {
             uint32_t counter{ 1U };
             while (changed) {
                 int changed_int{ 0 };
-                queue.enqueueWriteBuffer(changed_buf, CL_FALSE, 0, sizeof(int), &changed_int);
+                queue.enqueueWriteBuffer(changed_buf, CL_TRUE, 0, sizeof(int), &changed_int);
 
                 hyst_kernel.setArg(0, *read_buf);
                 hyst_kernel.setArg(1, *write_buf);

@@ -111,7 +111,7 @@ __kernel void canny_double_threshold(
 __kernel void canny_hysteresis(
     __global const float* input,
     __global float* output,
-    __global volatile int* changed_flag,
+    __global atomic_int* changed_flag,
     float strong_val,
     float weak_val,
     int rows,
@@ -141,7 +141,7 @@ __kernel void canny_hysteresis(
             input[idx_mr] == strong_val || input[idx_bl] == strong_val ||
             input[idx_bc] == strong_val || input[idx_br] == strong_val) {
             output[idx] = strong_val;
-            atomic_or(changed_flag, 1);
+            atomic_fetch_or_explicit(changed_flag, 1, memory_order_relaxed, memory_scope_device);
             return;
         }
     }

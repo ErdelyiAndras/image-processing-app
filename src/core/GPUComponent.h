@@ -21,6 +21,8 @@ protected:
 
     void initOpenCL(const std::string& kernel_path);
 
+    static cl::Program utils_program;
+
 private:
     static cl::Context s_context;
     static cl::CommandQueue s_queue;
