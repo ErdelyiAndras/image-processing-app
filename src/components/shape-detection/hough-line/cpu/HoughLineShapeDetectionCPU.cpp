@@ -56,7 +56,10 @@ namespace components {
                             if (drho == 0 && dtheta == 0) {
                                 continue;
                             }
-                            const uint32_t neighbor_idx{ (rho_idx + drho) * num_theta_bins + (theta_idx + dtheta) };
+                            const uint32_t neighbor_idx{
+                                static_cast<uint32_t>(static_cast<int>(rho_idx) + drho) * num_theta_bins +
+                                static_cast<uint32_t>(static_cast<int>(theta_idx) + dtheta)
+                            };
                             if (accumulator[neighbor_idx] > votes) {
                                 is_local_max = false;
                             }

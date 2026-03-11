@@ -84,7 +84,7 @@ namespace components {
                 uint32_t best_run_length{ 0U };
 
                 for (uint32_t k{ 0U }; k < line_pixels.size(); ++k) {
-                    const Pixel& pixel{ line_pixels.at(k) };
+                    const Pixel& pixel{ line_pixels[k] };
                     const bool on_edge{ inputImage(pixel.second, pixel.first) > 0.0f };
 
                     if (on_edge) {

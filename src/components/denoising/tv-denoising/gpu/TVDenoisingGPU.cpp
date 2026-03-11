@@ -87,8 +87,6 @@ namespace components {
             const float tv_norm{ tvNormAndGrad() };
             const float l2_norm{ l2NormAndGrad() };
 
-            queue.enqueueFillBuffer(gradientBuffer, 0.0f, 0, img_size * sizeof(float));
-
             cl::Kernel kernel{ program, "eval_loss_and_grad" };
             kernel.setArg(0, gradientBuffer);
             kernel.setArg(1, tvGradientBuffer);

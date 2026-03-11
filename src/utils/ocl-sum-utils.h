@@ -45,7 +45,7 @@ T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, const
     kernel.setArg(0, array_buffer);
 
     for (size_t offset = extended_size / 2; offset > 0; offset >>= 1) {
-        kernel.setArg(1, offset);
+        kernel.setArg(1, static_cast<cl_int>(offset));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, offset, cl::NullRange);
         queue.finish();
     }
@@ -80,7 +80,7 @@ T sum(cl::Context& context, cl::CommandQueue& queue, cl::Program& program, cl::B
     kernel.setArg(0, scratch);
 
     for (size_t offset = extended_size / 2; offset > 0; offset >>= 1) {
-        kernel.setArg(1, offset);
+        kernel.setArg(1, static_cast<cl_int>(offset));
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, offset, cl::NullRange);
         queue.finish();
     }

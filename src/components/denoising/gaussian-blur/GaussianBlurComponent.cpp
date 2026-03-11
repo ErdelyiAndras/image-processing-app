@@ -28,7 +28,7 @@ namespace components {
         void GaussianBlurComponent::applyDenoising() {
             const int half{ kernel_size / 2 };
 
-            std::vector<float> kernel(static_cast<size_t>(kernel_size * kernel_size));
+            std::vector<float> kernel(static_cast<size_t>(kernel_size) * static_cast<size_t>(kernel_size));
             float sum{ 0.0f };
             for (int i{ -half }; i <= half; ++i) {
                 for (int j{ -half }; j <= half; ++j) {
