@@ -48,6 +48,7 @@ namespace components {
             vote_min_threshold = shapeDetectionParams.vote_min_threshold;
             min_line_length    = shapeDetectionParams.min_line_length;
             max_line_gap       = shapeDetectionParams.max_line_gap;
+            num_theta_bins     = static_cast<uint32_t>(std::ceil(pi / theta_resolution));
         }
 
         void HoughLineShapeDetectionComponent::nonMaximumSuppression() {
@@ -208,7 +209,6 @@ namespace components {
             ShapeDetectionComponent::processContext(context);
             rho_max        = std::sqrt(static_cast<float>(height * height + width * width));
             num_rho_bins   = static_cast<uint32_t>(std::ceil(2 * rho_max / rho_resolution)) + 1U;
-            num_theta_bins = static_cast<uint32_t>(std::ceil(pi / theta_resolution));
 
             detected_lines.clear();
             accumulator.assign(num_rho_bins * num_theta_bins, 0U);

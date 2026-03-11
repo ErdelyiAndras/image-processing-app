@@ -42,8 +42,13 @@ namespace components {
             uint32_t num_radii;
 
             std::vector<HoughCircle> detected_circles;
+            std::vector<uint32_t> accumulator;
+
+            std::vector<float> cos_table;
+            std::vector<float> sin_table;
 
             virtual void applyHoughTransform() = 0;
+            void nonMaximumSuppression();
             void processDetectedCircles();
 
             virtual void processContext(const Context& context) override;

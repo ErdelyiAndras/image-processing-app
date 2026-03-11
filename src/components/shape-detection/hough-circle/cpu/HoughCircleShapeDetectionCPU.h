@@ -21,14 +21,7 @@ namespace components {
             );
 
         private:
-            std::vector<uint32_t> accumulator;
-
-            std::vector<float> cos_table;
-            std::vector<float> sin_table;
-
             void applyHoughTransform() override;
-
-            void processContext(const Context& context) override;
         };
     } // shape_detection
 } // components

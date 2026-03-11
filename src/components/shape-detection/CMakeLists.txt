@@ -21,4 +21,5 @@ target_sources(shape_detection PRIVATE
     $<TARGET_OBJECTS:hough_line_gpu>
     $<TARGET_OBJECTS:hough_circle>
     $<TARGET_OBJECTS:hough_circle_cpu>
+    $<TARGET_OBJECTS:hough_circle_gpu>
 )

@@ -1,4 +1,5 @@
 add_subdirectory(cpu)
+add_subdirectory(gpu)
 
 add_library(hough_circle OBJECT
     HoughCircleShapeDetectionComponent.cpp
@@ -13,4 +14,5 @@ target_link_libraries(hough_circle PUBLIC
     core
     config
     hough_circle_cpu
+    hough_circle_gpu
 )
