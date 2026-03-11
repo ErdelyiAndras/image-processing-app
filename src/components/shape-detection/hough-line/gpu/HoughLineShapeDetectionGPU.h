@@ -1,0 +1,38 @@
+#ifndef HOUGH_LINE_SHAPE_DETECTION_GPU_H
+#define HOUGH_LINE_SHAPE_DETECTION_GPU_H
+
+#include "HoughLineShapeDetectionComponent.h"
+#include "GPUComponent.h"
+#include "Context.h"
+#include "types.h"
+
+#include <vector>
+#include <CL/opencl.hpp>
+
+namespace components {
+    namespace shape_detection {
+        class HoughLineShapeDetectionGPU final : public HoughLineShapeDetectionComponent, protected GPUComponent {
+        public:
+            HoughLineShapeDetectionGPU();
+            HoughLineShapeDetectionGPU(
+                float rho_resolution,
+                float theta_resolution,
+                uint32_t vote_min_threshold,
+                uint32_t min_line_length,
+                uint32_t max_line_gap
+            );
+
+        private:
+            cl::Buffer edge_map_buffer;
+            cl::Buffer accumulator_buffer;
+            cl::Buffer cos_table_buffer;
+            cl::Buffer sin_table_buffer;
+
+            void applyHoughTransform() override;
+
+            void processContext(const Context& context) override;
+        };
+    } // shape_detection
+} // components
+
+#endif // HOUGH_LINE_SHAPE_DETECTION_GPU_H

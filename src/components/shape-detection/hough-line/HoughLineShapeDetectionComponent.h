@@ -46,8 +46,13 @@ namespace components {
             float rho_max;
 
             std::vector<HoughLine> detected_lines;
+            std::vector<uint32_t> accumulator;
+
+            std::vector<float> cos_table;
+            std::vector<float> sin_table;
 
             virtual void applyHoughTransform() = 0;
+            void nonMaximumSuppression();
             void processDetectedLines();
 
             virtual void processContext(const Context& context) override;

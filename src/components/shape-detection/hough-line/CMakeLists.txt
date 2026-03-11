@@ -1,4 +1,5 @@
 add_subdirectory(cpu)
+add_subdirectory(gpu)
 
 add_library(hough_line OBJECT
     HoughLineShapeDetectionComponent.cpp
@@ -13,4 +14,5 @@ target_link_libraries(hough_line PUBLIC
     core
     config
     hough_line_cpu
+    hough_line_gpu
 )

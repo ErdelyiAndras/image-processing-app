@@ -19,7 +19,10 @@ namespace components {
             , num_rho_bins(0U)
             , num_theta_bins(0U)
             , rho_max(0.0f)
-            , detected_lines() {}
+            , detected_lines()
+            , accumulator()
+            , cos_table()
+            , sin_table() {}
 
         HoughLineShapeDetectionComponent::HoughLineShapeDetectionComponent(
             float rho_res, float theta_res, uint32_t vote_min_threshold, uint32_t min_line_length, uint32_t max_line_gap
@@ -33,7 +36,10 @@ namespace components {
             , num_rho_bins(0U)
             , num_theta_bins(0U)
             , rho_max(0.0f)
-            , detected_lines() {}
+            , detected_lines()
+            , accumulator()
+            , cos_table()
+            , sin_table() {}
 
         void HoughLineShapeDetectionComponent::setParameters(const Parameters& params) {
             ParamType shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
@@ -42,6 +48,42 @@ namespace components {
             vote_min_threshold = shapeDetectionParams.vote_min_threshold;
             min_line_length    = shapeDetectionParams.min_line_length;
             max_line_gap       = shapeDetectionParams.max_line_gap;
+        }
+
+        void HoughLineShapeDetectionComponent::nonMaximumSuppression() {
+            for (uint32_t rho_idx{ 1U }; rho_idx < num_rho_bins - 1; ++rho_idx) {
+                for (uint32_t theta_idx{ 1U }; theta_idx < num_theta_bins - 1; ++theta_idx) {
+                    const uint32_t acc_idx{ rho_idx * num_theta_bins + theta_idx };
+                    const uint32_t votes{ accumulator[acc_idx] };
+                    if (votes < vote_min_threshold) {
+                        continue;
+                    }
+
+                    bool is_local_max = true;
+                    for (int drho{ -1 }; drho <= 1 && is_local_max; ++drho) {
+                        for (int dtheta{ -1 }; dtheta <= 1 && is_local_max; ++dtheta) {
+                            if (drho == 0 && dtheta == 0) {
+                                continue;
+                            }
+                            const uint32_t neighbor_idx{
+                                static_cast<uint32_t>(static_cast<int>(rho_idx) + drho) * num_theta_bins +
+                                static_cast<uint32_t>(static_cast<int>(theta_idx) + dtheta)
+                            };
+                            if (accumulator[neighbor_idx] > votes) {
+                                is_local_max = false;
+                            }
+                        }
+                    }
+
+                    if (!is_local_max) {
+                        continue;
+                    }
+
+                    const float rho{ static_cast<float>(rho_idx) * rho_resolution - rho_max };
+                    const float theta{ static_cast<float>(theta_idx) * theta_resolution };
+                    detected_lines.emplace_back(HoughLine{ rho, theta, votes});
+                }
+            }
         }
 
         void HoughLineShapeDetectionComponent::processDetectedLines() {
@@ -167,11 +209,22 @@ namespace components {
             rho_max        = std::sqrt(static_cast<float>(height * height + width * width));
             num_rho_bins   = static_cast<uint32_t>(std::ceil(2 * rho_max / rho_resolution)) + 1U;
             num_theta_bins = static_cast<uint32_t>(std::ceil(pi / theta_resolution));
+
             detected_lines.clear();
+            accumulator.assign(num_rho_bins * num_theta_bins, 0U);
+
+            cos_table.resize(num_theta_bins);
+            sin_table.resize(num_theta_bins);
+            for (uint32_t theta_idx{ 0U }; theta_idx < num_theta_bins; ++theta_idx) {
+                const float theta{ static_cast<float>(theta_idx) * theta_resolution };
+                cos_table[theta_idx] = std::cos(theta);
+                sin_table[theta_idx] = std::sin(theta);
+            }
         }
 
         void HoughLineShapeDetectionComponent::applyShapeDetection() {
             applyHoughTransform();
+            nonMaximumSuppression();
             processDetectedLines();
         }
     } // shape_detection
