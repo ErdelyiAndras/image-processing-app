@@ -8,6 +8,7 @@ namespace components {
             processContext(context);
             applyShapeDetection();
             context.getShapeMap() = outputImage;
+            context.getProcessedImage() = outputImage;
         }
 
         void ShapeDetectionComponent::processContext(const Context& context) {

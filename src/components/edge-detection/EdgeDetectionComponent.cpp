@@ -8,6 +8,7 @@ namespace components {
             processContext(context);
             applyEdgeDetection();
             context.getEdgeMap() = outputImage;
+            context.getProcessedImage() = outputImage;
         }
     } // edge_detection
 } // components
