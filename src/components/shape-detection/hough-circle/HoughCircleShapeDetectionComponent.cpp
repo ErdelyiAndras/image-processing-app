@@ -41,7 +41,7 @@ namespace components {
             , sin_table() {}
 
         void HoughCircleShapeDetectionComponent::setParameters(const Parameters& params) {
-            ParamType shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
             vote_min_threshold = shapeDetectionParams.vote_min_threshold;
             min_radius         = shapeDetectionParams.min_radius;
             max_radius         = shapeDetectionParams.max_radius;

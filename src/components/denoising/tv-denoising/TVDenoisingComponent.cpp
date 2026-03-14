@@ -25,7 +25,7 @@ namespace components {
             , step(step_size / (strength + 1)) {}
 
         void TVDenoisingComponent::setParameters(const Parameters& params) {
-            ParamType denoisingParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& denoisingParams{ dynamic_cast<const ParamType&>(params) };
             strength  = denoisingParams.strength;
             step_size = denoisingParams.step_size;
             tolerance = denoisingParams.tolerance;

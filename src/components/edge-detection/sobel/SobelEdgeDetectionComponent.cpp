@@ -13,7 +13,7 @@ namespace components {
             : threshold(threshold) {}
 
         void SobelEdgeDetectionComponent::setParameters(const Parameters& params) {
-            ParamType edgeDetectionParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& edgeDetectionParams{ dynamic_cast<const ParamType&>(params) };
             threshold = edgeDetectionParams.threshold;
         }
 

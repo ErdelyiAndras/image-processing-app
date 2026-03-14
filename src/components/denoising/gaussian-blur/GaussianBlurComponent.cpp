@@ -20,7 +20,7 @@ namespace components {
             , sigma(sigma) {}
 
         void GaussianBlurComponent::setParameters(const Parameters& params) {
-            ParamType gaussianBlurParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& gaussianBlurParams{ dynamic_cast<const ParamType&>(params) };
             kernel_size = gaussianBlurParams.kernel_size;
             sigma       = gaussianBlurParams.sigma;
         }

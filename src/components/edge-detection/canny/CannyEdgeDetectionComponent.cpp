@@ -19,7 +19,7 @@ namespace components {
             , changed(true) {}
 
         void CannyEdgeDetectionComponent::setParameters(const Parameters& params) {
-            ParamType cannyParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& cannyParams{ dynamic_cast<const ParamType&>(params) };
             low_threshold  = cannyParams.low_threshold;
             high_threshold = cannyParams.high_threshold;
         }

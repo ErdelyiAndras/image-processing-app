@@ -42,7 +42,7 @@ namespace components {
             , sin_table() {}
 
         void HoughLineShapeDetectionComponent::setParameters(const Parameters& params) {
-            ParamType shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
+            const ParamType& shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
             rho_resolution     = shapeDetectionParams.rho_resolution;
             theta_resolution   = shapeDetectionParams.theta_resolution;
             vote_min_threshold = shapeDetectionParams.vote_min_threshold;
