@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <typeinfo>
 
 namespace components {
     namespace shape_detection {
@@ -41,12 +42,15 @@ namespace components {
             , sin_table() {}
 
         void HoughCircleShapeDetectionComponent::setParameters(const Parameters& params) {
-            const ParamType& shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
-            vote_min_threshold = shapeDetectionParams.vote_min_threshold;
-            min_radius         = shapeDetectionParams.min_radius;
-            max_radius         = shapeDetectionParams.max_radius;
-            min_dist           = shapeDetectionParams.min_dist;
-            num_angle_steps    = shapeDetectionParams.num_angle_steps;
+            const ParamType* shapeDetectionParams{ dynamic_cast<const ParamType*>(&params) };
+            if (!shapeDetectionParams) {
+                throw std::bad_cast{};
+            }
+            vote_min_threshold = shapeDetectionParams->vote_min_threshold;
+            min_radius         = shapeDetectionParams->min_radius;
+            max_radius         = shapeDetectionParams->max_radius;
+            min_dist           = shapeDetectionParams->min_dist;
+            num_angle_steps    = shapeDetectionParams->num_angle_steps;
             num_radii          = max_radius - min_radius + 1U;
         }
 

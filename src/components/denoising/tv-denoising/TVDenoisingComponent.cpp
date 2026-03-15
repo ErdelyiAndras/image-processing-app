@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <typeinfo>
 
 namespace components {
     namespace denoising {
@@ -25,10 +26,13 @@ namespace components {
             , step(step_size / (strength + 1)) {}
 
         void TVDenoisingComponent::setParameters(const Parameters& params) {
-            const ParamType& denoisingParams{ dynamic_cast<const ParamType&>(params) };
-            strength  = denoisingParams.strength;
-            step_size = denoisingParams.step_size;
-            tolerance = denoisingParams.tolerance;
+            const ParamType* denoisingParams{ dynamic_cast<const ParamType*>(&params) };
+            if (!denoisingParams) {
+                throw std::bad_cast{};
+            }
+            strength  = denoisingParams->strength;
+            step_size = denoisingParams->step_size;
+            tolerance = denoisingParams->tolerance;
             step      = step_size / (strength + 1);
         }
 

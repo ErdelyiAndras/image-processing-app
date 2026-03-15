@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <cmath>
+#include <typeinfo>
 
 namespace components {
     namespace denoising {
@@ -20,9 +21,12 @@ namespace components {
             , sigma(sigma) {}
 
         void GaussianBlurComponent::setParameters(const Parameters& params) {
-            const ParamType& gaussianBlurParams{ dynamic_cast<const ParamType&>(params) };
-            kernel_size = gaussianBlurParams.kernel_size;
-            sigma       = gaussianBlurParams.sigma;
+            const ParamType* gaussianBlurParams{ dynamic_cast<const ParamType*>(&params) };
+            if (!gaussianBlurParams) {
+                throw std::bad_cast{};
+            }
+            kernel_size = gaussianBlurParams->kernel_size;
+            sigma       = gaussianBlurParams->sigma;
         }
 
         void GaussianBlurComponent::applyDenoising() {

@@ -4,6 +4,8 @@
 #include "CannyEdgeDetectionParameters.h"
 #include "EdgeDetectionComponent.h"
 
+#include <typeinfo>
+
 namespace components {
     namespace edge_detection {
         CannyEdgeDetectionComponent::CannyEdgeDetectionComponent()
@@ -19,9 +21,12 @@ namespace components {
             , changed(true) {}
 
         void CannyEdgeDetectionComponent::setParameters(const Parameters& params) {
-            const ParamType& cannyParams{ dynamic_cast<const ParamType&>(params) };
-            low_threshold  = cannyParams.low_threshold;
-            high_threshold = cannyParams.high_threshold;
+            const ParamType* cannyParams{ dynamic_cast<const ParamType*>(&params) };
+            if (!cannyParams) {
+                throw std::bad_cast{};
+            }
+            low_threshold  = cannyParams->low_threshold;
+            high_threshold = cannyParams->high_threshold;
         }
 
         void CannyEdgeDetectionComponent::processContext(const Context& context) {

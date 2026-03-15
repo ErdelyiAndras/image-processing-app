@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <typeinfo>
 
 namespace components {
     namespace shape_detection {
@@ -42,12 +43,15 @@ namespace components {
             , sin_table() {}
 
         void HoughLineShapeDetectionComponent::setParameters(const Parameters& params) {
-            const ParamType& shapeDetectionParams{ dynamic_cast<const ParamType&>(params) };
-            rho_resolution     = shapeDetectionParams.rho_resolution;
-            theta_resolution   = shapeDetectionParams.theta_resolution;
-            vote_min_threshold = shapeDetectionParams.vote_min_threshold;
-            min_line_length    = shapeDetectionParams.min_line_length;
-            max_line_gap       = shapeDetectionParams.max_line_gap;
+            const ParamType* shapeDetectionParams{ dynamic_cast<const ParamType*>(&params) };
+            if (!shapeDetectionParams) {
+                throw std::bad_cast{};
+            }
+            rho_resolution     = shapeDetectionParams->rho_resolution;
+            theta_resolution   = shapeDetectionParams->theta_resolution;
+            vote_min_threshold = shapeDetectionParams->vote_min_threshold;
+            min_line_length    = shapeDetectionParams->min_line_length;
+            max_line_gap       = shapeDetectionParams->max_line_gap;
             num_theta_bins     = static_cast<uint32_t>(std::ceil(pi / theta_resolution));
         }
 
