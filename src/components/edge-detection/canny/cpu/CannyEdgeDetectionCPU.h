@@ -4,12 +4,16 @@
 #include "CannyEdgeDetectionComponent.h"
 #include "Image.h"
 
+#include <string>
+
 namespace components {
     namespace edge_detection {
         class CannyEdgeDetectionCPU final : public CannyEdgeDetectionComponent {
         public:
             CannyEdgeDetectionCPU();
             CannyEdgeDetectionCPU(float low_threshold, float high_threshold);
+
+            inline std::string getName() const override { return "canny-cpu"; }
 
         private:
             Image grad_mag;

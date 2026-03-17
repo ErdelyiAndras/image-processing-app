@@ -4,12 +4,16 @@
 #include "TVDenoisingComponent.h"
 #include "GPUComponent.h"
 
+#include <string>
+
 namespace components {
     namespace denoising {
         class TVDenoisingGPU final : public TVDenoisingComponent, protected GPUComponent {
         public:
             TVDenoisingGPU();
             TVDenoisingGPU(float strength, float step_size, float tolerance);
+
+            std::string getName() const override { return "tv-gpu"; }
 
         private:
             cl::Buffer inputImageBuffer;

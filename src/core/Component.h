@@ -5,6 +5,8 @@
 #include "Parameters.h"
 #include "types.h"
 
+#include <string>
+
 namespace components {
     class Component {
     public:
@@ -12,7 +14,8 @@ namespace components {
         virtual ~Component() = default;
 
         virtual void setParameters(const Parameters& params) = 0;
-        virtual void process(Context& context) = 0;
+        virtual void process(Context& context);
+        virtual std::string getName() const = 0;
 
     protected:
         PixelIdx height;

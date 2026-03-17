@@ -5,7 +5,7 @@ namespace components {
         ShapeDetectionComponent::ShapeDetectionComponent() : Component() {}
 
         void ShapeDetectionComponent::process(Context& context) {
-            processContext(context);
+            Component::process(context);
             applyShapeDetection();
             context.getShapeMap() = outputImage;
         }

@@ -5,6 +5,7 @@
 #include "GPUComponent.h"
 
 #include <CL/opencl.hpp>
+#include <string>
 
 namespace components {
     namespace edge_detection {
@@ -12,6 +13,8 @@ namespace components {
         public:
             CannyEdgeDetectionGPU();
             CannyEdgeDetectionGPU(float low_threshold, float high_threshold);
+
+            inline std::string getName() const override { return "canny-gpu"; }
 
         private:
             cl::Buffer grad_mag_buffer;

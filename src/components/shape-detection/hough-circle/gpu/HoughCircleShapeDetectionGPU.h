@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <CL/opencl.hpp>
+#include <string>
 
 namespace components {
     namespace shape_detection {
@@ -21,6 +22,8 @@ namespace components {
                 float    min_dist,
                 uint32_t num_angle_steps
             );
+
+            inline std::string getName() const override { return "hough-circle-gpu"; }
 
         private:
             cl::Buffer edge_map_buffer;

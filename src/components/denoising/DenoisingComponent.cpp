@@ -5,7 +5,7 @@ namespace components {
         DenoisingComponent::DenoisingComponent() : Component() {}
 
         void DenoisingComponent::process(Context& context) {
-            processContext(context);
+            Component::process(context);
             applyDenoising();
             context.getProcessedImage() = outputImage;
         }

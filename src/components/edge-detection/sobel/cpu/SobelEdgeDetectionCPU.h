@@ -3,12 +3,16 @@
 
 #include "SobelEdgeDetectionComponent.h"
 
+#include <string>
+
 namespace components {
     namespace edge_detection {
         class SobelEdgeDetectionCPU final : public SobelEdgeDetectionComponent {
         public:
             SobelEdgeDetectionCPU();
             SobelEdgeDetectionCPU(float threshold);
+
+            inline std::string getName() const override { return "sobel-cpu"; }
 
         private:
             void applySobelFilter() override;

@@ -4,6 +4,7 @@
 #include "GaussianBlurComponent.h"
 
 #include <vector>
+#include <string>
 
 namespace components {
     namespace denoising {
@@ -11,6 +12,8 @@ namespace components {
         public:
             GaussianBlurCPU();
             GaussianBlurCPU(int kernel_size, float sigma);
+
+            inline std::string getName() const override { return "gauss-cpu"; }
 
         private:
             void computeConvolution(const std::vector<float>& kernel) override;

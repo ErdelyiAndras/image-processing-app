@@ -7,6 +7,11 @@ namespace components {
         , inputImage()
         , outputImage() {}
 
+    void Component::process(Context& context) {
+        processContext(context);
+        context.applyComponent(getName());
+    }
+
     void Component::processContext(const Context& context) {
         inputImage  = context.getProcessedImage();
         outputImage = Image{ inputImage.getRows(), inputImage.getCols() };

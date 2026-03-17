@@ -5,6 +5,7 @@
 #include "GPUComponent.h"
 
 #include <vector>
+#include <string>
 
 namespace components {
     namespace denoising {
@@ -12,6 +13,8 @@ namespace components {
         public:
             GaussianBlurGPU();
             GaussianBlurGPU(int kernel_size, float sigma);
+
+            inline std::string getName() const override { return "gauss-gpu"; }
 
         private:
             void computeConvolution(const std::vector<float>& kernel) override;

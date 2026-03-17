@@ -4,12 +4,16 @@
 #include "SobelEdgeDetectionComponent.h"
 #include "GPUComponent.h"
 
+#include <string>
+
 namespace components {
     namespace edge_detection {
         class SobelEdgeDetectionGPU final : public SobelEdgeDetectionComponent, protected GPUComponent {
         public:
             SobelEdgeDetectionGPU();
             SobelEdgeDetectionGPU(float threshold);
+
+            inline std::string getName() const override { return "sobel-gpu"; }
 
         private:
             void applySobelFilter() override;

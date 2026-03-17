@@ -4,12 +4,16 @@
 #include "TVDenoisingComponent.h"
 #include "types.h"
 
+#include <string>
+
 namespace components {
     namespace denoising {
         class TVDenoisingCPU final : public TVDenoisingComponent {
         public:
             TVDenoisingCPU();
             TVDenoisingCPU(float strength, float step_size, float tolerance);
+
+            inline std::string getName() const override { return "tv-cpu"; }
 
         private:
             Image tv_gradient;

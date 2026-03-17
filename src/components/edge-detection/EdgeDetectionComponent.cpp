@@ -5,7 +5,7 @@ namespace components {
         EdgeDetectionComponent::EdgeDetectionComponent() : Component() {}
 
         void EdgeDetectionComponent::process(Context& context) {
-            processContext(context);
+            Component::process(context);
             applyEdgeDetection();
             context.getEdgeMap() = outputImage;
         }

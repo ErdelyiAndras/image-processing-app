@@ -6,6 +6,7 @@
 #include "types.h"
 
 #include <vector>
+#include <string>
 
 namespace components {
     namespace shape_detection {
@@ -19,6 +20,8 @@ namespace components {
                 uint32_t min_line_length,
                 uint32_t max_line_gap
             );
+
+            inline std::string getName() const override final { return "hough-line-cpu"; }
 
         private:
             void applyHoughTransform() override;
