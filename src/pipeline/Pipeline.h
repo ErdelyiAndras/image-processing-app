@@ -1,0 +1,61 @@
+#ifndef PIPELINE_H
+#define PIPELINE_H
+
+#include "Component.h"
+#include "Context.h"
+#include "types.h"
+
+#include <vector>
+#include <memory>
+
+namespace pipeline {
+    class Pipeline {
+    public:
+        NodeId addNode(std::unique_ptr<components::Component> component);
+        void   connect(NodeId from, NodeId to);
+
+        void removeNode(NodeId id);
+        void disconnect(NodeId from, NodeId to);
+
+        components::Component& getComponent(NodeId nodeId);
+        template <typename T>
+        T& getComponentAs(NodeId nodeId) {
+            T* component{ dynamic_cast<T*>(&getComponent(nodeId)) };
+            if (!component) {
+                throw std::bad_cast{};
+            }
+            return *component;
+        }
+
+        bool validate();
+
+        std::vector<components::Context> execute(components::Context context);
+
+    private:
+        struct Node  {
+            std::unique_ptr<components::Component> component;
+            std::vector<NodeId> successors;
+            std::vector<NodeId> predecessors;
+            bool removed{ false };
+        };
+
+        enum class Color : uint8_t  {
+            Unvisited = 0U,
+            OnStack   = 1U,
+            Done      = 2U
+        };
+
+        bool isValid{ true };
+        std::vector<Node> nodes;
+
+        void assertNodeExists(NodeId id, const char* caller) const;
+
+        std::vector<NodeId> sources() const;
+        std::vector<NodeId> sinks()   const;
+        std::vector<NodeId> topologicalSort() const;
+        bool hasCycle() const;
+        bool dfs(NodeId id, std::vector<Color>& color) const;
+    };
+} // namespace pipeline
+
+#endif // PIPELINE_H

@@ -17,12 +17,34 @@
 
 #include "GaussianBlurParameters.h"
 
+#include "SobelEdgeDetectionCPU.h"
+#include "SobelEdgeDetectionGPU.h"
+
+#include "SobelEdgeDetectionParameters.h"
+
+#include "CannyEdgeDetectionCPU.h"
+#include "CannyEdgeDetectionGPU.h"
+
+#include "CannyEdgeDetectionParameters.h"
+
+#include "HoughLineShapeDetectionCPU.h"
+#include "HoughLineShapeDetectionGPU.h"
+
+#include "HoughLineShapeDetectionParameters.h"
+
+#include "HoughCircleShapeDetectionCPU.h"
+#include "HoughCircleShapeDetectionGPU.h"
+
+#include "HoughCircleShapeDetectionParameters.h"
+
 #include "Component.h"
 #include "Context.h"
 
+#include "Pipeline.h"
+
 int main(int argc, char** argv) {
     if (argc != 6) {
-        std::cerr << "Usage: " << argv[0] 
+        std::cerr << "Usage: " << argv[0]
                   << " <input_image_path> <output_image_path> <strength> <step_size> <tol>"
                   << std::endl;
         return -1;
@@ -34,90 +56,76 @@ int main(int argc, char** argv) {
         float step_size = std::stof(argv[4]);
         float tol = std::stof(argv[5]);
 
-
-        #pragma region TV Denoising
-
-        components::denoising::TVDenoisingParameters params{ strength, step_size, tol };
-
-        std::unique_ptr<components::Component> denoiser = std::make_unique<components::denoising::TVDenoisingCPU>();
-        denoiser->setParameters(params);
-        components::Context cpu_processing_context{ image };
-
-        auto start = std::chrono::high_resolution_clock::now();
-
-        denoiser->process(cpu_processing_context);
-
-        auto end = std::chrono::high_resolution_clock::now();
-
-        std::chrono::duration<float> elapsed = end - start;
-        std::cout << "CPU_TVDenoising took: " << elapsed.count() << " seconds" << std::endl;
-
-
-        denoiser = std::make_unique<components::denoising::TVDenoisingGPU>();
-        denoiser->setParameters(params);
-        components::Context gpu_processing_context{ image };
-
-        start = std::chrono::high_resolution_clock::now();
-
-        denoiser->process(gpu_processing_context);
-        
-        end = std::chrono::high_resolution_clock::now();
-
-        elapsed = end - start;
-        std::cout << "GPU_TVDenoising took: " << elapsed.count() << " seconds" << std::endl;
-
         std::string output_path = argv[2];
         size_t dot_pos = output_path.find_last_of('.');
         std::string base = (dot_pos == std::string::npos) ? output_path : output_path.substr(0, dot_pos);
         std::string ext = (dot_pos == std::string::npos) ? "" : output_path.substr(dot_pos);
 
-        cpu_processing_context.getProcessedImage().save(base + "_tv_cpu" + ext);
-        gpu_processing_context.getProcessedImage().save(base + "_tv_gpu" + ext);
+        components::Context processing_context{ image };
 
-        #pragma endregion
+        pipeline::Pipeline pipeline;
 
+        NodeId tv_denoising_gpu_node = pipeline.addNode(std::make_unique<components::denoising::TVDenoisingGPU>());
+        NodeId gauss_blur_gpu_node   = pipeline.addNode(std::make_unique<components::denoising::GaussianBlurGPU>());
+        NodeId canny_edge_gpu_node   = pipeline.addNode(std::make_unique<components::edge_detection::CannyEdgeDetectionGPU>());
+        NodeId sobel_edge_gpu_node   = pipeline.addNode(std::make_unique<components::edge_detection::SobelEdgeDetectionGPU>());
+        NodeId hough_line_gpu_node   = pipeline.addNode(std::make_unique<components::shape_detection::HoughLineShapeDetectionGPU>());
+        NodeId hough_circle_gpu_node = pipeline.addNode(std::make_unique<components::shape_detection::HoughCircleShapeDetectionGPU>());
 
-        #pragma region Gaussian Blur
+        pipeline.connect(tv_denoising_gpu_node, canny_edge_gpu_node);
+        pipeline.connect(canny_edge_gpu_node, hough_line_gpu_node);
+        pipeline.connect(gauss_blur_gpu_node, sobel_edge_gpu_node);
+        pipeline.connect(sobel_edge_gpu_node, hough_circle_gpu_node);
 
-        components::denoising::GaussianBlurParameters gauss_params{ 5, 16.0f };
+        pipeline.getComponent(tv_denoising_gpu_node).setParameters(
+            components::denoising::TVDenoisingParameters{ strength, step_size, tol }
+        );
+        pipeline.getComponent(gauss_blur_gpu_node).setParameters(
+            components::denoising::GaussianBlurParameters{ 5U, 1.0f }
+        );
+        pipeline.getComponent(canny_edge_gpu_node).setParameters(
+            components::edge_detection::CannyEdgeDetectionParameters{ 0.2f, 0.4f }
+        );
+        pipeline.getComponent(sobel_edge_gpu_node).setParameters(
+            components::edge_detection::SobelEdgeDetectionParameters{ 0.3f }
+        );
+        pipeline.getComponent(hough_line_gpu_node).setParameters(
+            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, 1.0f / 360.0f, 25U, 20U, 100U }
+        );
+        pipeline.getComponent(hough_circle_gpu_node).setParameters(
+            components::shape_detection::HoughCircleShapeDetectionParameters{ 250U, 10U, 100U, 80.0f, 360U }
+        );
 
-        std::unique_ptr<components::Component> blur = std::make_unique<components::denoising::GaussianBlurCPU>();
-        blur->setParameters(gauss_params);
-        components::Context cpu_gauss_context{ image };
+        auto start = std::chrono::high_resolution_clock::now();
 
-        start = std::chrono::high_resolution_clock::now();
+        std::vector<components::Context> results = pipeline.execute(processing_context);
 
-        blur->process(cpu_gauss_context);
+        auto end = std::chrono::high_resolution_clock::now();
 
-        end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> elapsed = end - start;
+        if (ENABLE_LOGGING) {
+            std::cout << "Pipeline execution took: " << elapsed.count() << " seconds" << std::endl;
+        }
 
-        elapsed = end - start;
-        std::cout << "CPU_GaussianBlur took: " << elapsed.count() << " seconds" << std::endl;
+        for (size_t i{ 0U }; i < results.size(); ++i) {
+            const components::Context& ctx = results.at(i);
+            ctx.getProcessedImage().save(base + "_output" + ctx.getAppliedComponents() + ext);
+            if (ENABLE_LOGGING) {
+                std::cout << "Output " << i << " saved to: " << base + "_output" + ctx.getAppliedComponents() + ext << std::endl;
+            }
+        }
 
-        blur = std::make_unique<components::denoising::GaussianBlurGPU>();
-        blur->setParameters(gauss_params);
-        components::Context gpu_gauss_context{ image };
-
-        start = std::chrono::high_resolution_clock::now();
-
-        blur->process(gpu_gauss_context);
-
-        end = std::chrono::high_resolution_clock::now();
-
-        elapsed = end - start;
-        std::cout << "GPU_GaussianBlur took: " << elapsed.count() << " seconds" << std::endl;
-
-        cpu_gauss_context.getProcessedImage().save(base + "_gauss_cpu" + ext);
-        gpu_gauss_context.getProcessedImage().save(base + "_gauss_gpu" + ext);
-
-        #pragma endregion
     }
     catch (const std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        if (ENABLE_LOGGING) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+        }
         return -1;
     }
     catch (...) {
-        std::cout << "Other exception" << std::endl;
+        if (ENABLE_LOGGING) {
+            std::cerr << "Other exception" << std::endl;
+        }
         return -1;
     }
 
