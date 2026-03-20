@@ -42,6 +42,8 @@
 
 #include "Pipeline.h"
 
+#include "CombineShapeMap.h"
+
 int main(int argc, char** argv) {
     if (argc != 6) {
         std::cerr << "Usage: " << argv[0]
@@ -65,17 +67,20 @@ int main(int argc, char** argv) {
 
         pipeline::Pipeline pipeline;
 
-        NodeId tv_denoising_gpu_node = pipeline.addNode(std::make_unique<components::denoising::TVDenoisingGPU>());
-        NodeId gauss_blur_gpu_node   = pipeline.addNode(std::make_unique<components::denoising::GaussianBlurGPU>());
-        NodeId canny_edge_gpu_node   = pipeline.addNode(std::make_unique<components::edge_detection::CannyEdgeDetectionGPU>());
-        NodeId sobel_edge_gpu_node   = pipeline.addNode(std::make_unique<components::edge_detection::SobelEdgeDetectionGPU>());
-        NodeId hough_line_gpu_node   = pipeline.addNode(std::make_unique<components::shape_detection::HoughLineShapeDetectionGPU>());
-        NodeId hough_circle_gpu_node = pipeline.addNode(std::make_unique<components::shape_detection::HoughCircleShapeDetectionGPU>());
+        NodeId tv_denoising_gpu_node  = pipeline.addNode(std::make_unique<components::denoising::TVDenoisingGPU>());
+        NodeId gauss_blur_gpu_node    = pipeline.addNode(std::make_unique<components::denoising::GaussianBlurGPU>());
+        NodeId canny_edge_gpu_node    = pipeline.addNode(std::make_unique<components::edge_detection::CannyEdgeDetectionGPU>());
+        NodeId sobel_edge_gpu_node    = pipeline.addNode(std::make_unique<components::edge_detection::SobelEdgeDetectionGPU>());
+        NodeId hough_line_gpu_node    = pipeline.addNode(std::make_unique<components::shape_detection::HoughLineShapeDetectionGPU>());
+        NodeId hough_circle_gpu_node  = pipeline.addNode(std::make_unique<components::shape_detection::HoughCircleShapeDetectionGPU>());
+        NodeId combine_shape_map_node = pipeline.addNode(std::make_unique<pipeline::CombineShapeMap>());
 
         pipeline.connect(tv_denoising_gpu_node, canny_edge_gpu_node);
         pipeline.connect(canny_edge_gpu_node, hough_line_gpu_node);
         pipeline.connect(gauss_blur_gpu_node, sobel_edge_gpu_node);
         pipeline.connect(sobel_edge_gpu_node, hough_circle_gpu_node);
+        pipeline.connect(hough_line_gpu_node, combine_shape_map_node);
+        pipeline.connect(hough_circle_gpu_node, combine_shape_map_node);
 
         pipeline.getComponent(tv_denoising_gpu_node).setParameters(
             components::denoising::TVDenoisingParameters{ strength, step_size, tol }
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
             components::edge_detection::SobelEdgeDetectionParameters{ 0.3f }
         );
         pipeline.getComponent(hough_line_gpu_node).setParameters(
-            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, 1.0f / 360.0f, 25U, 20U, 100U }
+            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, 1.0f / 360.0f, 50U, 50U, 100U }
         );
         pipeline.getComponent(hough_circle_gpu_node).setParameters(
             components::shape_detection::HoughCircleShapeDetectionParameters{ 250U, 10U, 100U, 80.0f, 360U }
