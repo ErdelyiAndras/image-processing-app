@@ -1,3 +1,5 @@
+add_subdirectory(merge)
+
 add_library(pipeline STATIC
     Pipeline.cpp
 )
@@ -8,4 +10,5 @@ target_include_directories(pipeline PUBLIC
 
 target_link_libraries(pipeline PUBLIC
     core
+    merge
 )

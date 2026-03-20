@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
             components::denoising::TVDenoisingParameters{ strength, step_size, tol }
         );
         pipeline.getComponent(gauss_blur_gpu_node).setParameters(
-            components::denoising::GaussianBlurParameters{ 5U, 1.0f }
+            components::denoising::GaussianBlurParameters{ 5, 1.0f }
         );
         pipeline.getComponent(canny_edge_gpu_node).setParameters(
             components::edge_detection::CannyEdgeDetectionParameters{ 0.2f, 0.4f }

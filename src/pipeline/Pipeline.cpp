@@ -9,13 +9,27 @@ namespace pipeline {
     NodeId Pipeline::addNode(std::unique_ptr<components::Component> component) {
         isValid = false;
         const NodeId id{ static_cast<NodeId>(nodes.size()) };
-        nodes.emplace_back(Node{ std::move(component), {}, {}, false });
+        nodes.emplace_back(Node{ ProcessingNode{ std::move(component) }, {}, {}, false });
+        return id;
+    }
+
+    NodeId Pipeline::addNode(std::unique_ptr<MergeStrategy> mergeStrategy) {
+        isValid = false;
+        const NodeId id{ static_cast<NodeId>(nodes.size()) };
+        nodes.emplace_back(Node{ MergeNode{ std::move(mergeStrategy) }, {}, {}, false });
         return id;
     }
 
     void Pipeline::connect(NodeId from, NodeId to) {
         assertNodeExists(from, __func__);
         assertNodeExists(to, __func__);
+
+        if (std::holds_alternative<ProcessingNode>(nodes[to].data) && !nodes[to].predecessors.empty()) {
+            throw std::invalid_argument{
+                "Pipeline::connect: processing node " + std::to_string(to) +
+                " already has a predecessor (only merge nodes can have multiple predecessors)"
+            };
+        }
 
         std::vector<NodeId>::iterator succIt{ std::find(nodes[from].successors.begin(), nodes[from].successors.end(), to) };
         if (succIt != nodes[from].successors.end()) {
@@ -42,7 +56,7 @@ namespace pipeline {
             std::vector<NodeId>& preds{ nodes[succ].predecessors };
             preds.erase(std::remove(preds.begin(), preds.end(), id), preds.end());
         }
-        nodes[id].component.reset();
+        std::visit(NodeResetter{}, nodes[id].data);
         nodes[id].predecessors.clear();
         nodes[id].successors.clear();
         nodes[id].removed = true;
@@ -72,12 +86,13 @@ namespace pipeline {
 
     components::Component& Pipeline::getComponent(NodeId nodeId) {
         assertNodeExists(nodeId, __func__);
-        if (!nodes[nodeId].component) {
+        ProcessingNode* procNode{ std::get_if<ProcessingNode>(&nodes[nodeId].data) };
+        if (!procNode || !procNode->component) {
             throw std::invalid_argument{
                 "Pipeline::getComponent: node id " + std::to_string(nodeId) + " has no component"
             };
         }
-        return *nodes[nodeId].component;
+        return *procNode->component;
     }
 
     bool Pipeline::hasCycle() const {
@@ -85,6 +100,21 @@ namespace pipeline {
 
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && color[id] == Color::Unvisited && dfs(id, color)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool Pipeline::hasNodeWithInvalidPredecessors() const {
+        for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
+            if (nodes[id].removed) {
+                continue;
+            }
+            if (std::holds_alternative<ProcessingNode>(nodes[id].data) && nodes[id].predecessors.size() > 1U) {
+                return true;
+            }
+            if (std::holds_alternative<MergeNode>(nodes[id].data) && nodes[id].predecessors.empty()) {
                 return true;
             }
         }
@@ -107,7 +137,7 @@ namespace pipeline {
 
     bool Pipeline::validate() {
         if (!isValid) {
-            isValid = !hasCycle();
+            isValid = !hasCycle() && !hasNodeWithInvalidPredecessors();
         }
         return isValid;
     }
@@ -151,6 +181,7 @@ namespace pipeline {
         std::vector<NodeId> result;
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && nodes[id].predecessors.empty()) {
+                assert(!std::holds_alternative<MergeNode>(nodes[id].data));
                 result.push_back(id);
             }
         }
@@ -191,19 +222,12 @@ namespace pipeline {
             const Node& node{ nodes[id] };
 
             std::unordered_map<NodeId, std::vector<components::Context>>::iterator it{ pending.find(id) };
-            if (it == pending.end() || it->second.empty()) {
-                throw std::runtime_error{
-                    "Pipeline::execute: node " + std::to_string(id) + " has no input context"
-                };
-            }
+            assert(it != pending.end() && !it->second.empty());
 
-            // only the first context is used until merge functionality is implemented
-            components::Context nodeCtx{ std::move(it->second.front()) };
+            components::Context nodeCtx{ std::visit(NodeMerger{ it->second }, node.data) };
             pending.erase(it);
 
-            if (node.component) {
-                node.component->process(nodeCtx);
-            }
+            std::visit(NodeProcessor{ nodeCtx }, node.data);
 
             if (node.successors.empty()) {
                 results.emplace(id, std::move(nodeCtx));
@@ -229,7 +253,7 @@ namespace pipeline {
     }
 
     void Pipeline::assertNodeExists(NodeId id, const char* caller) const {
-        if (id >= nodes.size()) {
+        if (static_cast<size_t>(id) >= nodes.size()) {
             throw std::out_of_range{
                 "Pipeline::" + std::string{ caller } + ": node id " + std::to_string(id) + " out of range"
             };
