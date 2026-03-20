@@ -28,6 +28,7 @@ namespace components {
 
         inline const std::string& getAppliedComponents() const { return appliedComponents; }
         inline void applyComponent(const std::string& componentName) { appliedComponents += "_" + componentName; }
+        inline void setAppliedComponents(const std::string& componentName) { appliedComponents = "_" + componentName; }
 
     private:
         const Image originalImage;
