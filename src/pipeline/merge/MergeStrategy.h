@@ -13,15 +13,14 @@ namespace pipeline {
 
         components::Context merge(const std::vector<components::Context>& contexts) const {
             components::Context mergedContext{ contexts.front() };
-            std::string mergedAppliedComponents{ "[" + mergedContext.getAppliedComponents() };
+            std::string mergedTrace{ "(" + mergedContext.getAppliedComponents() };
             for (size_t i{ 1U }; i < contexts.size(); ++i) {
                 const components::Context& incomingContext{ contexts[i] };
-                mergedAppliedComponents += "&" + incomingContext.getAppliedComponents();
+                mergedTrace += "+" + incomingContext.getAppliedComponents();
                 updateMergedContext(mergedContext, incomingContext);
             }
-            mergedAppliedComponents += "]";
-            mergedContext.setAppliedComponents(mergedAppliedComponents);
-            mergedContext.applyComponent(getName());
+            mergedTrace += ")";
+            mergedContext.setAppliedComponents({ mergedTrace, getName() });
             return mergedContext;
         }
 

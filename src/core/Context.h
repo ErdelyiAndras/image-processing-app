@@ -4,6 +4,7 @@
 #include "Image.h"
 
 #include <string>
+#include <vector>
 
 namespace components {
     class Context {
@@ -26,9 +27,20 @@ namespace components {
         inline const Image& getShapeMap() const { return shapeMap; }
         inline Image& getShapeMap() { return shapeMap; }
 
-        inline const std::string& getAppliedComponents() const { return appliedComponents; }
-        inline void applyComponent(const std::string& componentName) { appliedComponents += "_" + componentName; }
-        inline void setAppliedComponents(const std::string& componentName) { appliedComponents = "_" + componentName; }
+        std::string getAppliedComponents() const {
+            std::string appliedComponentsStr;
+            for (size_t i{ 0U }; i < appliedComponents.size(); ++i) {
+                appliedComponentsStr += appliedComponents.at(i);
+                if (i + 1U < appliedComponents.size()) {
+                    appliedComponentsStr += "_";
+                }
+            }
+            return appliedComponentsStr;
+        }
+        inline void applyComponent(const std::string& componentName) { appliedComponents.push_back(componentName); }
+        inline void setAppliedComponents(std::vector<std::string> components) {
+            appliedComponents = std::move(components);
+        }
 
     private:
         const Image originalImage;
@@ -36,7 +48,7 @@ namespace components {
         Image edgeMap;
         Image shapeMap;
 
-        std::string appliedComponents;
+        std::vector<std::string> appliedComponents;
     };
 } // components
 
