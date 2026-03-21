@@ -103,10 +103,16 @@ Image& Image::operator=(Image&& other) noexcept {
 }
 
 PixelValue& Image::operator()(PixelIdx row, PixelIdx col) {
+    if (row >= rows || col >= cols) {
+        throw std::out_of_range("Pixel index out of range");
+    }
     return image[row * cols + col];
 }
 
 const PixelValue& Image::operator()(PixelIdx row, PixelIdx col) const {
+    if (row >= rows || col >= cols) {
+        throw std::out_of_range("Pixel index out of range");
+    }
     return image[row * cols + col];
 }
 

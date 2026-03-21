@@ -15,7 +15,7 @@ set(HOUGH_LINE_SHAPE_DETECTION_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kerne
 set(HOUGH_CIRCLE_SHAPE_DETECTION_KERNEL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../kernels/shape-detection/HoughCircleShapeDetection.cl")
 
 target_compile_definitions(config INTERFACE
-    $<IF:$<CONFIG:Debug>,ENABLE_LOGGING=1,ENABLE_LOGGING=0>
+    $<IF:$<OR:$<CONFIG:Debug>,$<CONFIG:WarningsAsErrors>>,ENABLE_LOGGING=1,ENABLE_LOGGING=0>
 )
 
 target_compile_definitions(config INTERFACE

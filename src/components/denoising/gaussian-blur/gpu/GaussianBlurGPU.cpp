@@ -31,8 +31,8 @@ namespace components {
             gpu_kernel.setArg(0, img_buf);
             gpu_kernel.setArg(1, out_buf);
             gpu_kernel.setArg(2, kernel_buf);
-            gpu_kernel.setArg(3, height);
-            gpu_kernel.setArg(4, width);
+            gpu_kernel.setArg(3, static_cast<int>(height));
+            gpu_kernel.setArg(4, static_cast<int>(width));
             gpu_kernel.setArg(5, kernel_size);
 
             queue.enqueueNDRangeKernel(gpu_kernel, cl::NullRange, img_size, cl::NullRange);

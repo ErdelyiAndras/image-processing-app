@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
             components::edge_detection::SobelEdgeDetectionParameters{ 0.3f }
         );
         pipeline.getComponent(hough_line_gpu_node).setParameters(
-            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, 1.0f / 360.0f, 50U, 50U, 100U }
+            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, pi / 180.0f, 50U, 50U, 100U }
         );
         pipeline.getComponent(hough_circle_gpu_node).setParameters(
             components::shape_detection::HoughCircleShapeDetectionParameters{ 250U, 10U, 100U, 80.0f, 360U }

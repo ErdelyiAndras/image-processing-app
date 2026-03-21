@@ -22,16 +22,8 @@ target_compile_definitions(core PUBLIC
 )
 
 get_target_property(OCL_INCLUDE_DIRS OpenCL::HeadersCpp INTERFACE_INCLUDE_DIRECTORIES)
-if (MSVC)
-    foreach(OCL_INCLUDE_DIR ${OCL_INCLUDE_DIRS})
-        target_compile_options(core PUBLIC
-            /external:I${OCL_INCLUDE_DIR}
-        )
-    endforeach()
-else()
-    foreach(OCL_INCLUDE_DIR ${OCL_INCLUDE_DIRS})
-        target_include_directories(core SYSTEM PUBLIC
-            ${OCL_INCLUDE_DIR}
-        )
-    endforeach()
-endif()
+foreach(OCL_INCLUDE_DIR ${OCL_INCLUDE_DIRS})
+    target_compile_options(core PUBLIC
+        /external:I${OCL_INCLUDE_DIR}
+    )
+endforeach()

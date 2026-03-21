@@ -6,18 +6,19 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace components {
     class Context {
     public:
         Context(Image& image)
-            : originalImage(image)
+            : originalImage(std::make_shared<const Image>(image))
             , processedImage(image)
             , edgeMap(image.getRows(), image.getCols())
             , shapeMap(image.getRows(), image.getCols())
             , appliedComponents() {}
 
-        inline const Image& getOriginalImage() const { return originalImage; }
+        inline const Image& getOriginalImage() const { return *originalImage; }
 
         inline const Image& getProcessedImage() const { return processedImage; }
         inline Image& getProcessedImage() { return processedImage; }
@@ -57,7 +58,7 @@ namespace components {
         };
 
     private:
-        const Image originalImage;
+        std::shared_ptr<const Image> originalImage;
         Image processedImage;
         Image edgeMap;
         Image shapeMap;

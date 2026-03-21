@@ -47,8 +47,8 @@ namespace components {
             kernel.setArg(1, tvNormMtxBuffer);
             kernel.setArg(2, dxMtxBuffer);
             kernel.setArg(3, dyMtxBuffer);
-            kernel.setArg(4, height);
-            kernel.setArg(5, width);
+            kernel.setArg(4, static_cast<int>(height));
+            kernel.setArg(5, static_cast<int>(width));
             kernel.setArg(6, epsilon);
 
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
@@ -60,8 +60,8 @@ namespace components {
             grad_kernel.setArg(0, dxMtxBuffer);
             grad_kernel.setArg(1, dyMtxBuffer);
             grad_kernel.setArg(2, tvGradientBuffer);
-            grad_kernel.setArg(3, height);
-            grad_kernel.setArg(4, width);
+            grad_kernel.setArg(3, static_cast<int>(height));
+            grad_kernel.setArg(4, static_cast<int>(width));
             queue.enqueueNDRangeKernel(grad_kernel, cl::NullRange, img_size, cl::NullRange);
 
             return tv_norm;
@@ -73,8 +73,8 @@ namespace components {
             kernel.setArg(1, inputImageBuffer);
             kernel.setArg(2, l2NormMtxBuffer);
             kernel.setArg(3, l2GradientBuffer);
-            kernel.setArg(4, height);
-            kernel.setArg(5, width);
+            kernel.setArg(4, static_cast<int>(height));
+            kernel.setArg(5, static_cast<int>(width));
 
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 

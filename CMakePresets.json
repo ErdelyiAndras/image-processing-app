@@ -1,39 +1,88 @@
 {
-  "version": 3,
-  "configurePresets": [
-    {
-      "name": "default",
-      "hidden": true,
-      "generator": "Visual Studio 17 2022",
-      "architecture": "x64",
-      "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      }
-    },
-    {
-      "name": "debug",
-      "inherits": "default",
-      "binaryDir": "${sourceDir}/build-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "release",
-      "inherits": "default",
-      "binaryDir": "${sourceDir}/build-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "warnings-as-errors",
-      "inherits": "default",
-      "binaryDir": "${sourceDir}/build-warnings-as-errors",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "WARNINGS_AS_ERRORS": "ON"
-      }
-    }
-  ]
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "generator-msvc",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "architecture": "x64",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows"
+            }
+        },
+        {
+            "name": "generator-ninja-clang-cl",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "CMAKE_CXX_COMPILER": "clang-cl"
+            }
+        },
+        {
+            "name": "msvc",
+            "inherits": ["base", "generator-msvc"],
+            "binaryDir": "${sourceDir}/build-msvc"
+        },
+        {
+            "name": "clang-cl-debug",
+            "inherits": ["base", "generator-ninja-clang-cl"],
+            "binaryDir": "${sourceDir}/build-clang-cl-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--extra-arg=--driver-mode=cl;--extra-arg=/EHsc"
+            }
+        },
+        {
+            "name": "clang-cl-release",
+            "inherits": ["base", "generator-ninja-clang-cl"],
+            "binaryDir": "${sourceDir}/build-clang-cl-release",
+            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+        },
+        {
+            "name": "clang-cl-warnings-as-errors",
+            "inherits": ["base", "generator-ninja-clang-cl"],
+            "binaryDir": "${sourceDir}/build-clang-cl-warnings-as-errors",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "WarningsAsErrors",
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--extra-arg=--driver-mode=cl;--extra-arg=/EHsc"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "msvc-debug",
+            "configurePreset": "msvc",
+            "configuration": "Debug"
+        },
+        {
+            "name": "msvc-release",
+            "configurePreset": "msvc",
+            "configuration": "Release"
+        },
+        {
+            "name": "msvc-warnings-as-errors",
+            "configurePreset": "msvc",
+            "configuration": "WarningsAsErrors"
+        },
+        {
+            "name": "clang-cl-debug",
+            "configurePreset": "clang-cl-debug"
+        },
+        {
+            "name": "clang-cl-release",
+            "configurePreset": "clang-cl-release"
+        },
+        {
+            "name": "clang-cl-warnings-as-errors",
+            "configurePreset": "clang-cl-warnings-as-errors"
+        }
+    ]
 }
