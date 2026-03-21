@@ -132,42 +132,30 @@ void Image::clear() {
 bool Image::saveComposite(
     const std::string& name,
     const std::string& ext,
-    const Image& processedImage,
-    const Image& edgeMap,
-    const Image& shapeMap
+    const Image& baseImage,
+    const std::vector<std::pair<const Image* const, Color>>& overlays
 ) {
-    const PixelIdx rows{ processedImage.getRows() };
-    const PixelIdx cols{ processedImage.getCols() };
-
-    constexpr uint8_t edgeRed{ 0U };
-    constexpr uint8_t edgeGreen{ 255U };
-    constexpr uint8_t edgeBlue{ 255U };
-    constexpr uint8_t shapeRed{ 255U };
-    constexpr uint8_t shapeGreen{ 50U };
-    constexpr uint8_t shapeBlue{ 50U };
+    const PixelIdx rows{ baseImage.getRows() };
+    const PixelIdx cols{ baseImage.getCols() };
 
     std::vector<uint8_t> rgbData(static_cast<size_t>(rows) * cols * 3U);
+
     for (PixelIdx i{ 0U }; i < rows; ++i) {
         for (PixelIdx j{ 0U }; j < cols; ++j) {
             const size_t pixel{ (static_cast<size_t>(i) * cols + j) * 3 };
-            const uint8_t gray{ toUint8(processedImage(i, j)) };
+            const uint8_t gray{ toUint8(baseImage(i, j)) };
 
             rgbData[pixel]     = gray;
             rgbData[pixel + 1] = gray;
             rgbData[pixel + 2] = gray;
 
-            if (edgeMap(i, j) != 0.0f) {
-                const float t{ std::clamp(edgeMap(i, j), 0.0f, 1.0f) };
-                rgbData[pixel]     = blend(gray, edgeRed, t);
-                rgbData[pixel + 1] = blend(gray, edgeGreen, t);
-                rgbData[pixel + 2] = blend(gray, edgeBlue, t);
-            }
-
-            if (shapeMap(i, j) != 0.0f) {
-                const float t{ std::clamp(shapeMap(i, j), 0.0f, 1.0f) };
-                rgbData[pixel]     = blend(gray, shapeRed, t);
-                rgbData[pixel + 1] = blend(gray, shapeGreen, t);
-                rgbData[pixel + 2] = blend(gray, shapeBlue, t);
+            for (const auto& [overlay, color] : overlays) {
+                const PixelValue t{ (*overlay)(i, j) };
+                if (t > 0.0f) {
+                    rgbData[pixel]     = blend(rgbData[pixel],     color.r, t);
+                    rgbData[pixel + 1] = blend(rgbData[pixel + 1], color.g, t);
+                    rgbData[pixel + 2] = blend(rgbData[pixel + 2], color.b, t);
+                }
             }
         }
     }

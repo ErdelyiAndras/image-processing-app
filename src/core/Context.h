@@ -2,6 +2,7 @@
 #define CONTEXT_H
 
 #include "Image.h"
+#include "Color.h"
 
 #include <string>
 #include <vector>
@@ -44,7 +45,15 @@ namespace components {
 
         bool save(const std::string& base, const std::string& ext) const {
             const std::string name{ base + "_output" + getAppliedComponents() };
-            return Image::saveComposite(name, ext, getProcessedImage(), getEdgeMap(), getShapeMap());
+            return Image::saveComposite(
+                name,
+                ext,
+                getProcessedImage(),
+                {
+                    { &getEdgeMap(), Color::Blue },
+                    { &getShapeMap(), Color::Red }
+                }
+            );
         };
 
     private:

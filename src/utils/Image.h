@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "types.h"
+#include "Color.h"
 
 /**
  * @class Image
@@ -126,9 +127,8 @@ public:
     static bool saveComposite(
         const std::string& name,
         const std::string& ext,
-        const Image& processedImage,
-        const Image& edgeMap,
-        const Image& shapeMap
+        const Image& baseImage,
+        const std::vector<std::pair<const Image* const, Color>>& overlays
     );
 
 private:

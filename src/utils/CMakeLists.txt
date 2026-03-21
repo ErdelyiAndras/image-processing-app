@@ -2,6 +2,7 @@ find_package(Stb REQUIRED)
 
 add_library(utils
     Image.cpp
+    Color.cpp
 )
 
 target_include_directories(utils PUBLIC
