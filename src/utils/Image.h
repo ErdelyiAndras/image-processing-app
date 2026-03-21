@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 #include "types.h"
 
@@ -96,7 +97,7 @@ public:
      * @param path Output file path.
      * @return true if saved successfully, false otherwise.
      */
-    bool save(const std::string& path) const;
+    bool save(const std::string& name, const std::string& ext) const;
 
     void clear();
 
@@ -122,12 +123,32 @@ public:
      */
     inline const PixelValue* data() const { return image; }
 
+    static bool saveComposite(
+        const std::string& name,
+        const std::string& ext,
+        const Image& processedImage,
+        const Image& edgeMap,
+        const Image& shapeMap
+    );
+
 private:
     PixelIdx rows;
     PixelIdx cols;
     PixelValue* image;
 
     inline size_t size() const { return static_cast<size_t>(rows) * static_cast<size_t>(cols); }
+
+    static bool saveUsingFormat(
+        const std::string& name,
+        const std::string& ext,
+        const std::vector<uint8_t>& output,
+        int cols,
+        int rows,
+        int channels
+    );
+
+    static uint8_t toUint8(PixelValue value);
+    static uint8_t blend(uint8_t base, uint8_t overlay, float t);
 };
 
 #endif // IMAGE_H

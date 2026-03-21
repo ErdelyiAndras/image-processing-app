@@ -42,6 +42,11 @@ namespace components {
             appliedComponents = std::move(components);
         }
 
+        bool save(const std::string& base, const std::string& ext) const {
+            const std::string name{ base + "_output" + getAppliedComponents() };
+            return Image::saveComposite(name, ext, getProcessedImage(), getEdgeMap(), getShapeMap());
+        };
+
     private:
         const Image originalImage;
         Image processedImage;

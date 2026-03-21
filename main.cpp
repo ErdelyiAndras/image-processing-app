@@ -114,7 +114,10 @@ int main(int argc, char** argv) {
 
         for (size_t i{ 0U }; i < results.size(); ++i) {
             const components::Context& ctx = results.at(i);
-            ctx.getProcessedImage().save(base + "_output" + ctx.getAppliedComponents() + ext);
+            ctx.save(base, ext);
+            ctx.getProcessedImage().save(base + "_processed" + ctx.getAppliedComponents(), ext);
+            ctx.getEdgeMap().save(base + "_edge" + ctx.getAppliedComponents(), ext);
+            ctx.getShapeMap().save(base + "_shape" + ctx.getAppliedComponents(), ext);
             if (ENABLE_LOGGING) {
                 std::cout << "Output " << i << " saved to: " << base + "_output" + ctx.getAppliedComponents() + ext << std::endl;
             }

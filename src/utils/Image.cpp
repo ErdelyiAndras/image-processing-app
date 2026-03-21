@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstring>
 #include <vector>
+#include <cmath>
 
 Image::Image(PixelIdx rows, PixelIdx cols) : rows(rows), cols(cols), image(nullptr) {
     if (rows == 0 || cols == 0) {
@@ -109,7 +110,7 @@ const PixelValue& Image::operator()(PixelIdx row, PixelIdx col) const {
     return image[row * cols + col];
 }
 
-bool Image::save(const std::string& path) const {
+bool Image::save(const std::string& name, const std::string& ext) const {
     if (!image || rows == 0 || cols == 0) {
         return false;
     }
@@ -119,28 +120,85 @@ bool Image::save(const std::string& path) const {
         PixelValue val = std::clamp(image[i], 0.0f, 1.0f);
         output[i] = static_cast<uint8_t>(val * 255.0f + 0.5f);
     }
-
-    std::string ext;
-    size_t dot = path.find_last_of('.');
-    if (dot != std::string::npos) {
-        ext = path.substr(dot);
-    }
-
-    if (ext == ".png") {
-        return stbi_write_png(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data(), static_cast<int>(cols)) != 0;
-    } else if (ext == ".jpg" || ext == ".jpeg") {
-        return stbi_write_jpg(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data(), 95) != 0;
-    } else if (ext == ".bmp") {
-        return stbi_write_bmp(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data()) != 0;
-    } else if (ext == ".tga") {
-        return stbi_write_tga(path.c_str(), static_cast<int>(cols), static_cast<int>(rows), 1, output.data()) != 0;
-    }
-
-    return false;
+    return saveUsingFormat(name, ext, output, static_cast<int>(cols), static_cast<int>(rows), 1);
 }
 
 void Image::clear() {
     if (image) {
         std::memset(image, 0, sizeof(PixelValue) * size());
     }
+}
+
+bool Image::saveComposite(
+    const std::string& name,
+    const std::string& ext,
+    const Image& processedImage,
+    const Image& edgeMap,
+    const Image& shapeMap
+) {
+    const PixelIdx rows{ processedImage.getRows() };
+    const PixelIdx cols{ processedImage.getCols() };
+
+    constexpr uint8_t edgeRed{ 0U };
+    constexpr uint8_t edgeGreen{ 255U };
+    constexpr uint8_t edgeBlue{ 255U };
+    constexpr uint8_t shapeRed{ 255U };
+    constexpr uint8_t shapeGreen{ 50U };
+    constexpr uint8_t shapeBlue{ 50U };
+
+    std::vector<uint8_t> rgbData(static_cast<size_t>(rows) * cols * 3U);
+    for (PixelIdx i{ 0U }; i < rows; ++i) {
+        for (PixelIdx j{ 0U }; j < cols; ++j) {
+            const size_t pixel{ (static_cast<size_t>(i) * cols + j) * 3 };
+            const uint8_t gray{ toUint8(processedImage(i, j)) };
+
+            rgbData[pixel]     = gray;
+            rgbData[pixel + 1] = gray;
+            rgbData[pixel + 2] = gray;
+
+            if (edgeMap(i, j) != 0.0f) {
+                const float t{ std::clamp(edgeMap(i, j), 0.0f, 1.0f) };
+                rgbData[pixel]     = blend(gray, edgeRed, t);
+                rgbData[pixel + 1] = blend(gray, edgeGreen, t);
+                rgbData[pixel + 2] = blend(gray, edgeBlue, t);
+            }
+
+            if (shapeMap(i, j) != 0.0f) {
+                const float t{ std::clamp(shapeMap(i, j), 0.0f, 1.0f) };
+                rgbData[pixel]     = blend(gray, shapeRed, t);
+                rgbData[pixel + 1] = blend(gray, shapeGreen, t);
+                rgbData[pixel + 2] = blend(gray, shapeBlue, t);
+            }
+        }
+    }
+
+    return saveUsingFormat(name, ext, rgbData, static_cast<int>(cols), static_cast<int>(rows), 3);
+}
+
+bool Image::saveUsingFormat(
+    const std::string& name,
+    const std::string& ext,
+    const std::vector<uint8_t>& output,
+    int cols,
+    int rows,
+    int channels
+) {
+    if (ext == ".png") {
+        return stbi_write_png((name + ext).c_str(), cols, rows, channels, output.data(), cols * channels) != 0;
+    } else if (ext == ".jpg" || ext == ".jpeg") {
+        return stbi_write_jpg((name + ext).c_str(), cols, rows, channels, output.data(), 95) != 0;
+    } else if (ext == ".bmp") {
+        return stbi_write_bmp((name + ext).c_str(), cols, rows, channels, output.data()) != 0;
+    } else if (ext == ".tga") {
+        return stbi_write_tga((name + ext).c_str(), cols, rows, channels, output.data()) != 0;
+    }
+    return false;
+}
+
+uint8_t Image::toUint8(PixelValue value) {
+    return static_cast<uint8_t>(std::clamp(value, 0.0f, 1.0f) * 255.0f + 0.5f);
+}
+
+uint8_t Image::blend(uint8_t base, uint8_t overlay, float t) {
+    return static_cast<uint8_t>(std::round((1.0f - t) * base + t * overlay));
 }
