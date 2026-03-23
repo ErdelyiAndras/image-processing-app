@@ -1,4 +1,5 @@
 #include "TVDenoisingGPU.h"
+#include "kernel_sources.h"
 #include "config.h"
 #include "ocl-sum-utils.h"
 
@@ -18,7 +19,7 @@ namespace components {
             , dxMtxBuffer()
             , dyMtxBuffer()
             , l2NormMtxBuffer() {
-            initOpenCL(TV_DENOISING_KERNEL_PATH);
+            initOpenCL(TV_DENOISING_KERNEL_SOURCE);
         }
 
         TVDenoisingGPU::TVDenoisingGPU(float strength, float step_size, float tolerance)
@@ -33,7 +34,7 @@ namespace components {
             , dxMtxBuffer()
             , dyMtxBuffer()
             , l2NormMtxBuffer() {
-            initOpenCL(TV_DENOISING_KERNEL_PATH);
+            initOpenCL(TV_DENOISING_KERNEL_SOURCE);
         }
 
         float TVDenoisingGPU::tvNormAndGrad() {
@@ -132,17 +133,17 @@ namespace components {
             dyMtxBuffer       = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
             l2NormMtxBuffer   = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
 
-            queue.enqueueWriteBuffer(inputImageBuffer, CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
+            queue.enqueueWriteBuffer(inputImageBuffer,  CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
             queue.enqueueWriteBuffer(outputImageBuffer, CL_FALSE, 0, img_size * sizeof(float), outputImage.data());
 
             queue.enqueueFillBuffer(tvGradientBuffer, 0.0f, 0, img_size * sizeof(float));
             queue.enqueueFillBuffer(l2GradientBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(gradientBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(momentumBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(dxMtxBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(dyMtxBuffer, 0.0f, 0, img_size * sizeof(float));
-            queue.enqueueFillBuffer(l2NormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(gradientBuffer,   0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(momentumBuffer,   0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(tvNormMtxBuffer,  0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dxMtxBuffer,      0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(dyMtxBuffer,      0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(l2NormMtxBuffer,  0.0f, 0, img_size * sizeof(float));
         }
     } // denoising
 } // components

@@ -1,5 +1,5 @@
 #include "GaussianBlurGPU.h"
-#include "config.h"
+#include "kernel_sources.h"
 
 #include <CL/opencl.h>
 
@@ -10,12 +10,12 @@ namespace components {
     namespace denoising {
         GaussianBlurGPU::GaussianBlurGPU()
             : GaussianBlurComponent() {
-            initOpenCL(GAUSSIAN_BLUR_KERNEL_PATH);
+            initOpenCL(GAUSSIAN_BLUR_KERNEL_SOURCE);
         }
 
         GaussianBlurGPU::GaussianBlurGPU(int kernel_size, float sigma)
             : GaussianBlurComponent(kernel_size, sigma) {
-            initOpenCL(GAUSSIAN_BLUR_KERNEL_PATH);
+            initOpenCL(GAUSSIAN_BLUR_KERNEL_SOURCE);
         }
 
         void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {

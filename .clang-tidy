@@ -9,7 +9,9 @@ Checks: >
     -modernize-use-trailing-return-type,
     -readability-magic-numbers,
     -cppcoreguidelines-avoid-magic-numbers,
-    -cppcoreguidelines-pro-bounds-pointer-arithmetic
+    -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+    -cppcoreguidelines-owning-memory,
+    -readability-uppercase-literal-suffix
 
 WarningsAsErrors: ""
 

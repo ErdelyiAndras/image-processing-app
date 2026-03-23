@@ -1,11 +1,12 @@
 #include "CannyEdgeDetectionGPU.h"
-#include "config.h"
+#include "kernel_sources.h"
 #include "types.h"
 
 #include <CL/opencl.h>
 
-#include <vector>
+#include <iostream>
 #include <utility>
+#include <vector>
 
 namespace components {
     namespace edge_detection {
@@ -16,7 +17,7 @@ namespace components {
             , nms_buffer()
             , output_buffer()
             , temp_out_buffer() {
-            initOpenCL(CANNY_EDGE_DETECTION_KERNEL_PATH);
+            initOpenCL(CANNY_EDGE_DETECTION_KERNEL_SOURCE);
         }
 
         CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(float low_threshold, float high_threshold)
@@ -26,7 +27,7 @@ namespace components {
             , nms_buffer()
             , output_buffer()
             , temp_out_buffer() {
-            initOpenCL(CANNY_EDGE_DETECTION_KERNEL_PATH);
+            initOpenCL(CANNY_EDGE_DETECTION_KERNEL_SOURCE);
         }
 
         void CannyEdgeDetectionGPU::calculateSobelGradient() {
@@ -86,7 +87,6 @@ namespace components {
             cl::Buffer* read_buf{ &output_buffer };
             cl::Buffer* write_buf{ &temp_out_buffer };
 
-
             uint32_t counter{ 1U };
             while (changed) {
                 int changed_int{ 0 };
@@ -128,7 +128,7 @@ namespace components {
             output_buffer   = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
             temp_out_buffer = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, img_size * sizeof(float) };
 
-            queue.enqueueFillBuffer(output_buffer, 0.0f, 0, img_size * sizeof(float));
+            queue.enqueueFillBuffer(output_buffer,   0.0f, 0, img_size * sizeof(float));
             queue.enqueueFillBuffer(temp_out_buffer, 0.0f, 0, img_size * sizeof(float));
         }
     } // edge_detection

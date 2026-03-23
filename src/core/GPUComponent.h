@@ -19,7 +19,7 @@ protected:
     cl::CommandQueue queue;
     cl::Program program;
 
-    void initOpenCL(const std::string& kernel_path);
+    void initOpenCL(const char* kernel_source);
 
     static cl::Program utils_program;
 

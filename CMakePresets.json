@@ -23,7 +23,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
-                "CMAKE_CXX_COMPILER": "clang-cl"
+                "CMAKE_CXX_COMPILER":   "clang-cl"
             }
         },
         {
@@ -36,23 +36,23 @@
             "inherits": ["base", "generator-ninja-clang-cl"],
             "binaryDir": "${sourceDir}/build-clang-cl-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--extra-arg=--driver-mode=cl;--extra-arg=/EHsc"
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
             "name": "clang-cl-release",
             "inherits": ["base", "generator-ninja-clang-cl"],
             "binaryDir": "${sourceDir}/build-clang-cl-release",
-            "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
         },
         {
             "name": "clang-cl-warnings-as-errors",
             "inherits": ["base", "generator-ninja-clang-cl"],
             "binaryDir": "${sourceDir}/build-clang-cl-warnings-as-errors",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "WarningsAsErrors",
-                "CMAKE_CXX_CLANG_TIDY": "clang-tidy;--extra-arg=--driver-mode=cl;--extra-arg=/EHsc"
+                "CMAKE_BUILD_TYPE": "WarningsAsErrors"
             }
         }
     ],

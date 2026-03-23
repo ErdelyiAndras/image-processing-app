@@ -27,3 +27,14 @@ foreach(OCL_INCLUDE_DIR ${OCL_INCLUDE_DIRS})
         /external:I${OCL_INCLUDE_DIR}
     )
 endforeach()
+
+target_precompile_headers(core PUBLIC
+    <CL/opencl.hpp>
+    <algorithm>
+    <cmath>
+    <cstdint>
+    <memory>
+    <stdexcept>
+    <string>
+    <vector>
+)
