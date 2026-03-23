@@ -199,7 +199,7 @@ namespace pipeline {
         return result;
     }
 
-    std::vector<components::Context> Pipeline::execute(components::Context context) {
+    std::unordered_map<NodeId, components::Context> Pipeline::execute(components::Context context) {
         if (!validate()) {
             throw std::runtime_error{ "Pipeline::execute: graph contains a cycle" };
         }
@@ -245,10 +245,10 @@ namespace pipeline {
         }
 
         const std::vector<NodeId> snks{ sinks() };
-        std::vector<components::Context> outputs;
+        std::unordered_map<NodeId, components::Context> outputs;
         outputs.reserve(snks.size());
         for (const NodeId sink : snks) {
-            outputs.push_back(std::move(results.at(sink)));
+            outputs.emplace(sink, std::move(results.at(sink)));
         }
         return outputs;
     }

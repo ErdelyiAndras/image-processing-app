@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <unordered_map>
 
 #include "Image.h"
 
@@ -103,7 +104,7 @@ int main(int argc, char** argv) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        std::vector<components::Context> results = pipeline.execute(processing_context);
+        std::unordered_map<NodeId, components::Context> results = pipeline.execute(processing_context);
 
         auto end = std::chrono::high_resolution_clock::now();
 
@@ -112,14 +113,13 @@ int main(int argc, char** argv) {
             std::cout << "Pipeline execution took: " << elapsed.count() << " seconds" << std::endl;
         }
 
-        for (size_t i{ 0U }; i < results.size(); ++i) {
-            const components::Context& ctx = results.at(i);
+        for (auto& [i, ctx] : results) {
             ctx.save(base, ext);
             ctx.getProcessedImage().save(base + "_processed" + ctx.getAppliedComponents(), ext);
             ctx.getEdgeMap().save(base + "_edge" + ctx.getAppliedComponents(), ext);
             ctx.getShapeMap().save(base + "_shape" + ctx.getAppliedComponents(), ext);
             if (ENABLE_LOGGING) {
-                std::cout << "Output " << i << " saved to: " << base + "_output" + ctx.getAppliedComponents() + ext << std::endl;
+                std::cout << "Node " << i << " output saved to: " << base + "_output" + ctx.getAppliedComponents() + ext << std::endl;
             }
         }
 

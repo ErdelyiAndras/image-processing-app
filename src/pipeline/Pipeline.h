@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <variant>
 #include <cassert>
+#include <unordered_map>
 
 namespace pipeline {
     class Pipeline {
@@ -34,7 +35,7 @@ namespace pipeline {
 
         bool validate();
 
-        std::vector<components::Context> execute(components::Context context);
+        std::unordered_map<NodeId, components::Context> execute(components::Context context);
 
     private:
         struct ProcessingNode {
