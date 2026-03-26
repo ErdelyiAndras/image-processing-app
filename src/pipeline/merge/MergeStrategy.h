@@ -24,9 +24,10 @@ namespace pipeline {
             return mergedContext;
         }
 
+        virtual std::string getName() const = 0;
+
     protected:
         virtual void updateMergedContext(components::Context& mergedContext, const components::Context& incomingContext) const = 0;
-        virtual std::string getName() const = 0;
     };
 }
 

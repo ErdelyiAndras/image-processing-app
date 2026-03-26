@@ -44,6 +44,7 @@
 #include "Pipeline.h"
 
 #include "CombineShapeMap.h"
+#include "CombineEdgeMap.h"
 
 int main(int argc, char** argv) {
     if (argc != 6) {
@@ -102,6 +103,42 @@ int main(int argc, char** argv) {
             components::shape_detection::HoughCircleShapeDetectionParameters{ 250U, 10U, 100U, 80.0f, 360U }
         );
 
+
+        NodeId tv_denoising_gpu_node2 = pipeline.addNode(std::make_unique<components::denoising::TVDenoisingGPU>());
+        NodeId canny_edge_gpu_node2   = pipeline.addNode(std::make_unique<components::edge_detection::CannyEdgeDetectionGPU>());
+        NodeId sobel_edge_gpu_node2   = pipeline.addNode(std::make_unique<components::edge_detection::SobelEdgeDetectionGPU>());
+        NodeId hough_line_gpu_node2   = pipeline.addNode(std::make_unique<components::shape_detection::HoughLineShapeDetectionGPU>());
+        NodeId hough_circle_gpu_node2 = pipeline.addNode(std::make_unique<components::shape_detection::HoughCircleShapeDetectionGPU>());
+
+        NodeId combine_edge_map_node   = pipeline.addNode(std::make_unique<pipeline::CombineEdgeMap>());
+        NodeId combine_shape_map_node2 = pipeline.addNode(std::make_unique<pipeline::CombineShapeMap>());
+
+        pipeline.connect(tv_denoising_gpu_node2, canny_edge_gpu_node2);
+        pipeline.connect(tv_denoising_gpu_node2, sobel_edge_gpu_node2);
+        pipeline.connect(canny_edge_gpu_node2, combine_edge_map_node);
+        pipeline.connect(sobel_edge_gpu_node2, combine_edge_map_node);
+        pipeline.connect(combine_edge_map_node, hough_line_gpu_node2);
+        pipeline.connect(combine_edge_map_node, hough_circle_gpu_node2);
+        pipeline.connect(hough_line_gpu_node2, combine_shape_map_node2);
+        pipeline.connect(hough_circle_gpu_node2, combine_shape_map_node2);
+
+        pipeline.getComponent(tv_denoising_gpu_node2).setParameters(
+            components::denoising::TVDenoisingParameters{ strength, step_size, tol }
+        );
+        pipeline.getComponent(canny_edge_gpu_node2).setParameters(
+            components::edge_detection::CannyEdgeDetectionParameters{ 0.3f, 0.7f }
+        );
+        pipeline.getComponent(sobel_edge_gpu_node2).setParameters(
+            components::edge_detection::SobelEdgeDetectionParameters{ 0.7f }
+        );
+        pipeline.getComponent(hough_line_gpu_node2).setParameters(
+            components::shape_detection::HoughLineShapeDetectionParameters{ 1.0f, pi / 180.0f, 30U, 10U, 50U }
+        );
+        pipeline.getComponent(hough_circle_gpu_node2).setParameters(
+            components::shape_detection::HoughCircleShapeDetectionParameters{ 250U, 10U, 100U, 80.0f, 360U }
+        );
+
+
         auto start = std::chrono::high_resolution_clock::now();
 
         std::unordered_map<NodeId, components::Context> results = pipeline.execute(processing_context);
@@ -115,11 +152,11 @@ int main(int argc, char** argv) {
 
         for (auto& [i, ctx] : results) {
             ctx.save(base, ext);
-            ctx.getProcessedImage().save(base + "_processed" + ctx.getAppliedComponents(), ext);
-            ctx.getEdgeMap().save(base + "_edge" + ctx.getAppliedComponents(), ext);
-            ctx.getShapeMap().save(base + "_shape" + ctx.getAppliedComponents(), ext);
+            ctx.getProcessedImage().save(base + "_processed_" + ctx.getAppliedComponents(), ext);
+            ctx.getEdgeMap().save(base + "_edge_" + ctx.getAppliedComponents(), ext);
+            ctx.getShapeMap().save(base + "_shape_" + ctx.getAppliedComponents(), ext);
             if (ENABLE_LOGGING) {
-                std::cout << "Node " << i << " output saved to: " << base + "_output" + ctx.getAppliedComponents() + ext << std::endl;
+                std::cout << "Node " << i << " - " << pipeline.getComponentName(i) << ": output saved to: " << base + "_output_" + ctx.getAppliedComponents() + ext << std::endl;
             }
         }
 

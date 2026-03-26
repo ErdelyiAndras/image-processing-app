@@ -45,7 +45,7 @@ namespace components {
         }
 
         bool save(const std::string& base, const std::string& ext) const {
-            const std::string name{ base + "_output" + getAppliedComponents() };
+            const std::string name{ base + "_output_" + getAppliedComponents() };
             return Image::saveComposite(
                 name,
                 ext,

@@ -96,6 +96,19 @@ namespace pipeline {
         return *procNode->component;
     }
 
+    std::string Pipeline::getComponentName(NodeId nodeId) {
+        assertNodeExists(nodeId, __func__);
+        if (std::holds_alternative<ProcessingNode>(nodes[nodeId].data)) {
+            const ProcessingNode& procNode{ std::get<ProcessingNode>(nodes[nodeId].data) };
+            assert(procNode.component);
+            return procNode.component->getName();
+        } else {
+            const MergeNode& mergeNode{ std::get<MergeNode>(nodes[nodeId].data) };
+            assert(mergeNode.mergeStrategy);
+            return mergeNode.mergeStrategy->getName();
+        }
+    }
+
     bool Pipeline::hasCycle() const {
         std::vector<Color> color(nodes.size(), Color::Unvisited);
 

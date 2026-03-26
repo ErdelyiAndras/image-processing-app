@@ -21,6 +21,7 @@ namespace pipeline {
                 }
             }
         }
+
     private:
         std::string getName() const override {
             return "combine-shape-map";

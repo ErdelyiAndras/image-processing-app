@@ -12,6 +12,7 @@
 #include <variant>
 #include <cassert>
 #include <unordered_map>
+#include <string>
 
 namespace pipeline {
     class Pipeline {
@@ -32,6 +33,8 @@ namespace pipeline {
             }
             return *component;
         }
+
+        std::string getComponentName(NodeId nodeId);
 
         bool validate();
 
