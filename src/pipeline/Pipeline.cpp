@@ -214,7 +214,7 @@ namespace pipeline {
 
     std::unordered_map<NodeId, components::Context> Pipeline::execute(components::Context context) {
         if (!validate()) {
-            throw std::runtime_error{ "Pipeline::execute: graph contains a cycle" };
+            throw std::runtime_error{ "Pipeline::execute: graph contains a cycle or has node(s) with invalid predecessor count" };
         }
 
         const std::vector<NodeId> order{ topologicalSort() };
