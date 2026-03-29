@@ -199,9 +199,10 @@ if(_UBSAN_AVAILABLE)
 endif()
 
 add_subdirectory(src)
+add_subdirectory(ui)
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE image_processing_lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE image_processing_lib cli)
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
