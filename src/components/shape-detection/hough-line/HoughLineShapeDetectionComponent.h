@@ -1,7 +1,6 @@
 #ifndef HOUGH_LINE_SHAPE_DETECTION_COMPONENT_H
 #define HOUGH_LINE_SHAPE_DETECTION_COMPONENT_H
 
-#include "shape-detection-config.h"
 #include "ShapeDetectionComponent.h"
 #include "HoughLineShapeDetectionParameters.h"
 #include "HoughLine.h"
@@ -15,14 +14,7 @@ namespace components {
     namespace shape_detection {
         class HoughLineShapeDetectionComponent : public ShapeDetectionComponent {
         public:
-            HoughLineShapeDetectionComponent();
-            HoughLineShapeDetectionComponent(
-                float rho_resolution,
-                float theta_resolution,
-                uint32_t vote_min_threshold,
-                uint32_t min_line_length,
-                uint32_t max_line_gap
-            );
+            explicit HoughLineShapeDetectionComponent(const HoughLineShapeDetectionParameters& params);
 
             virtual ~HoughLineShapeDetectionComponent() = default;
 

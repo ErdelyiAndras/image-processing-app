@@ -13,14 +13,7 @@ namespace components {
     namespace shape_detection {
         class HoughCircleShapeDetectionComponent : public ShapeDetectionComponent {
         public:
-            HoughCircleShapeDetectionComponent();
-            HoughCircleShapeDetectionComponent(
-                uint32_t vote_min_threshold,
-                uint32_t min_radius,
-                uint32_t max_radius,
-                float    min_dist,
-                uint32_t num_angle_steps
-            );
+            explicit HoughCircleShapeDetectionComponent(const HoughCircleShapeDetectionParameters& params);
 
             virtual ~HoughCircleShapeDetectionComponent() = default;
 

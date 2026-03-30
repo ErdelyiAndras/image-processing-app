@@ -9,8 +9,7 @@ namespace components {
     namespace edge_detection {
         class CannyEdgeDetectionComponent : public EdgeDetectionComponent {
         public:
-            CannyEdgeDetectionComponent();
-            CannyEdgeDetectionComponent(float low_threshold, float high_threshold);
+            explicit CannyEdgeDetectionComponent(const CannyEdgeDetectionParameters& params);
 
             virtual ~CannyEdgeDetectionComponent() = default;
 

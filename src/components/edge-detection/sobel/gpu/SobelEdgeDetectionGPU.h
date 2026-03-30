@@ -2,6 +2,7 @@
 #define SOBEL_EDGE_DETECTION_GPU_H
 
 #include "SobelEdgeDetectionComponent.h"
+#include "SobelEdgeDetectionParameters.h"
 #include "GPUComponent.h"
 
 #include <string>
@@ -11,7 +12,8 @@ namespace components {
         class SobelEdgeDetectionGPU final : public SobelEdgeDetectionComponent, protected GPUComponent {
         public:
             SobelEdgeDetectionGPU();
-            SobelEdgeDetectionGPU(float threshold);
+            explicit SobelEdgeDetectionGPU(const SobelEdgeDetectionParameters& params);
+            explicit SobelEdgeDetectionGPU(float threshold);
 
             inline std::string getName() const override { return "sobel-gpu"; }
 

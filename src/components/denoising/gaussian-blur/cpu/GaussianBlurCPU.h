@@ -2,6 +2,7 @@
 #define GAUSSIAN_BLUR_CPU_H
 
 #include "GaussianBlurComponent.h"
+#include "GaussianBlurParameters.h"
 
 #include <vector>
 #include <string>
@@ -11,7 +12,8 @@ namespace components {
         class GaussianBlurCPU final : public GaussianBlurComponent {
         public:
             GaussianBlurCPU();
-            GaussianBlurCPU(int kernel_size, float sigma);
+            explicit GaussianBlurCPU(const GaussianBlurParameters& params);
+            explicit GaussianBlurCPU(int kernel_size, float sigma);
 
             inline std::string getName() const override { return "gauss-cpu"; }
 

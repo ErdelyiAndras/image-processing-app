@@ -2,7 +2,6 @@
 #include "TVDenoisingParameters.h"
 #include "DenoisingComponent.h"
 #include "Parameters.h"
-#include "denoising-config.h"
 #include "types.h"
 #include "config.h"
 
@@ -12,19 +11,12 @@
 
 namespace components {
     namespace denoising {
-        TVDenoisingComponent::TVDenoisingComponent()
+        TVDenoisingComponent::TVDenoisingComponent(const TVDenoisingParameters& params)
             : DenoisingComponent()
-            , strength(default_strength)
-            , step_size(default_step_size)
-            , tolerance(default_tolerance)
-            , step(step_size / (strength + 1)) {}
-
-        TVDenoisingComponent::TVDenoisingComponent(float strength, float step_size, float tolerance)
-            : DenoisingComponent()
-            , strength(strength)
-            , step_size(step_size)
-            , tolerance(tolerance)
-            , step(step_size / (strength + 1)) {}
+            , strength(params.strength)
+            , step_size(params.step_size)
+            , tolerance(params.tolerance)
+            , step(params.step_size / (params.strength + 1)) {}
 
         void TVDenoisingComponent::setParameters(const Parameters& params) {
             const ParamType* denoisingParams{ dynamic_cast<const ParamType*>(&params) };

@@ -2,6 +2,7 @@
 #define TV_DENOISING_GPU_H
 
 #include "TVDenoisingComponent.h"
+#include "TVDenoisingParameters.h"
 #include "GPUComponent.h"
 
 #include <string>
@@ -11,7 +12,8 @@ namespace components {
         class TVDenoisingGPU final : public TVDenoisingComponent, protected GPUComponent {
         public:
             TVDenoisingGPU();
-            TVDenoisingGPU(float strength, float step_size, float tolerance);
+            explicit TVDenoisingGPU(const TVDenoisingParameters& params);
+            explicit TVDenoisingGPU(float strength, float step_size, float tolerance);
 
             std::string getName() const override { return "tv-gpu"; }
 

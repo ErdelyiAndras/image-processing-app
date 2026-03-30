@@ -1,4 +1,5 @@
 #include "HoughLineShapeDetectionComponent.h"
+#include "HoughLineShapeDetectionParameters.h"
 #include "types.h"
 #include "config.h"
 
@@ -10,32 +11,17 @@
 
 namespace components {
     namespace shape_detection {
-        HoughLineShapeDetectionComponent::HoughLineShapeDetectionComponent()
-            : ShapeDetectionComponent()
-            , rho_resolution(default_rho_resolution)
-            , theta_resolution(default_theta_resolution)
-            , vote_min_threshold(default_threshold)
-            , min_line_length(default_min_line_length)
-            , max_line_gap(default_max_line_gap)
-            , num_rho_bins(0U)
-            , num_theta_bins(static_cast<uint32_t>(std::ceil(pi / default_theta_resolution)))
-            , rho_max(0.0f)
-            , detected_lines()
-            , accumulator()
-            , cos_table()
-            , sin_table() {}
-
         HoughLineShapeDetectionComponent::HoughLineShapeDetectionComponent(
-            float rho_res, float theta_res, uint32_t vote_min_threshold, uint32_t min_line_length, uint32_t max_line_gap
+            const HoughLineShapeDetectionParameters& params
         )
             : ShapeDetectionComponent()
-            , rho_resolution(rho_res)
-            , theta_resolution(theta_res)
-            , vote_min_threshold(vote_min_threshold)
-            , min_line_length(min_line_length)
-            , max_line_gap(max_line_gap)
+            , rho_resolution(params.rho_resolution)
+            , theta_resolution(params.theta_resolution)
+            , vote_min_threshold(params.vote_min_threshold)
+            , min_line_length(params.min_line_length)
+            , max_line_gap(params.max_line_gap)
             , num_rho_bins(0U)
-            , num_theta_bins(static_cast<uint32_t>(std::ceil(pi / theta_res)))
+            , num_theta_bins(static_cast<uint32_t>(std::ceil(pi / params.theta_resolution)))
             , rho_max(0.0f)
             , detected_lines()
             , accumulator()

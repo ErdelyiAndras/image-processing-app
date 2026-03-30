@@ -1,6 +1,6 @@
 #include "HoughCircleShapeDetectionComponent.h"
+#include "HoughCircleShapeDetectionParameters.h"
 #include "HoughCircle.h"
-#include "shape-detection-config.h"
 
 #include <vector>
 #include <algorithm>
@@ -9,33 +9,14 @@
 
 namespace components {
     namespace shape_detection {
-        HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent()
+        HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent(const HoughCircleShapeDetectionParameters& params)
             : ShapeDetectionComponent()
-            , vote_min_threshold(default_circle_vote_min_threshold)
-            , min_radius(default_min_radius)
-            , max_radius(default_max_radius)
-            , min_dist(default_min_dist)
-            , num_angle_steps(default_num_angle_steps)
-            , num_radii(default_max_radius - default_min_radius + 1U)
-            , detected_circles()
-            , accumulator()
-            , cos_table()
-            , sin_table() {}
-
-        HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent(
-            uint32_t vote_min_threshold,
-            uint32_t min_radius,
-            uint32_t max_radius,
-            float    min_dist,
-            uint32_t num_angle_steps
-        )
-            : ShapeDetectionComponent()
-            , vote_min_threshold(vote_min_threshold)
-            , min_radius(min_radius)
-            , max_radius(max_radius)
-            , min_dist(min_dist)
-            , num_angle_steps(num_angle_steps)
-            , num_radii(max_radius - min_radius + 1U)
+            , vote_min_threshold(params.vote_min_threshold)
+            , min_radius(params.min_radius)
+            , max_radius(params.max_radius)
+            , min_dist(params.min_dist)
+            , num_angle_steps(params.num_angle_steps)
+            , num_radii(params.max_radius - params.min_radius + 1U)
             , detected_circles()
             , accumulator()
             , cos_table()

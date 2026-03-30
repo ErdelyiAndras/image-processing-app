@@ -1,7 +1,6 @@
 #ifndef GAUSSIAN_BLUR_COMPONENT_H
 #define GAUSSIAN_BLUR_COMPONENT_H
 
-#include "denoising-config.h"
 #include "DenoisingComponent.h"
 #include "GaussianBlurParameters.h"
 
@@ -11,8 +10,7 @@ namespace components {
     namespace denoising {
         class GaussianBlurComponent : public DenoisingComponent {
         public:
-            GaussianBlurComponent();
-            GaussianBlurComponent(int kernel_size, float sigma);
+            explicit GaussianBlurComponent(const GaussianBlurParameters& params);
 
             virtual ~GaussianBlurComponent() = default;
 

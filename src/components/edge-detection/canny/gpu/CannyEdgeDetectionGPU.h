@@ -2,6 +2,7 @@
 #define CANNY_EDGE_DETECTION_GPU_H
 
 #include "CannyEdgeDetectionComponent.h"
+#include "CannyEdgeDetectionParameters.h"
 #include "GPUComponent.h"
 
 #include <CL/opencl.hpp>
@@ -12,7 +13,8 @@ namespace components {
         class CannyEdgeDetectionGPU final : public CannyEdgeDetectionComponent, protected GPUComponent {
         public:
             CannyEdgeDetectionGPU();
-            CannyEdgeDetectionGPU(float low_threshold, float high_threshold);
+            explicit CannyEdgeDetectionGPU(const CannyEdgeDetectionParameters& params);
+            explicit CannyEdgeDetectionGPU(float low_threshold, float high_threshold);
 
             inline std::string getName() const override { return "canny-gpu"; }
 

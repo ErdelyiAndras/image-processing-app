@@ -2,6 +2,7 @@
 #define CANNY_EDGE_DETECTION_CPU_H
 
 #include "CannyEdgeDetectionComponent.h"
+#include "CannyEdgeDetectionParameters.h"
 #include "Image.h"
 
 #include <string>
@@ -11,7 +12,8 @@ namespace components {
         class CannyEdgeDetectionCPU final : public CannyEdgeDetectionComponent {
         public:
             CannyEdgeDetectionCPU();
-            CannyEdgeDetectionCPU(float low_threshold, float high_threshold);
+            explicit CannyEdgeDetectionCPU(const CannyEdgeDetectionParameters& params);
+            explicit CannyEdgeDetectionCPU(float low_threshold, float high_threshold);
 
             inline std::string getName() const override { return "canny-cpu"; }
 

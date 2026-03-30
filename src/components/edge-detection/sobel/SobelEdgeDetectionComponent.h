@@ -1,7 +1,6 @@
 #ifndef SOBEL_EDGE_DETECTION_COMPONENT_H
 #define SOBEL_EDGE_DETECTION_COMPONENT_H
 
-#include "edge-detection-config.h"
 #include "EdgeDetectionComponent.h"
 #include "SobelEdgeDetectionParameters.h"
 
@@ -9,8 +8,7 @@ namespace components {
     namespace edge_detection {
         class SobelEdgeDetectionComponent : public EdgeDetectionComponent {
         public:
-            SobelEdgeDetectionComponent();
-            SobelEdgeDetectionComponent(float threshold);
+            explicit SobelEdgeDetectionComponent(const SobelEdgeDetectionParameters& params);
 
             virtual ~SobelEdgeDetectionComponent() = default;
 

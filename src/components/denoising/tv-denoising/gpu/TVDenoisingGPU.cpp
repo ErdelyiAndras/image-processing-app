@@ -1,4 +1,5 @@
 #include "TVDenoisingGPU.h"
+#include "TVDenoisingParameters.h"
 #include "kernel_sources.h"
 #include "config.h"
 #include "ocl-sum-utils.h"
@@ -8,7 +9,10 @@
 namespace components {
     namespace denoising {
         TVDenoisingGPU::TVDenoisingGPU()
-            : TVDenoisingComponent()
+            : TVDenoisingGPU(TVDenoisingParameters{}) {}
+
+        TVDenoisingGPU::TVDenoisingGPU(const TVDenoisingParameters& params)
+            : TVDenoisingComponent(params)
             , inputImageBuffer()
             , outputImageBuffer()
             , tvGradientBuffer()
@@ -23,19 +27,7 @@ namespace components {
         }
 
         TVDenoisingGPU::TVDenoisingGPU(float strength, float step_size, float tolerance)
-            : TVDenoisingComponent(strength, step_size, tolerance)
-            , inputImageBuffer()
-            , outputImageBuffer()
-            , tvGradientBuffer()
-            , l2GradientBuffer()
-            , gradientBuffer()
-            , momentumBuffer()
-            , tvNormMtxBuffer()
-            , dxMtxBuffer()
-            , dyMtxBuffer()
-            , l2NormMtxBuffer() {
-            initOpenCL(TV_DENOISING_KERNEL_SOURCE);
-        }
+            : TVDenoisingGPU(TVDenoisingParameters{ strength, step_size, tolerance }) {}
 
         float TVDenoisingGPU::tvNormAndGrad() {
             queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));

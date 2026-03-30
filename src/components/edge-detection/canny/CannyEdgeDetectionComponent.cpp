@@ -1,5 +1,4 @@
 #include "CannyEdgeDetectionComponent.h"
-#include "edge-detection-config.h"
 #include "Parameters.h"
 #include "CannyEdgeDetectionParameters.h"
 #include "EdgeDetectionComponent.h"
@@ -8,16 +7,10 @@
 
 namespace components {
     namespace edge_detection {
-        CannyEdgeDetectionComponent::CannyEdgeDetectionComponent()
+        CannyEdgeDetectionComponent::CannyEdgeDetectionComponent(const CannyEdgeDetectionParameters& params)
             : EdgeDetectionComponent()
-            , low_threshold(default_low_threshold)
-            , high_threshold(default_high_threshold)
-            , changed(true) {}
-
-        CannyEdgeDetectionComponent::CannyEdgeDetectionComponent(float low_threshold, float high_threshold)
-            : EdgeDetectionComponent()
-            , low_threshold(low_threshold)
-            , high_threshold(high_threshold)
+            , low_threshold(params.low_threshold)
+            , high_threshold(params.high_threshold)
             , changed(true) {}
 
         void CannyEdgeDetectionComponent::setParameters(const Parameters& params) {

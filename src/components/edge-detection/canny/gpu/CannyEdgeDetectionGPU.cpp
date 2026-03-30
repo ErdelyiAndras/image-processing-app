@@ -1,4 +1,5 @@
 #include "CannyEdgeDetectionGPU.h"
+#include "CannyEdgeDetectionParameters.h"
 #include "kernel_sources.h"
 #include "types.h"
 
@@ -11,7 +12,10 @@
 namespace components {
     namespace edge_detection {
         CannyEdgeDetectionGPU::CannyEdgeDetectionGPU()
-            : CannyEdgeDetectionComponent()
+            : CannyEdgeDetectionGPU(CannyEdgeDetectionParameters{}) {}
+
+        CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(const CannyEdgeDetectionParameters& params)
+            : CannyEdgeDetectionComponent(params)
             , grad_mag_buffer()
             , grad_dir_buffer()
             , nms_buffer()
@@ -21,14 +25,7 @@ namespace components {
         }
 
         CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(float low_threshold, float high_threshold)
-            : CannyEdgeDetectionComponent(low_threshold, high_threshold)
-            , grad_mag_buffer()
-            , grad_dir_buffer()
-            , nms_buffer()
-            , output_buffer()
-            , temp_out_buffer() {
-            initOpenCL(CANNY_EDGE_DETECTION_KERNEL_SOURCE);
-        }
+            : CannyEdgeDetectionGPU(CannyEdgeDetectionParameters{ low_threshold, high_threshold }) {}
 
         void CannyEdgeDetectionGPU::calculateSobelGradient() {
             cl::Buffer img_buf{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };

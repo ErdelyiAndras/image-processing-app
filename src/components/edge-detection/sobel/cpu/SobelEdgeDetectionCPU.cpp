@@ -1,4 +1,5 @@
 #include "SobelEdgeDetectionCPU.h"
+#include "SobelEdgeDetectionParameters.h"
 
 #include "types.h"
 
@@ -7,10 +8,14 @@
 
 namespace components {
     namespace edge_detection {
-        SobelEdgeDetectionCPU::SobelEdgeDetectionCPU() : SobelEdgeDetectionComponent() {}
+        SobelEdgeDetectionCPU::SobelEdgeDetectionCPU()
+            : SobelEdgeDetectionCPU(SobelEdgeDetectionParameters{}) {}
+
+        SobelEdgeDetectionCPU::SobelEdgeDetectionCPU(const SobelEdgeDetectionParameters& params)
+            : SobelEdgeDetectionComponent(params) {}
 
         SobelEdgeDetectionCPU::SobelEdgeDetectionCPU(float threshold)
-            : SobelEdgeDetectionComponent(threshold) {}
+            : SobelEdgeDetectionCPU(SobelEdgeDetectionParameters{ threshold }) {}
 
         void SobelEdgeDetectionCPU::applySobelFilter() {
             // Sobel kernels:

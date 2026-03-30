@@ -2,6 +2,7 @@
 #define HOUGH_LINE_SHAPE_DETECTION_GPU_H
 
 #include "HoughLineShapeDetectionComponent.h"
+#include "HoughLineShapeDetectionParameters.h"
 #include "GPUComponent.h"
 #include "Context.h"
 #include "types.h"
@@ -15,7 +16,8 @@ namespace components {
         class HoughLineShapeDetectionGPU final : public HoughLineShapeDetectionComponent, protected GPUComponent {
         public:
             HoughLineShapeDetectionGPU();
-            HoughLineShapeDetectionGPU(
+            explicit HoughLineShapeDetectionGPU(const HoughLineShapeDetectionParameters& params);
+            explicit HoughLineShapeDetectionGPU(
                 float rho_resolution,
                 float theta_resolution,
                 uint32_t vote_min_threshold,

@@ -10,8 +10,7 @@ namespace components {
     namespace denoising {
         class TVDenoisingComponent : public DenoisingComponent {
         public:
-            TVDenoisingComponent();
-            TVDenoisingComponent(float strength, float step_size, float tolerance);
+            explicit TVDenoisingComponent(const TVDenoisingParameters& params);
 
             virtual ~TVDenoisingComponent() = default;
 

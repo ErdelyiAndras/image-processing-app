@@ -2,6 +2,7 @@
 #define GAUSSIAN_BLUR_GPU_H
 
 #include "GaussianBlurComponent.h"
+#include "GaussianBlurParameters.h"
 #include "GPUComponent.h"
 
 #include <vector>
@@ -12,7 +13,8 @@ namespace components {
         class GaussianBlurGPU final : public GaussianBlurComponent, protected GPUComponent {
         public:
             GaussianBlurGPU();
-            GaussianBlurGPU(int kernel_size, float sigma);
+            explicit GaussianBlurGPU(const GaussianBlurParameters& params);
+            explicit GaussianBlurGPU(int kernel_size, float sigma);
 
             inline std::string getName() const override { return "gauss-gpu"; }
 

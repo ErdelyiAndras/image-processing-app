@@ -1,4 +1,5 @@
 #include "GaussianBlurCPU.h"
+#include "GaussianBlurParameters.h"
 
 #include "types.h"
 
@@ -8,10 +9,14 @@
 
 namespace components {
     namespace denoising {
-        GaussianBlurCPU::GaussianBlurCPU() : GaussianBlurComponent() {}
+        GaussianBlurCPU::GaussianBlurCPU()
+            : GaussianBlurCPU(GaussianBlurParameters{}) {}
+
+        GaussianBlurCPU::GaussianBlurCPU(const GaussianBlurParameters& params)
+            : GaussianBlurComponent(params) {}
 
         GaussianBlurCPU::GaussianBlurCPU(int kernel_size, float sigma)
-            : GaussianBlurComponent(kernel_size, sigma) {}
+            : GaussianBlurCPU(GaussianBlurParameters{ kernel_size, sigma }) {}
 
         void GaussianBlurCPU::computeConvolution(const std::vector<float>& kernel) {
             const int half{ kernel_size / 2 };

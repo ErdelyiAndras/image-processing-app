@@ -1,4 +1,5 @@
 #include "HoughCircleShapeDetectionCPU.h"
+#include "HoughCircleShapeDetectionParameters.h"
 #include "config.h"
 
 #include <cmath>
@@ -7,7 +8,10 @@
 namespace components {
     namespace shape_detection {
         HoughCircleShapeDetectionCPU::HoughCircleShapeDetectionCPU()
-            : HoughCircleShapeDetectionComponent() {}
+            : HoughCircleShapeDetectionCPU(HoughCircleShapeDetectionParameters{}) {}
+
+        HoughCircleShapeDetectionCPU::HoughCircleShapeDetectionCPU(const HoughCircleShapeDetectionParameters& params)
+            : HoughCircleShapeDetectionComponent(params) {}
 
         HoughCircleShapeDetectionCPU::HoughCircleShapeDetectionCPU(
             uint32_t vote_min_threshold,
@@ -16,7 +20,15 @@ namespace components {
             float    min_dist,
             uint32_t num_angle_steps
         )
-            : HoughCircleShapeDetectionComponent(vote_min_threshold, min_radius, max_radius, min_dist, num_angle_steps) {}
+            : HoughCircleShapeDetectionCPU(
+                HoughCircleShapeDetectionParameters{
+                    vote_min_threshold,
+                    min_radius,
+                    max_radius,
+                    min_dist,
+                    num_angle_steps
+                }
+            ) {}
 
         void HoughCircleShapeDetectionCPU::applyHoughTransform() {
             for (PixelIdx py{ 0U }; py < height; ++py) {

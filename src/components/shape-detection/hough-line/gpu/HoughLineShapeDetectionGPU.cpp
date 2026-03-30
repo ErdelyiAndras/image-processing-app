@@ -1,10 +1,14 @@
 #include "HoughLineShapeDetectionGPU.h"
+#include "HoughLineShapeDetectionParameters.h"
 #include "kernel_sources.h"
 
 namespace components {
     namespace shape_detection {
         HoughLineShapeDetectionGPU::HoughLineShapeDetectionGPU()
-            : HoughLineShapeDetectionComponent()
+            : HoughLineShapeDetectionGPU(HoughLineShapeDetectionParameters{}) {}
+
+        HoughLineShapeDetectionGPU::HoughLineShapeDetectionGPU(const HoughLineShapeDetectionParameters& params)
+            : HoughLineShapeDetectionComponent(params)
             , edge_map_buffer()
             , accumulator_buffer()
             , cos_table_buffer()
@@ -19,13 +23,15 @@ namespace components {
             uint32_t min_line_length,
             uint32_t max_line_gap
         )
-            : HoughLineShapeDetectionComponent(rho_resolution, theta_resolution, vote_min_threshold, min_line_length, max_line_gap)
-            , edge_map_buffer()
-            , accumulator_buffer()
-            , cos_table_buffer()
-            , sin_table_buffer() {
-            initOpenCL(HOUGH_LINE_SHAPE_DETECTION_KERNEL_SOURCE);
-        }
+            : HoughLineShapeDetectionGPU(
+                HoughLineShapeDetectionParameters{
+                    rho_resolution,
+                    theta_resolution,
+                    vote_min_threshold,
+                    min_line_length,
+                    max_line_gap
+                }
+            ) {}
 
         void HoughLineShapeDetectionGPU::applyHoughTransform() {
             cl::Kernel vote_kernel{ program, "hough_line_vote" };

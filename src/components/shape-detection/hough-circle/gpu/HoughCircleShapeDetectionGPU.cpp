@@ -1,10 +1,14 @@
 #include "HoughCircleShapeDetectionGPU.h"
+#include "HoughCircleShapeDetectionParameters.h"
 #include "kernel_sources.h"
 
 namespace components {
     namespace shape_detection {
         HoughCircleShapeDetectionGPU::HoughCircleShapeDetectionGPU()
-            : HoughCircleShapeDetectionComponent()
+            : HoughCircleShapeDetectionGPU(HoughCircleShapeDetectionParameters{}) {}
+
+        HoughCircleShapeDetectionGPU::HoughCircleShapeDetectionGPU(const HoughCircleShapeDetectionParameters& params)
+            : HoughCircleShapeDetectionComponent(params)
             , edge_map_buffer()
             , accumulator_buffer()
             , cos_table_buffer()
@@ -19,13 +23,15 @@ namespace components {
             float    min_dist,
             uint32_t num_angle_steps
         )
-            : HoughCircleShapeDetectionComponent(vote_min_threshold, min_radius, max_radius, min_dist, num_angle_steps)
-            , edge_map_buffer()
-            , accumulator_buffer()
-            , cos_table_buffer()
-            , sin_table_buffer() {
-            initOpenCL(HOUGH_CIRCLE_SHAPE_DETECTION_KERNEL_SOURCE);
-        }
+            : HoughCircleShapeDetectionGPU(
+                HoughCircleShapeDetectionParameters{
+                    vote_min_threshold,
+                    min_radius,
+                    max_radius,
+                    min_dist,
+                    num_angle_steps
+                }
+            ) {}
 
         void HoughCircleShapeDetectionGPU::applyHoughTransform() {
             cl::Kernel vote_kernel{ program, "hough_circle_vote" };

@@ -1,4 +1,5 @@
 #include "CannyEdgeDetectionCPU.h"
+#include "CannyEdgeDetectionParameters.h"
 
 #include "types.h"
 #include "config.h"
@@ -9,16 +10,16 @@
 namespace components {
     namespace edge_detection {
         CannyEdgeDetectionCPU::CannyEdgeDetectionCPU()
-            : CannyEdgeDetectionComponent()
+            : CannyEdgeDetectionCPU(CannyEdgeDetectionParameters{}) {}
+
+        CannyEdgeDetectionCPU::CannyEdgeDetectionCPU(const CannyEdgeDetectionParameters& params)
+            : CannyEdgeDetectionComponent(params)
             , grad_mag()
             , grad_dir()
             , nms() {}
 
         CannyEdgeDetectionCPU::CannyEdgeDetectionCPU(float low_threshold, float high_threshold)
-            : CannyEdgeDetectionComponent(low_threshold, high_threshold)
-            , grad_mag()
-            , grad_dir()
-            , nms() {}
+            : CannyEdgeDetectionCPU(CannyEdgeDetectionParameters{ low_threshold, high_threshold }) {}
 
         void CannyEdgeDetectionCPU::calculateSobelGradient() {
             for (PixelIdx i{ 1U }; i < height - 1; ++i) {

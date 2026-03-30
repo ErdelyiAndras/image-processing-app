@@ -1,4 +1,5 @@
 #include "TVDenoisingCPU.h"
+#include "TVDenoisingParameters.h"
 
 #include "types.h"
 #include "config.h"
@@ -9,18 +10,17 @@
 namespace components {
     namespace denoising {
         TVDenoisingCPU::TVDenoisingCPU()
-            : TVDenoisingComponent()
+            : TVDenoisingCPU(TVDenoisingParameters{}) {}
+
+        TVDenoisingCPU::TVDenoisingCPU(const TVDenoisingParameters& params)
+            : TVDenoisingComponent(params)
             , tv_gradient()
             , l2_gradient()
             , gradient()
             , momentum() {}
 
         TVDenoisingCPU::TVDenoisingCPU(float strength, float step_size, float tolerance)
-            : TVDenoisingComponent(strength, step_size, tolerance)
-            , tv_gradient()
-            , l2_gradient()
-            , gradient()
-            , momentum() {}
+            : TVDenoisingCPU(TVDenoisingParameters{ strength, step_size, tolerance }) {}
 
         float TVDenoisingCPU::tvNormAndGrad() {
             float tv_norm{ 0.0f };

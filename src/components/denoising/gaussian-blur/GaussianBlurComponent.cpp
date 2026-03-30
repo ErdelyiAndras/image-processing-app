@@ -2,7 +2,6 @@
 #include "GaussianBlurParameters.h"
 #include "DenoisingComponent.h"
 #include "Parameters.h"
-#include "denoising-config.h"
 
 #include <vector>
 #include <cmath>
@@ -10,15 +9,10 @@
 
 namespace components {
     namespace denoising {
-        GaussianBlurComponent::GaussianBlurComponent()
+        GaussianBlurComponent::GaussianBlurComponent(const GaussianBlurParameters& params)
             : DenoisingComponent()
-            , kernel_size(default_kernel_size)
-            , sigma(default_sigma) {}
-
-        GaussianBlurComponent::GaussianBlurComponent(int kernel_size, float sigma)
-            : DenoisingComponent()
-            , kernel_size(kernel_size)
-            , sigma(sigma) {}
+            , kernel_size(params.kernel_size)
+            , sigma(params.sigma) {}
 
         void GaussianBlurComponent::setParameters(const Parameters& params) {
             const ParamType* gaussianBlurParams{ dynamic_cast<const ParamType*>(&params) };

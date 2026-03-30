@@ -1,4 +1,5 @@
 #include "HoughLineShapeDetectionCPU.h"
+#include "HoughLineShapeDetectionParameters.h"
 #include "types.h"
 
 #include <cmath>
@@ -6,7 +7,10 @@
 namespace components {
     namespace shape_detection {
         HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU()
-            : HoughLineShapeDetectionComponent() {}
+            : HoughLineShapeDetectionCPU(HoughLineShapeDetectionParameters{}) {}
+
+        HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU(const HoughLineShapeDetectionParameters& params)
+            : HoughLineShapeDetectionComponent(params) {}
 
         HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU(
             float rho_resolution,
@@ -15,7 +19,15 @@ namespace components {
             uint32_t min_line_length,
             uint32_t max_line_gap
         )
-            : HoughLineShapeDetectionComponent(rho_resolution, theta_resolution, vote_min_threshold, min_line_length, max_line_gap) {}
+            : HoughLineShapeDetectionCPU(
+                HoughLineShapeDetectionParameters{
+                    rho_resolution,
+                    theta_resolution,
+                    vote_min_threshold,
+                    min_line_length,
+                    max_line_gap
+                }
+            ) {}
 
         void HoughLineShapeDetectionCPU::applyHoughTransform() {
             for (PixelIdx i{ 0U }; i < height; ++i) {
