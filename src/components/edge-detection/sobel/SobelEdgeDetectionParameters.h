@@ -2,11 +2,15 @@
 #define SOBEL_EDGE_DETECTION_PARAMETERS_H
 
 #include "Parameters.h"
+#include "edge-detection-config.h"
 
 namespace components {
     namespace edge_detection {
         struct SobelEdgeDetectionParameters : public Parameters {
             float threshold;
+
+            SobelEdgeDetectionParameters()
+                : threshold(default_threshold) {}
 
             SobelEdgeDetectionParameters(float threshold)
                 : threshold(threshold) {}

@@ -2,6 +2,7 @@
 #define HOUGH_CIRCLE_SHAPE_DETECTION_PARAMETERS_H
 
 #include "Parameters.h"
+#include "shape-detection-config.h"
 #include "types.h"
 
 namespace components {
@@ -12,6 +13,13 @@ namespace components {
             uint32_t max_radius;
             float    min_dist;
             uint32_t num_angle_steps;
+
+            HoughCircleShapeDetectionParameters()
+                : vote_min_threshold(default_circle_vote_min_threshold)
+                , min_radius(default_min_radius)
+                , max_radius(default_max_radius)
+                , min_dist(default_min_dist)
+                , num_angle_steps(default_num_angle_steps) {}
 
             HoughCircleShapeDetectionParameters(
                 uint32_t vote_min_threshold,

@@ -2,6 +2,7 @@
 #define HOUGH_LINE_SHAPE_DETECTION_PARAMETERS_H
 
 #include "Parameters.h"
+#include "shape-detection-config.h"
 #include "types.h"
 
 namespace components {
@@ -12,6 +13,13 @@ namespace components {
             uint32_t vote_min_threshold;
             uint32_t min_line_length;
             uint32_t max_line_gap;
+
+            HoughLineShapeDetectionParameters()
+                : rho_resolution(default_rho_resolution)
+                , theta_resolution(default_theta_resolution)
+                , vote_min_threshold(default_threshold)
+                , min_line_length(default_min_line_length)
+                , max_line_gap(default_max_line_gap) {}
 
             HoughLineShapeDetectionParameters(
                 float rho_resolution,
