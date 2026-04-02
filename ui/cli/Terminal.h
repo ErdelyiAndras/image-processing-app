@@ -3,17 +3,11 @@
 
 #include <iomanip>
 #include <iostream>
-#include <limits>
 #include <string>
 
 class Terminal {
 public:
     Terminal() = delete;
-
-    static void flushLine() {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
 
     static void separator(char c = '-', size_t w = 56) {
         std::cout << std::string(w, c) << "\n";
@@ -27,18 +21,38 @@ public:
     }
 
     static int readChoice(int lo, int hi) {
-        int v;
+        std::string line;
         while (true) {
             std::cout << "Choice: ";
-            if (std::cin >> v) {
-                flushLine();
-                if (v >= lo && v <= hi) {
-                    return v;
-                }
-            } else {
-                flushLine();
+            std::getline(std::cin, line);
+            if (!line.empty()) {
+                try {
+                    size_t pos;
+                    const int v{ std::stoi(line, &pos) };
+                    if (pos == line.size() && v >= lo && v <= hi) {
+                        return v;
+                    }
+                } catch (...) {}
             }
             std::cout << "  Please enter a number between " << lo << " and " << hi << ".\n";
+        }
+    }
+
+    static int readNodeId(const std::string& prompt, int cancelValue = -1) {
+        std::string line;
+        while (true) {
+            std::cout << "  " << prompt << " (" << cancelValue << " to cancel): ";
+            std::getline(std::cin, line);
+            if (!line.empty()) {
+                try {
+                    size_t pos;
+                    const int v{ std::stoi(line, &pos) };
+                    if (pos == line.size()) {
+                        return v;
+                    }
+                } catch (...) {}
+            }
+            std::cout << "  Invalid. Enter an integer.\n";
         }
     }
 
@@ -53,7 +67,7 @@ public:
             }
             try {
                 size_t pos;
-                float v = std::stof(line, &pos);
+                const float v{ std::stof(line, &pos) };
                 if (pos == line.size()) {
                     return v;
                 }
@@ -73,7 +87,7 @@ public:
             }
             try {
                 size_t pos;
-                int v = std::stoi(line, &pos);
+                const int v{ std::stoi(line, &pos) };
                 if (pos == line.size()) {
                     return v;
                 }

@@ -260,12 +260,25 @@ void PipelineController::run() {
         for (auto& [id, ctx] : results) {
             const std::string label{ ctx.getAppliedComponents() };
             const std::string current_base{ base + "_" + std::to_string(id) };
-            ctx.save(current_base + "_output_" + label, ext);
-            ctx.getProcessedImage().save(current_base + "_processed_" + label, ext);
-            ctx.getEdgeMap().save(current_base + "_edge_" + label, ext);
-            ctx.getShapeMap().save(current_base + "_shape_" + label, ext);
+
+            const auto makeName{ [&](const char* suffix) {
+                return current_base + "_" + suffix + "_" + label;
+            } };
+
+            ctx.save(
+                makeName("output"), ext
+            );
+            ctx.getProcessedImage().save(
+                makeName("processed"), ext
+            );
+            ctx.getEdgeMap().save(
+                makeName("edge"), ext
+            );
+            ctx.getShapeMap().save(
+                makeName("map"), ext
+            );
             std::cout << "    [sink " << id << "] "
-                      << current_base << "_output_" << label << ext << "\n";
+                      << makeName("output") << ext << "\n";
         }
 
     } catch (const std::exception& e) {
@@ -311,27 +324,21 @@ void PipelineController::eraseConnectionsFor(NodeId id) {
 }
 
 bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const {
-    int v;
+    static constexpr int cancelValue{ -1 };
     while (true) {
-        std::cout << "  " << prompt << " (-1 to cancel): ";
-        if (std::cin >> v) {
-            Terminal::flushLine();
-            if (v == -1) {
-                return false;
+        const int v{ Terminal::readNodeId(prompt, cancelValue) };
+        if (v == cancelValue) {
+            return false;
+        }
+        if (v >= 0) {
+            const NodeId id{ static_cast<NodeId>(v) };
+            if (nodeInfo.count(id)) {
+                out = id;
+                return true;
             }
-            if (v >= 0) {
-                const NodeId id{ static_cast<NodeId>(v) };
-                if (nodeInfo.count(id)) {
-                    out = id;
-                    return true;
-                }
-                std::cout << "  Node " << v << " does not exist. Try again.\n";
-            } else {
-                std::cout << "  Invalid ID.\n";
-            }
+            std::cout << "  Node " << v << " does not exist. Try again.\n";
         } else {
-            Terminal::flushLine();
-            std::cout << "  Invalid input.\n";
+            std::cout << "  Invalid ID.\n";
         }
     }
 }
