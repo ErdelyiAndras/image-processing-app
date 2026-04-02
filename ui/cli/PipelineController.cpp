@@ -38,35 +38,48 @@ void PipelineController::setOutput() {
 
 void PipelineController::addNode() {
     Terminal::header("Add Node");
-    std::cout << "  1. Denoising\n"
-              << "  2. Edge Detection\n"
-              << "  3. Shape Detection\n"
-              << "  4. Merge Strategy\n"
-              << "  0. Cancel\n\n";
+    for (uint8_t i{ 0U }; i < static_cast<uint8_t>(Category::CategoryCount); ++i) {
+        std::cout << "  " << (i + 1) << ". "
+                  << ComponentRegistry::categoryName(static_cast<Category>(i))
+                  << "\n";
+    }
+    std::cout << "  0. Cancel\n\n";
 
-    const int cat{ Terminal::readChoice(0, 4) };
+    const int cat{ Terminal::readChoice(0, static_cast<uint8_t>(Category::CategoryCount)) };
     if (cat == 0) {
         return;
     }
 
-    ComponentType type;
-    if (!selectComponentType(cat, type)) {
+    const Category chosenCategory{ static_cast<Category>(cat - 1) };
+
+    const std::vector<const ComponentDescriptor*> components{ ComponentRegistry::byCategory(chosenCategory) };
+
+    std::cout << "\n  " << ComponentRegistry::categoryName(chosenCategory) << ":\n";
+    for (size_t i{ 0 }; i < components.size(); ++i) {
+        std::cout << "    " << (i + 1) << ". " << components[i]->displayName() << "\n";
+    }
+    std::cout << "    0. Cancel\n\n";
+
+    const int comp{ Terminal::readChoice(0, static_cast<int>(components.size())) };
+    if (comp == 0) {
         return;
     }
 
+    const ComponentDescriptor& desc{ *components[static_cast<size_t>(comp - 1)] };
+
     NodeParams params{ std::monostate{} };
-    if (!NodeFactory::isMerge(type)) {
+    if (desc.hasParams()) {
         std::cout << "\n  Parameters (press Enter to accept default):\n";
-        params = ParameterPrompter::promptFresh(type);
+        params = desc.promptParams(desc.defaultParams());
     }
 
     std::cout << "\n";
-    const std::string name{ Terminal::readString("Node name", NodeFactory::typeName(type)) };
+    const std::string name{ Terminal::readString("Node name", desc.displayName()) };
 
     try {
-        const NodeId id{ registerNode(type, std::move(params), name) };
+        const NodeId id{ registerNode(desc, std::move(params), name) };
         std::cout << "\n  Node " << id << " added: ["
-                  << NodeFactory::typeName(type) << "] \"" << name << "\"\n";
+                  << desc.displayName() << "] \"" << name << "\"\n";
     } catch (const std::exception& e) {
         std::cout << "\n  Error: " << e.what() << "\n";
     }
@@ -170,20 +183,21 @@ void PipelineController::configureNode() {
     }
 
     NodeInfo& info{ nodeInfo.at(id) };
+    const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
 
-    if (NodeFactory::isMerge(info.type)) {
-        std::cout << "  [" << NodeFactory::typeName(info.type)
+    if (!desc.hasParams()) {
+        std::cout << "  [" << desc.displayName()
                   << "] has no configurable parameters.\n";
         return;
     }
 
-    std::cout << "\n  Node " << id << ": [" << NodeFactory::typeName(info.type)
+    std::cout << "\n  Node " << id << ": [" << desc.displayName()
               << "] \"" << info.displayName << "\"\n"
               << "  Current parameters:\n";
-    ParameterPrompter::printParams(info);
+    desc.printParams(info.params);
     std::cout << "\n  New parameters (press Enter to keep current value):\n";
 
-    NodeParams newParams{ ParameterPrompter::promptUpdate(info.type, info.params) };
+    NodeParams newParams{ desc.promptParams(info.params) };
 
     try {
         applyParamsToNode(id, newParams);
@@ -221,13 +235,17 @@ void PipelineController::run() {
     }
 
     const size_t dotPos{ outputPath.find_last_of('.') };
-    const std::string base{ (dotPos == std::string::npos) ? outputPath : outputPath.substr(0, dotPos) };
-    const std::string ext{ (dotPos == std::string::npos) ? std::string{ ".png" } : outputPath.substr(dotPos) };
+    const std::string base{
+        (dotPos == std::string::npos) ? outputPath : outputPath.substr(0, dotPos)
+    };
+    const std::string ext{
+        (dotPos == std::string::npos) ? std::string{ ".png" } : outputPath.substr(dotPos)
+    };
 
     try {
         std::cout << "  Loading: " << inputPath << "\n";
-        Image image(inputPath);
-        components::Context context(image);
+        Image image{ inputPath };
+        components::Context context{ image };
 
         std::cout << "  Executing pipeline...\n";
         const auto start  { std::chrono::high_resolution_clock::now() };
@@ -235,18 +253,19 @@ void PipelineController::run() {
         const auto end    { std::chrono::high_resolution_clock::now() };
 
         const float elapsed{ std::chrono::duration<float>(end - start).count() };
-        std::cout << "  Done in " << std::fixed << std::setprecision(3) << elapsed << " s\n\n";
+        std::cout << "  Done in " << std::fixed << std::setprecision(3)
+                  << elapsed << " s\n\n";
         std::cout << "  Saving " << results.size() << " output(s):\n";
 
         for (auto& [id, ctx] : results) {
             const std::string label{ ctx.getAppliedComponents() };
             const std::string current_base{ base + "_" + std::to_string(id) };
-            ctx.save(current_base, ext);
+            ctx.save(current_base + "_output_" + label, ext);
             ctx.getProcessedImage().save(current_base + "_processed_" + label, ext);
-            ctx.getEdgeMap().save(current_base + "_edge_"   + label, ext);
+            ctx.getEdgeMap().save(current_base + "_edge_" + label, ext);
             ctx.getShapeMap().save(current_base + "_shape_" + label, ext);
             std::cout << "    [sink " << id << "] "
-                      << base << "_output_" << label << ext << "\n";
+                      << current_base << "_output_" << label << ext << "\n";
         }
 
     } catch (const std::exception& e) {
@@ -258,87 +277,16 @@ std::string PipelineController::pathOrUnset(const std::string& s) {
     return s.empty() ? "(not set)" : s;
 }
 
-int PipelineController::pickDevice() {
-    std::cout << "\n  Device:\n"
-              << "    1. CPU\n"
-              << "    2. GPU\n\n";
-    return Terminal::readChoice(1, 2);
-}
-
-bool PipelineController::selectComponentType(int category, ComponentType& out) {
-    switch (category) {
-        case 1: {
-            std::cout << "\n  Denoising:\n"
-                      << "    1. TV Denoising\n"
-                      << "    2. Gaussian Blur\n"
-                      << "    0. Cancel\n\n";
-            const int comp{ Terminal::readChoice(0, 2) };
-            if (comp == 0) {
-                return false;
-            }
-            const int dev{ pickDevice() };
-            out = (comp == 1)
-                ? (dev == 1 ? ComponentType::TVDenoisingCPU  : ComponentType::TVDenoisingGPU)
-                : (dev == 1 ? ComponentType::GaussianBlurCPU : ComponentType::GaussianBlurGPU);
-            return true;
-        }
-        case 2: {
-            std::cout << "\n  Edge Detection:\n"
-                      << "    1. Sobel\n"
-                      << "    2. Canny\n"
-                      << "    0. Cancel\n\n";
-            const int comp{ Terminal::readChoice(0, 2) };
-            if (comp == 0) {
-                return false;
-            }
-            const int dev{ pickDevice() };
-            out = (comp == 1)
-                ? (dev == 1 ? ComponentType::SobelCPU : ComponentType::SobelGPU)
-                : (dev == 1 ? ComponentType::CannyCPU : ComponentType::CannyGPU);
-            return true;
-        }
-        case 3: {
-            std::cout << "\n  Shape Detection:\n"
-                      << "    1. Hough Line\n"
-                      << "    2. Hough Circle\n"
-                      << "    0. Cancel\n\n";
-            const int comp{ Terminal::readChoice(0, 2) };
-            if (comp == 0) {
-                return false;
-            }
-            const int dev{ pickDevice() };
-            out = (comp == 1)
-                ? (dev == 1 ? ComponentType::HoughLineCPU   : ComponentType::HoughLineGPU)
-                : (dev == 1 ? ComponentType::HoughCircleCPU : ComponentType::HoughCircleGPU);
-            return true;
-        }
-        case 4: {
-            std::cout << "\n  Merge Strategies:\n"
-                      << "    1. Combine Edge Map\n"
-                      << "    2. Combine Shape Map\n"
-                      << "    0. Cancel\n\n";
-            const int comp{ Terminal::readChoice(0, 2) };
-            if (comp == 0) {
-                return false;
-            }
-            out = (comp == 1) ? ComponentType::CombineEdgeMap : ComponentType::CombineShapeMap;
-            return true;
-        }
-        default:
-            return false;
-    }
-}
-
 NodeId PipelineController::registerNode(
-    ComponentType type, NodeParams params, const std::string& name
+    const ComponentDescriptor& desc, NodeParams params, const std::string& name
 ) {
     NodeId id;
-    if (NodeFactory::isMerge(type)) {
-        id = pipeline.addNode(NodeFactory::makeMergeStrategy(type));
+    if (desc.isMerge()) {
+        id = pipeline.addNode(desc.makeMerge());
     } else {
-        id = pipeline.addNode(NodeFactory::makeComponent(type, params));
+        id = pipeline.addNode(desc.makeComponent(params));
     }
-    nodeInfo[id] = NodeInfo{ type, name, std::move(params) };
+    nodeInfo.insert_or_assign(id, NodeInfo{ desc.type(), name, std::move(params) });
     return id;
 }
 
@@ -409,9 +357,10 @@ void PipelineController::printNodeTable() const {
 
     for (const NodeId id : ids) {
         const NodeInfo& info{ nodeInfo.at(id) };
+        const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
         std::cout << "  " << std::left
                   << std::setw(5)  << id
-                  << std::setw(32) << NodeFactory::typeName(info.type)
+                  << std::setw(32) << desc.displayName()
                   << info.displayName << "\n";
     }
 }

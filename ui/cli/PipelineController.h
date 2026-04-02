@@ -2,8 +2,7 @@
 #define PIPELINE_CONTROLLER_H
 
 #include "NodeTypes.h"
-#include "NodeFactory.h"
-#include "ParameterPrompter.h"
+#include "ComponentRegistry.h"
 #include "Terminal.h"
 #include "Pipeline.h"
 
@@ -41,10 +40,7 @@ private:
 
     static std::string pathOrUnset(const std::string& s);
 
-    static int pickDevice();
-    static bool selectComponentType(int category, ComponentType& out);
-
-    NodeId registerNode(ComponentType type, NodeParams params, const std::string& name);
+    NodeId registerNode(const ComponentDescriptor& desc, NodeParams params, const std::string& name);
 
     void applyParamsToNode(NodeId id, const NodeParams& params);
 

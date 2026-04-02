@@ -107,16 +107,6 @@ public:
         return r;
     }
 
-    static ValidationResult validate(const NodeParams& params) {
-        return std::visit([](const auto& p) {
-            using T = std::decay_t<decltype(p)>;
-            if constexpr (std::is_same_v<T, std::monostate>)
-                return ValidationResult{};
-            else
-                return ParameterValidator::validate(p);
-        }, params);
-    }
-
     static void printErrors(const ValidationResult& result) {
         std::cout << "\n  Validation failed:\n";
         for (const std::string& err : result.errors)

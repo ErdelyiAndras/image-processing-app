@@ -166,10 +166,6 @@ namespace pipeline {
     }
 
     void Pipeline::computeTopologicalOrder() {
-        if (isValid) {
-            return;
-        }
-
         std::vector<uint32_t> inDegree(nodes.size(), 0U);
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (nodes[id].removed) {
@@ -203,10 +199,6 @@ namespace pipeline {
     }
 
     void Pipeline::computeSources() {
-        if (isValid) {
-            return;
-        }
-
         sources.clear();
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && nodes[id].predecessors.empty()) {
@@ -217,10 +209,6 @@ namespace pipeline {
     }
 
     void Pipeline::computeSinks() {
-        if (isValid) {
-            return;
-        }
-
         sinks.clear();
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && nodes[id].successors.empty()) {

@@ -39,15 +39,16 @@ namespace components {
             }
             return appliedComponentsStr;
         }
+
         inline void applyComponent(const std::string& componentName) { appliedComponents.push_back(componentName); }
+
         inline void setAppliedComponents(std::vector<std::string> components) {
             appliedComponents = std::move(components);
         }
 
         bool save(const std::string& base, const std::string& ext) const {
-            const std::string name{ base + "_output_" + getAppliedComponents() };
             return Image::saveComposite(
-                name,
+                base,
                 ext,
                 getProcessedImage(),
                 {

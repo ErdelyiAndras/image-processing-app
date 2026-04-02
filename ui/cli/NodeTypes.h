@@ -1,6 +1,8 @@
 #ifndef NODE_TYPES_H
 #define NODE_TYPES_H
 
+#include "types.h"
+
 #include "TVDenoisingParameters.h"
 #include "GaussianBlurParameters.h"
 #include "SobelEdgeDetectionParameters.h"
@@ -43,6 +45,14 @@ enum class ComponentType {
     HoughCircleGPU,
     CombineEdgeMap,
     CombineShapeMap
+};
+
+enum class Category : uint8_t {
+    Denoising,
+    EdgeDetection,
+    ShapeDetection,
+    Merge,
+    CategoryCount
 };
 
 struct NodeInfo {
