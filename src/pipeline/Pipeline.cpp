@@ -149,14 +149,27 @@ namespace pipeline {
         return false;
     }
 
+    void Pipeline::recompute() {
+        if (!hasCycle() && !hasNodeWithInvalidPredecessors()) {
+            computeSources();
+            computeSinks();
+            computeTopologicalOrder();
+            isValid = true;
+        }
+    }
+
     bool Pipeline::validate() {
         if (!isValid) {
-            isValid = !hasCycle() && !hasNodeWithInvalidPredecessors();
+            recompute();
         }
         return isValid;
     }
 
-    std::vector<NodeId> Pipeline::topologicalSort() const {
+    void Pipeline::computeTopologicalOrder() {
+        if (isValid) {
+            return;
+        }
+
         std::vector<uint32_t> inDegree(nodes.size(), 0U);
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (nodes[id].removed) {
@@ -174,42 +187,46 @@ namespace pipeline {
             }
         }
 
-        std::vector<NodeId> order;
-        order.reserve(nodes.size());
+        topologicalOrder.clear();
+        topologicalOrder.reserve(nodes.size());
 
         while (!q.empty()) {
             const NodeId id{ q.front() };
             q.pop();
-            order.push_back(id);
+            topologicalOrder.push_back(id);
             for (const NodeId succ : nodes[id].successors) {
                 if (--inDegree[succ] == 0U) {
                     q.push(succ);
                 }
             }
         }
-
-        return order;
     }
 
-    std::vector<NodeId> Pipeline::sources() const {
-        std::vector<NodeId> result;
+    void Pipeline::computeSources() {
+        if (isValid) {
+            return;
+        }
+
+        sources.clear();
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && nodes[id].predecessors.empty()) {
                 assert(!std::holds_alternative<MergeNode>(nodes[id].data));
-                result.push_back(id);
+                sources.push_back(id);
             }
         }
-        return result;
     }
 
-    std::vector<NodeId> Pipeline::sinks() const {
-        std::vector<NodeId> result;
+    void Pipeline::computeSinks() {
+        if (isValid) {
+            return;
+        }
+
+        sinks.clear();
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (!nodes[id].removed && nodes[id].successors.empty()) {
-                result.push_back(id);
+                sinks.push_back(id);
             }
         }
-        return result;
     }
 
     std::unordered_map<NodeId, components::Context> Pipeline::execute(components::Context context) {
@@ -217,22 +234,19 @@ namespace pipeline {
             throw std::runtime_error{ "Pipeline::execute: graph contains a cycle or has node(s) with invalid predecessor count" };
         }
 
-        const std::vector<NodeId> order{ topologicalSort() };
-
         std::unordered_map<NodeId, std::vector<components::Context>> pending;
 
-        const std::vector<NodeId> srcs{ sources() };
-        for (size_t i{ 0U }; i < srcs.size(); ++i) {
-            if (i + 1U < srcs.size()) {
-                pending[srcs[i]].push_back(context);
+        for (size_t i{ 0U }; i < sources.size(); ++i) {
+            if (i + 1U < sources.size()) {
+                pending[sources[i]].push_back(context);
             } else {
-                pending[srcs[i]].push_back(std::move(context));
+                pending[sources[i]].push_back(std::move(context));
             }
         }
 
         std::unordered_map<NodeId, components::Context> results;
 
-        for (const NodeId id : order) {
+        for (const NodeId id : topologicalOrder) {
             const Node& node{ nodes[id] };
 
             std::unordered_map<NodeId, std::vector<components::Context>>::iterator it{ pending.find(id) };
@@ -257,10 +271,9 @@ namespace pipeline {
             }
         }
 
-        const std::vector<NodeId> snks{ sinks() };
         std::unordered_map<NodeId, components::Context> outputs;
-        outputs.reserve(snks.size());
-        for (const NodeId sink : snks) {
+        outputs.reserve(sinks.size());
+        for (const NodeId sink : sinks) {
             outputs.emplace(sink, std::move(results.at(sink)));
         }
         return outputs;

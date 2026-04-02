@@ -96,13 +96,18 @@ namespace pipeline {
         };
 
         bool isValid{ true };
+        std::vector<NodeId> sources;
+        std::vector<NodeId> sinks;
+        std::vector<NodeId> topologicalOrder;
+
         std::vector<Node> nodes;
 
         void assertNodeExists(NodeId id, const char* caller) const;
 
-        std::vector<NodeId> sources() const;
-        std::vector<NodeId> sinks()   const;
-        std::vector<NodeId> topologicalSort() const;
+        void computeSources();
+        void computeSinks();
+        void computeTopologicalOrder();
+        void recompute();
         bool hasCycle() const;
         bool hasNodeWithInvalidPredecessors() const;
         bool dfs(NodeId id, std::vector<Color>& color) const;
