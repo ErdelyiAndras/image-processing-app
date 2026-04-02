@@ -2,7 +2,6 @@
 #define COMPONENT_REGISTRY_H
 
 #include "NodeTypes.h"
-#include "ParameterPrompter.h"
 #include "Component.h"
 #include "MergeStrategy.h"
 
@@ -36,9 +35,7 @@ public:
     virtual bool isMerge()   const = 0;
     virtual bool hasParams() const = 0;
 
-    virtual NodeParams defaultParams()                         const = 0;
-    virtual NodeParams promptParams(const NodeParams& current) const = 0;
-    virtual void       printParams(const NodeParams&)          const = 0;
+    virtual NodeParams defaultParams() const = 0;
 
     virtual std::unique_ptr<components::Component>   makeComponent(const NodeParams&) const = 0;
     virtual std::unique_ptr<pipeline::MergeStrategy> makeMerge()                      const = 0;
@@ -57,23 +54,13 @@ public:
     bool isMerge()   const override { return false; }
     bool hasParams() const override { return true; }
 
-    NodeParams defaultParams() const override {
-        return ParamsT{};
-    }
-
-    NodeParams promptParams(const NodeParams& current) const override {
-        return ParameterPrompter::promptTyped<ParamsT>(current);
-    }
-
-    void printParams(const NodeParams& params) const override {
-        ParameterPrompter::printTyped<ParamsT>(params);
-    }
+    NodeParams defaultParams() const override { return ParamsT{}; }
 
     std::unique_ptr<components::Component> makeComponent(const NodeParams& params) const override {
         return std::make_unique<ConcreteT>(std::get<ParamsT>(params));
     }
 
-    virtual std::unique_ptr<pipeline::MergeStrategy> makeMerge() const override {
+    std::unique_ptr<pipeline::MergeStrategy> makeMerge() const override {
         throw std::logic_error{ "ProcessingDescriptor::makeMerge called on a processing descriptor" };
     }
 
@@ -98,14 +85,6 @@ public:
 
     NodeParams defaultParams() const override {
         throw std::logic_error{ "MergeDescriptor::defaultParams called on a merge descriptor" };
-    }
-
-    NodeParams promptParams(const NodeParams&) const override {
-        throw std::logic_error{ "MergeDescriptor::promptParams called on a merge descriptor" };
-    }
-
-    void printParams(const NodeParams&) const override {
-        throw std::logic_error{ "MergeDescriptor::printParams called on a merge descriptor" };
     }
 
     std::unique_ptr<components::Component> makeComponent(const NodeParams&) const override {

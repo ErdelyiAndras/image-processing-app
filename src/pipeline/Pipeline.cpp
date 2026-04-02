@@ -43,6 +43,7 @@ namespace pipeline {
         isValid = false;
         nodes[from].successors.push_back(to);
         nodes[to].predecessors.push_back(from);
+        connections.emplace_back(Connection{ from, to });
     }
 
     void Pipeline::removeNode(NodeId id) {
@@ -52,10 +53,26 @@ namespace pipeline {
         for (const NodeId pred : nodes[id].predecessors) {
             std::vector<NodeId>& succs{ nodes[pred].successors };
             succs.erase(std::remove(succs.begin(), succs.end(), id), succs.end());
+            connections.erase(
+                std::remove_if(connections.begin(), connections.end(),
+                    [pred, id](const Connection& c) {
+                        return c.first == pred && c.second == id;
+                    }
+                ),
+                connections.end()
+            );
         }
         for (const NodeId succ : nodes[id].successors) {
             std::vector<NodeId>& preds{ nodes[succ].predecessors };
             preds.erase(std::remove(preds.begin(), preds.end(), id), preds.end());
+            connections.erase(
+                std::remove_if(connections.begin(), connections.end(),
+                    [id, succ](const Connection& c) {
+                        return c.first == id && c.second == succ;
+                    }
+                ),
+                connections.end()
+            );
         }
         std::visit(NodeResetter{}, nodes[id].data);
         nodes[id].predecessors.clear();
@@ -83,11 +100,20 @@ namespace pipeline {
         std::vector<NodeId>& preds{ nodes[to].predecessors };
         const std::vector<NodeId>::iterator predIt{ std::find(preds.begin(), preds.end(), from) };
         preds.erase(predIt);
+
+        connections.erase(
+            std::remove_if(connections.begin(), connections.end(),
+                [from, to](const Connection& c) {
+                    return c.first == from && c.second == to;
+                }
+            ),
+            connections.end()
+        );
     }
 
-    components::Component& Pipeline::getComponent(NodeId nodeId) {
+    components::Component& Pipeline::getComponent(NodeId nodeId) const {
         assertNodeExists(nodeId, __func__);
-        ProcessingNode* procNode{ std::get_if<ProcessingNode>(&nodes[nodeId].data) };
+        const ProcessingNode* procNode{ std::get_if<ProcessingNode>(&nodes[nodeId].data) };
         if (!procNode || !procNode->component) {
             throw std::invalid_argument{
                 "Pipeline::getComponent: node id " + std::to_string(nodeId) + " has no component"
@@ -96,7 +122,7 @@ namespace pipeline {
         return *procNode->component;
     }
 
-    std::string Pipeline::getComponentName(NodeId nodeId) {
+    std::string Pipeline::getComponentName(NodeId nodeId) const {
         assertNodeExists(nodeId, __func__);
         if (std::holds_alternative<ProcessingNode>(nodes[nodeId].data)) {
             const ProcessingNode& procNode{ std::get<ProcessingNode>(nodes[nodeId].data) };

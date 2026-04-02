@@ -1,4 +1,5 @@
 add_library(cli STATIC
+    ParameterPrompter.cpp
     PipelineController.cpp
 )
 
@@ -7,5 +8,5 @@ target_include_directories(cli PUBLIC
 )
 
 target_link_libraries(cli PUBLIC
-    image_processing_lib
+    ui_model
 )

@@ -13,8 +13,12 @@
 #include <cassert>
 #include <unordered_map>
 #include <string>
+#include <utility>
 
 namespace pipeline {
+
+    using Connection = std::pair<NodeId, NodeId>;
+
     class Pipeline {
     public:
         NodeId addNode(std::unique_ptr<components::Component> component);
@@ -24,9 +28,9 @@ namespace pipeline {
         void removeNode(NodeId id);
         void disconnect(NodeId from, NodeId to);
 
-        components::Component& getComponent(NodeId nodeId);
+        components::Component& getComponent(NodeId nodeId) const;
         template <typename T>
-        T& getComponentAs(NodeId nodeId) {
+        T& getComponentAs(NodeId nodeId) const {
             T* component{ dynamic_cast<T*>(&getComponent(nodeId)) };
             if (!component) {
                 throw std::bad_cast{};
@@ -34,7 +38,9 @@ namespace pipeline {
             return *component;
         }
 
-        std::string getComponentName(NodeId nodeId);
+        std::string getComponentName(NodeId nodeId) const;
+
+        inline const std::vector<Connection>& getConnections() const { return connections; }
 
         bool validate();
 
@@ -101,6 +107,7 @@ namespace pipeline {
         std::vector<NodeId> topologicalOrder;
 
         std::vector<Node> nodes;
+        std::vector<Connection> connections;
 
         void assertNodeExists(NodeId id, const char* caller) const;
 

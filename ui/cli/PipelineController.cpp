@@ -1,24 +1,19 @@
 #include "PipelineController.h"
+#include "ParameterPrompter.h"
+#include "ComponentRegistry.h"
 
-#include "Image.h"
-#include "Context.h"
-
-#include <algorithm>
-#include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <stdexcept>
 
 PipelineController::PipelineController(std::string inputPath, std::string outputPath)
-    : inputPath(std::move(inputPath))
-    , outputPath(std::move(outputPath)) {}
+    : model(std::move(inputPath), std::move(outputPath)) {}
 
 void PipelineController::setInput() {
     Terminal::header("Set Input Image");
-    const std::string path{ Terminal::readString("Image path", inputPath) };
+    const std::string path{ Terminal::readString("Image path", model.getInputPath()) };
     if (!path.empty()) {
-        inputPath = path;
-        std::cout << "\n  Input set to: " << inputPath << "\n";
+        model.setInputPath(path);
+        std::cout << "\n  Input set to: " << model.getInputPath() << "\n";
     } else {
         std::cout << "  No change.\n";
     }
@@ -27,10 +22,10 @@ void PipelineController::setInput() {
 void PipelineController::setOutput() {
     Terminal::header("Set Output Path");
     std::cout << "  Include extension, e.g. output/result.png\n\n";
-    const std::string path{ Terminal::readString("Output path", outputPath) };
+    const std::string path{ Terminal::readString("Output path", model.getOutputPath()) };
     if (!path.empty()) {
-        outputPath = path;
-        std::cout << "\n  Output set to: " << outputPath << "\n";
+        model.setOutputPath(path);
+        std::cout << "\n  Output set to: " << model.getOutputPath() << "\n";
     } else {
         std::cout << "  No change.\n";
     }
@@ -38,6 +33,7 @@ void PipelineController::setOutput() {
 
 void PipelineController::addNode() {
     Terminal::header("Add Node");
+
     for (uint8_t i{ 0U }; i < static_cast<uint8_t>(Category::CategoryCount); ++i) {
         std::cout << "  " << (i + 1) << ". "
                   << ComponentRegistry::categoryName(static_cast<Category>(i))
@@ -45,13 +41,12 @@ void PipelineController::addNode() {
     }
     std::cout << "  0. Cancel\n\n";
 
-    const int cat{ Terminal::readChoice(0, static_cast<uint8_t>(Category::CategoryCount)) };
+    const int cat{ Terminal::readChoice(0, static_cast<int>(Category::CategoryCount)) };
     if (cat == 0) {
         return;
     }
 
     const Category chosenCategory{ static_cast<Category>(cat - 1) };
-
     const std::vector<const ComponentDescriptor*> components{ ComponentRegistry::byCategory(chosenCategory) };
 
     std::cout << "\n  " << ComponentRegistry::categoryName(chosenCategory) << ":\n";
@@ -70,14 +65,14 @@ void PipelineController::addNode() {
     NodeParams params{ std::monostate{} };
     if (desc.hasParams()) {
         std::cout << "\n  Parameters (press Enter to accept default):\n";
-        params = desc.promptParams(desc.defaultParams());
+        params = ParameterPrompter::prompt(desc.defaultParams());
     }
 
     std::cout << "\n";
     const std::string name{ Terminal::readString("Node name", desc.displayName()) };
 
     try {
-        const NodeId id{ registerNode(desc, std::move(params), name) };
+        const NodeId id{ model.addNode(desc, std::move(params), name) };
         std::cout << "\n  Node " << id << " added: ["
                   << desc.displayName() << "] \"" << name << "\"\n";
     } catch (const std::exception& e) {
@@ -88,7 +83,7 @@ void PipelineController::addNode() {
 void PipelineController::removeNode() {
     Terminal::header("Remove Node");
     printNodeTable();
-    if (nodeInfo.empty()) {
+    if (model.nodeCount() == 0) {
         return;
     }
 
@@ -99,10 +94,8 @@ void PipelineController::removeNode() {
     }
 
     try {
-        pipeline.removeNode(id);
-        eraseConnectionsFor(id);
-        const std::string name{ nodeInfo.at(id).displayName };
-        nodeInfo.erase(id);
+        const std::string name{ model.node(id).displayName };
+        model.removeNode(id);
         std::cout << "  Node " << id << " (\"" << name << "\") removed.\n";
     } catch (const std::exception& e) {
         std::cout << "  Error: " << e.what() << "\n";
@@ -112,7 +105,7 @@ void PipelineController::removeNode() {
 void PipelineController::connectNodes() {
     Terminal::header("Connect Nodes");
     printNodeTable();
-    if (nodeInfo.size() < 2) {
+    if (model.nodeCount() < 2) {
         std::cout << "  Need at least two nodes to connect.\n";
         return;
     }
@@ -127,12 +120,11 @@ void PipelineController::connectNodes() {
     }
 
     try {
-        pipeline.connect(from, to);
-        connections.emplace_back(from, to);
+        model.connect(from, to);
         std::cout << "  Connected: "
-                  << from << " [" << nodeInfo.at(from).displayName << "]"
+                  << from << " [" << model.node(from).displayName << "]"
                   << "  -->  "
-                  << to   << " [" << nodeInfo.at(to).displayName   << "]\n";
+                  << to   << " [" << model.node(to).displayName   << "]\n";
     } catch (const std::exception& e) {
         std::cout << "  Error: " << e.what() << "\n";
     }
@@ -141,7 +133,7 @@ void PipelineController::connectNodes() {
 void PipelineController::disconnectNodes() {
     Terminal::header("Disconnect Nodes");
     printConnectionList();
-    if (connections.empty()) {
+    if (model.getConnections().empty()) {
         return;
     }
 
@@ -150,19 +142,12 @@ void PipelineController::disconnectNodes() {
     if (!askNodeId("From node ID", from)) {
         return;
     }
-    if (!askNodeId("To node ID",   to)) {
+    if (!askNodeId("To node ID", to)) {
         return;
     }
 
     try {
-        pipeline.disconnect(from, to);
-        connections.erase(
-            std::remove_if(connections.begin(), connections.end(),
-                [from, to](const Connection& c) {
-                    return c.first == from && c.second == to;
-                }),
-            connections.end()
-        );
+        model.disconnect(from, to);
         std::cout << "  Disconnected: " << from << " --> " << to << "\n";
     } catch (const std::exception& e) {
         std::cout << "  Error: " << e.what() << "\n";
@@ -172,7 +157,7 @@ void PipelineController::disconnectNodes() {
 void PipelineController::configureNode() {
     Terminal::header("Configure Node");
     printNodeTable();
-    if (nodeInfo.empty()) {
+    if (model.nodeCount() == 0) {
         return;
     }
 
@@ -182,7 +167,7 @@ void PipelineController::configureNode() {
         return;
     }
 
-    NodeInfo& info{ nodeInfo.at(id) };
+    const NodeInfo& info{ model.node(id) };
     const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
 
     if (!desc.hasParams()) {
@@ -194,14 +179,13 @@ void PipelineController::configureNode() {
     std::cout << "\n  Node " << id << ": [" << desc.displayName()
               << "] \"" << info.displayName << "\"\n"
               << "  Current parameters:\n";
-    desc.printParams(info.params);
+    ParameterPrompter::print(info.params);
     std::cout << "\n  New parameters (press Enter to keep current value):\n";
 
-    NodeParams newParams{ desc.promptParams(info.params) };
+    NodeParams newParams{ ParameterPrompter::prompt(info.params) };
 
     try {
-        applyParamsToNode(id, newParams);
-        info.params = std::move(newParams);
+        model.configureNode(id, std::move(newParams));
         std::cout << "\n  Parameters updated.\n";
     } catch (const std::exception& e) {
         std::cout << "  Error: " << e.what() << "\n";
@@ -210,8 +194,10 @@ void PipelineController::configureNode() {
 
 void PipelineController::listPipeline() const {
     Terminal::header("Pipeline Overview");
-    std::cout << "  Input  : " << pathOrUnset(inputPath)  << "\n";
-    std::cout << "  Output : " << pathOrUnset(outputPath) << "\n\n";
+    const std::string& in{ model.getInputPath() };
+    const std::string& out{ model.getOutputPath() };
+    std::cout << "  Input  : " << (in.empty()  ? "(not set)" : in)  << "\n";
+    std::cout << "  Output : " << (out.empty() ? "(not set)" : out) << "\n\n";
     std::cout << "  Nodes:\n";
     printNodeTable();
     std::cout << "\n  Connections:\n";
@@ -221,43 +207,26 @@ void PipelineController::listPipeline() const {
 void PipelineController::run() {
     Terminal::header("Run Pipeline");
 
-    if (inputPath.empty()) {
-        std::cout << "  Error: input path not set. Use option 1.\n";
-        return;
-    }
-    if (outputPath.empty()) {
-        std::cout << "  Error: output path not set. Use option 2.\n";
-        return;
-    }
-    if (nodeInfo.empty()) {
-        std::cout << "  Error: pipeline has no nodes. Use option 3.\n";
-        return;
-    }
-
-    const size_t dotPos{ outputPath.find_last_of('.') };
-    const std::string base{
-        (dotPos == std::string::npos) ? outputPath : outputPath.substr(0, dotPos)
-    };
-    const std::string ext{
-        (dotPos == std::string::npos) ? std::string{ ".png" } : outputPath.substr(dotPos)
-    };
-
     try {
-        std::cout << "  Loading: " << inputPath << "\n";
-        Image image{ inputPath };
-        components::Context context{ image };
-
+        std::cout << "  Loading: " << model.getInputPath() << "\n";
         std::cout << "  Executing pipeline...\n";
-        const auto start  { std::chrono::high_resolution_clock::now() };
-              auto results{ pipeline.execute(context) };
-        const auto end    { std::chrono::high_resolution_clock::now() };
 
-        const float elapsed{ std::chrono::duration<float>(end - start).count() };
+        auto result{ model.execute() };
+
         std::cout << "  Done in " << std::fixed << std::setprecision(3)
-                  << elapsed << " s\n\n";
-        std::cout << "  Saving " << results.size() << " output(s):\n";
+                  << result.elapsedSeconds << " s\n\n";
+        std::cout << "  Saving " << result.outputs.size() << " output(s):\n";
 
-        for (auto& [id, ctx] : results) {
+        const std::string& outputPath{ model.getOutputPath() };
+        const size_t dotPos{ outputPath.find_last_of('.') };
+        const std::string base{
+            (dotPos == std::string::npos) ? outputPath : outputPath.substr(0, dotPos)
+        };
+        const std::string ext{
+            (dotPos == std::string::npos) ? std::string{ ".png" } : outputPath.substr(dotPos)
+        };
+
+        for (auto& [id, ctx] : result.outputs) {
             const std::string label{ ctx.getAppliedComponents() };
             const std::string current_base{ base + "_" + std::to_string(id) };
 
@@ -286,43 +255,6 @@ void PipelineController::run() {
     }
 }
 
-std::string PipelineController::pathOrUnset(const std::string& s) {
-    return s.empty() ? "(not set)" : s;
-}
-
-NodeId PipelineController::registerNode(
-    const ComponentDescriptor& desc, NodeParams params, const std::string& name
-) {
-    NodeId id;
-    if (desc.isMerge()) {
-        id = pipeline.addNode(desc.makeMerge());
-    } else {
-        id = pipeline.addNode(desc.makeComponent(params));
-    }
-    nodeInfo.insert_or_assign(id, NodeInfo{ desc.type(), name, std::move(params) });
-    return id;
-}
-
-void PipelineController::applyParamsToNode(NodeId id, const NodeParams& params) {
-    std::visit([&](const auto& p) {
-        using T = std::decay_t<decltype(p)>;
-        if constexpr (!std::is_same_v<T, std::monostate>) {
-            pipeline.getComponent(id).setParameters(p);
-        }
-    }, params);
-}
-
-void PipelineController::eraseConnectionsFor(NodeId id) {
-    connections.erase(
-        std::remove_if(connections.begin(), connections.end(),
-            [id](const Connection& c) {
-                return c.first == id || c.second == id;
-            }
-        ),
-        connections.end()
-    );
-}
-
 bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const {
     static constexpr int cancelValue{ -1 };
     while (true) {
@@ -332,7 +264,7 @@ bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const
         }
         if (v >= 0) {
             const NodeId id{ static_cast<NodeId>(v) };
-            if (nodeInfo.count(id)) {
+            if (model.hasNode(id)) {
                 out = id;
                 return true;
             }
@@ -344,7 +276,7 @@ bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const
 }
 
 void PipelineController::printNodeTable() const {
-    if (nodeInfo.empty()) {
+    if (model.nodeCount() == 0) {
         std::cout << "  (no nodes)\n";
         return;
     }
@@ -356,14 +288,14 @@ void PipelineController::printNodeTable() const {
     Terminal::separator();
 
     std::vector<NodeId> ids;
-    ids.reserve(nodeInfo.size());
-    for (const auto& [key, _] : nodeInfo) {
+    ids.reserve(model.nodeCount());
+    for (const auto& [key, _] : model.nodes()) {
         ids.push_back(key);
     }
     std::sort(ids.begin(), ids.end());
 
     for (const NodeId id : ids) {
-        const NodeInfo& info{ nodeInfo.at(id) };
+        const NodeInfo& info{ model.node(id) };
         const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
         std::cout << "  " << std::left
                   << std::setw(5)  << id
@@ -373,13 +305,14 @@ void PipelineController::printNodeTable() const {
 }
 
 void PipelineController::printConnectionList() const {
+    const auto& connections{ model.getConnections() };
     if (connections.empty()) {
         std::cout << "  (no connections)\n";
         return;
     }
     for (const auto& [from, to] : connections) {
-        std::cout << "  " << from << " [" << nodeInfo.at(from).displayName << "]"
+        std::cout << "  " << from << " [" << model.node(from).displayName << "]"
                   << "  -->  "
-                  << to   << " [" << nodeInfo.at(to).displayName   << "]\n";
+                  << to   << " [" << model.node(to).displayName   << "]\n";
     }
 }
