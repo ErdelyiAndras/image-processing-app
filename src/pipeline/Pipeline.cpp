@@ -1,6 +1,5 @@
 #include "Pipeline.h"
 
-#include <functional>
 #include <queue>
 #include <string>
 #include <unordered_map>

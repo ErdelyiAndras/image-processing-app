@@ -1,5 +1,4 @@
 #include "SobelEdgeDetectionGPU.h"
-#include "SobelEdgeDetectionParameters.h"
 #include "kernel_sources.h"
 
 #include <CL/opencl.h>
@@ -7,15 +6,15 @@
 namespace components {
     namespace edge_detection {
         SobelEdgeDetectionGPU::SobelEdgeDetectionGPU()
-            : SobelEdgeDetectionGPU(SobelEdgeDetectionParameters{}) {}
+            : SobelEdgeDetectionGPU(ParamType{}) {}
 
-        SobelEdgeDetectionGPU::SobelEdgeDetectionGPU(const SobelEdgeDetectionParameters& params)
+        SobelEdgeDetectionGPU::SobelEdgeDetectionGPU(const ParamType& params)
             : SobelEdgeDetectionComponent(params) {
             initOpenCL(SOBEL_EDGE_DETECTION_KERNEL_SOURCE);
         }
 
         SobelEdgeDetectionGPU::SobelEdgeDetectionGPU(float threshold)
-            : SobelEdgeDetectionGPU(SobelEdgeDetectionParameters{ threshold }) {}
+            : SobelEdgeDetectionGPU(ParamType{ threshold }) {}
 
         void SobelEdgeDetectionGPU::applySobelFilter() {
             cl::Buffer img_buffer{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };
@@ -34,7 +33,7 @@ namespace components {
 
             cl::Kernel thresh_kernel{ program, "sobel_threshold" };
             thresh_kernel.setArg(0, out_buffer);
-            thresh_kernel.setArg(1, threshold);
+            thresh_kernel.setArg(1, parameters.threshold);
             thresh_kernel.setArg(2, static_cast<int>(height));
             thresh_kernel.setArg(3, static_cast<int>(width));
 

@@ -6,24 +6,18 @@
 
 namespace components {
     namespace edge_detection {
-        class SobelEdgeDetectionComponent : public EdgeDetectionComponent {
+        class SobelEdgeDetectionComponent : public EdgeDetectionComponent<SobelEdgeDetectionParameters> {
         public:
-            explicit SobelEdgeDetectionComponent(const SobelEdgeDetectionParameters& params);
+            explicit SobelEdgeDetectionComponent(const ParamType& params);
 
             virtual ~SobelEdgeDetectionComponent() = default;
 
-            inline float getThreshold() const { return threshold; }
-
-            void setParameters(const Parameters& params) override final;
+            inline float getThreshold() const { return parameters.threshold; }
 
         protected:
-            float threshold;
-
             virtual void applySobelFilter() = 0;
 
         private:
-            using ParamType = SobelEdgeDetectionParameters;
-
             void applyEdgeDetection() override final;
         };
     } // edge_detection

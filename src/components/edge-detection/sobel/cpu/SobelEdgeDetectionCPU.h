@@ -2,7 +2,6 @@
 #define SOBEL_EDGE_DETECTION_CPU_H
 
 #include "SobelEdgeDetectionComponent.h"
-#include "SobelEdgeDetectionParameters.h"
 
 #include <string>
 
@@ -11,7 +10,7 @@ namespace components {
         class SobelEdgeDetectionCPU final : public SobelEdgeDetectionComponent {
         public:
             SobelEdgeDetectionCPU();
-            explicit SobelEdgeDetectionCPU(const SobelEdgeDetectionParameters& params);
+            explicit SobelEdgeDetectionCPU(const ParamType& params);
             explicit SobelEdgeDetectionCPU(float threshold);
 
             inline std::string getName() const override { return "sobel-cpu"; }

@@ -2,7 +2,6 @@
 #define HOUGH_CIRCLE_SHAPE_DETECTION_CPU_H
 
 #include "HoughCircleShapeDetectionComponent.h"
-#include "HoughCircleShapeDetectionParameters.h"
 #include "Context.h"
 #include "types.h"
 
@@ -14,7 +13,7 @@ namespace components {
         class HoughCircleShapeDetectionCPU final : public HoughCircleShapeDetectionComponent {
         public:
             HoughCircleShapeDetectionCPU();
-            explicit HoughCircleShapeDetectionCPU(const HoughCircleShapeDetectionParameters& params);
+            explicit HoughCircleShapeDetectionCPU(const ParamType& params);
             explicit HoughCircleShapeDetectionCPU(
                 uint32_t vote_min_threshold,
                 uint32_t min_radius,

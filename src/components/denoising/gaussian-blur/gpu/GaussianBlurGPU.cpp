@@ -1,5 +1,4 @@
 #include "GaussianBlurGPU.h"
-#include "GaussianBlurParameters.h"
 #include "kernel_sources.h"
 
 #include <CL/opencl.h>
@@ -10,15 +9,15 @@
 namespace components {
     namespace denoising {
         GaussianBlurGPU::GaussianBlurGPU()
-            : GaussianBlurGPU(GaussianBlurParameters{}) {}
+            : GaussianBlurGPU(ParamType{}) {}
 
-        GaussianBlurGPU::GaussianBlurGPU(const GaussianBlurParameters& params)
+        GaussianBlurGPU::GaussianBlurGPU(const ParamType& params)
             : GaussianBlurComponent(params) {
             initOpenCL(GAUSSIAN_BLUR_KERNEL_SOURCE);
         }
 
         GaussianBlurGPU::GaussianBlurGPU(int kernel_size, float sigma)
-            : GaussianBlurGPU(GaussianBlurParameters{ kernel_size, sigma }) {}
+            : GaussianBlurGPU(ParamType{ kernel_size, sigma }) {}
 
         void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {
             cl::Buffer img_buf{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };
@@ -35,7 +34,7 @@ namespace components {
             gpu_kernel.setArg(2, kernel_buf);
             gpu_kernel.setArg(3, static_cast<int>(height));
             gpu_kernel.setArg(4, static_cast<int>(width));
-            gpu_kernel.setArg(5, kernel_size);
+            gpu_kernel.setArg(5, parameters.kernel_size);
 
             queue.enqueueNDRangeKernel(gpu_kernel, cl::NullRange, img_size, cl::NullRange);
 

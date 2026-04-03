@@ -1,17 +1,25 @@
 #ifndef DENOISING_COMPONENT_H
 #define DENOISING_COMPONENT_H
 
-#include "Component.h"
+#include "ParameterizedComponent.h"
 #include "Context.h"
 
 namespace components {
     namespace denoising {
-        class DenoisingComponent : public Component {
+        template <typename T>
+        class DenoisingComponent : public ParameterizedComponent<T> {
         public:
-            DenoisingComponent();
+            explicit DenoisingComponent(
+                const typename ParameterizedComponent<T>::ParamType& params
+            ) : ParameterizedComponent<T>(params) {};
+
             virtual ~DenoisingComponent() = default;
 
-            void process(Context& context) override final;
+            void process(Context& context) override final {
+                ParameterizedComponent<T>::process(context);
+                applyDenoising();
+                context.getProcessedImage() = this->outputImage;
+            }
 
         protected:
             virtual void applyDenoising() = 0;

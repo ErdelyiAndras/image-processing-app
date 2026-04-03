@@ -1,5 +1,4 @@
 #include "CannyEdgeDetectionCPU.h"
-#include "CannyEdgeDetectionParameters.h"
 
 #include "types.h"
 #include "config.h"
@@ -10,16 +9,16 @@
 namespace components {
     namespace edge_detection {
         CannyEdgeDetectionCPU::CannyEdgeDetectionCPU()
-            : CannyEdgeDetectionCPU(CannyEdgeDetectionParameters{}) {}
+            : CannyEdgeDetectionCPU(ParamType{}) {}
 
-        CannyEdgeDetectionCPU::CannyEdgeDetectionCPU(const CannyEdgeDetectionParameters& params)
+        CannyEdgeDetectionCPU::CannyEdgeDetectionCPU(const ParamType& params)
             : CannyEdgeDetectionComponent(params)
             , grad_mag()
             , grad_dir()
             , nms() {}
 
         CannyEdgeDetectionCPU::CannyEdgeDetectionCPU(float low_threshold, float high_threshold)
-            : CannyEdgeDetectionCPU(CannyEdgeDetectionParameters{ low_threshold, high_threshold }) {}
+            : CannyEdgeDetectionCPU(ParamType{ low_threshold, high_threshold }) {}
 
         void CannyEdgeDetectionCPU::calculateSobelGradient() {
             for (PixelIdx i{ 1U }; i < height - 1; ++i) {
@@ -83,9 +82,9 @@ namespace components {
         void CannyEdgeDetectionCPU::doubleThresholding() {
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
-                    if (nms(i, j) >= high_threshold) {
+                    if (nms(i, j) >= parameters.high_threshold) {
                         outputImage(i, j) = strong;
-                    } else if (nms(i, j) >= low_threshold) {
+                    } else if (nms(i, j) >= parameters.low_threshold) {
                         outputImage(i, j) = weak;
                     } else {
                         outputImage(i, j) = 0.0f;

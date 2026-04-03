@@ -15,7 +15,6 @@ target_link_libraries(denoising PUBLIC
 )
 
 target_sources(denoising PRIVATE
-    DenoisingComponent.cpp
     $<TARGET_OBJECTS:tv_denoising>
     $<TARGET_OBJECTS:tv_denoising_cpu>
     $<TARGET_OBJECTS:tv_denoising_gpu>

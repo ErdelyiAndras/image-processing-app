@@ -15,7 +15,6 @@ target_link_libraries(shape_detection PUBLIC
 )
 
 target_sources(shape_detection PRIVATE
-    ShapeDetectionComponent.cpp
     $<TARGET_OBJECTS:hough_line>
     $<TARGET_OBJECTS:hough_line_cpu>
     $<TARGET_OBJECTS:hough_line_gpu>

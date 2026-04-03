@@ -1,8 +1,6 @@
 #include "PipelineUI.h"
 
-#include <iostream>
 #include <string>
-#include <iomanip>
 
 int main(int argc, char** argv) {
     const std::string inputPath  = (argc > 1) ? argv[1] : "";

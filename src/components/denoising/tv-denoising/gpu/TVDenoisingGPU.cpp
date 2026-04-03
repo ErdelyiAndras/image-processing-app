@@ -1,5 +1,4 @@
 #include "TVDenoisingGPU.h"
-#include "TVDenoisingParameters.h"
 #include "kernel_sources.h"
 #include "config.h"
 #include "ocl-sum-utils.h"
@@ -9,9 +8,9 @@
 namespace components {
     namespace denoising {
         TVDenoisingGPU::TVDenoisingGPU()
-            : TVDenoisingGPU(TVDenoisingParameters{}) {}
+            : TVDenoisingGPU(ParamType{}) {}
 
-        TVDenoisingGPU::TVDenoisingGPU(const TVDenoisingParameters& params)
+        TVDenoisingGPU::TVDenoisingGPU(const ParamType& params)
             : TVDenoisingComponent(params)
             , inputImageBuffer()
             , outputImageBuffer()
@@ -27,7 +26,7 @@ namespace components {
         }
 
         TVDenoisingGPU::TVDenoisingGPU(float strength, float step_size, float tolerance)
-            : TVDenoisingGPU(TVDenoisingParameters{ strength, step_size, tolerance }) {}
+            : TVDenoisingGPU(ParamType{ strength, step_size, tolerance }) {}
 
         float TVDenoisingGPU::tvNormAndGrad() {
             queue.enqueueFillBuffer(tvNormMtxBuffer, 0.0f, 0, img_size * sizeof(float));
@@ -84,10 +83,10 @@ namespace components {
             kernel.setArg(0, gradientBuffer);
             kernel.setArg(1, tvGradientBuffer);
             kernel.setArg(2, l2GradientBuffer);
-            kernel.setArg(3, strength);
+            kernel.setArg(3, parameters.strength);
             queue.enqueueNDRangeKernel(kernel, cl::NullRange, img_size, cl::NullRange);
 
-            return strength * tv_norm + l2_norm;
+            return parameters.strength * tv_norm + l2_norm;
         }
 
         void TVDenoisingGPU::evalMomentumAndUpdateImage(const uint32_t counter) {

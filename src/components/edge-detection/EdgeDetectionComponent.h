@@ -1,17 +1,25 @@
 #ifndef EDGE_DETECTION_COMPONENT_H
 #define EDGE_DETECTION_COMPONENT_H
 
-#include "Component.h"
+#include "ParameterizedComponent.h"
 #include "Context.h"
 
 namespace components {
     namespace edge_detection {
-        class EdgeDetectionComponent : public Component {
+        template <typename T>
+        class EdgeDetectionComponent : public ParameterizedComponent<T> {
         public:
-            EdgeDetectionComponent();
+            explicit EdgeDetectionComponent(
+                const typename ParameterizedComponent<T>::ParamType& params
+            ) : ParameterizedComponent<T>(params) {};
+
             virtual ~EdgeDetectionComponent() = default;
 
-            void process(Context& context) override final;
+            void process(Context& context) override final {
+                ParameterizedComponent<T>::process(context);
+                applyEdgeDetection();
+                context.getEdgeMap() = this->outputImage;
+            }
 
         protected:
             virtual void applyEdgeDetection() = 0;

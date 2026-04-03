@@ -7,21 +7,16 @@
 
 namespace components {
     namespace edge_detection {
-        class CannyEdgeDetectionComponent : public EdgeDetectionComponent {
+        class CannyEdgeDetectionComponent : public EdgeDetectionComponent<CannyEdgeDetectionParameters> {
         public:
-            explicit CannyEdgeDetectionComponent(const CannyEdgeDetectionParameters& params);
+            explicit CannyEdgeDetectionComponent(const ParamType& params);
 
             virtual ~CannyEdgeDetectionComponent() = default;
 
-            inline float getLowThreshold() const { return low_threshold; }
-            inline float getHighThreshold() const { return high_threshold; }
-
-            void setParameters(const Parameters& params) override final;
+            inline float getLowThreshold()  const { return parameters.low_threshold; }
+            inline float getHighThreshold() const { return parameters.high_threshold; }
 
         protected:
-            float low_threshold;
-            float high_threshold;
-
             bool changed;
 
             static constexpr float strong = components::edge_detection::strong;
@@ -35,8 +30,6 @@ namespace components {
             void processContext(const Context& context) override;
 
         private:
-            using ParamType = CannyEdgeDetectionParameters;
-
             void applyEdgeDetection() override final;
         };
     } // edge_detection

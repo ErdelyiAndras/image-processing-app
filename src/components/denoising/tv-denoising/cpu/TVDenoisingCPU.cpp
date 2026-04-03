@@ -1,5 +1,4 @@
 #include "TVDenoisingCPU.h"
-#include "TVDenoisingParameters.h"
 
 #include "types.h"
 #include "config.h"
@@ -10,9 +9,9 @@
 namespace components {
     namespace denoising {
         TVDenoisingCPU::TVDenoisingCPU()
-            : TVDenoisingCPU(TVDenoisingParameters{}) {}
+            : TVDenoisingCPU(ParamType{}) {}
 
-        TVDenoisingCPU::TVDenoisingCPU(const TVDenoisingParameters& params)
+        TVDenoisingCPU::TVDenoisingCPU(const ParamType& params)
             : TVDenoisingComponent(params)
             , tv_gradient()
             , l2_gradient()
@@ -20,7 +19,7 @@ namespace components {
             , momentum() {}
 
         TVDenoisingCPU::TVDenoisingCPU(float strength, float step_size, float tolerance)
-            : TVDenoisingCPU(TVDenoisingParameters{ strength, step_size, tolerance }) {}
+            : TVDenoisingCPU(ParamType{ strength, step_size, tolerance }) {}
 
         float TVDenoisingCPU::tvNormAndGrad() {
             float tv_norm{ 0.0f };
@@ -62,11 +61,11 @@ namespace components {
 
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
-                    gradient(i, j) = strength * tv_gradient(i, j) + l2_gradient(i, j);
+                    gradient(i, j) = parameters.strength * tv_gradient(i, j) + l2_gradient(i, j);
                 }
             }
 
-            return strength * tv_norm + l2_norm;
+            return parameters.strength * tv_norm + l2_norm;
         }
 
         void TVDenoisingCPU::evalMomentumAndUpdateImage(const uint32_t counter) {

@@ -4,6 +4,7 @@
 #include "Context.h"
 #include "Parameters.h"
 #include "types.h"
+#include "Image.h"
 
 #include <string>
 

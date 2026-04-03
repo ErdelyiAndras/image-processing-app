@@ -1,5 +1,4 @@
 #include "SobelEdgeDetectionCPU.h"
-#include "SobelEdgeDetectionParameters.h"
 
 #include "types.h"
 
@@ -9,13 +8,13 @@
 namespace components {
     namespace edge_detection {
         SobelEdgeDetectionCPU::SobelEdgeDetectionCPU()
-            : SobelEdgeDetectionCPU(SobelEdgeDetectionParameters{}) {}
+            : SobelEdgeDetectionCPU(ParamType{}) {}
 
-        SobelEdgeDetectionCPU::SobelEdgeDetectionCPU(const SobelEdgeDetectionParameters& params)
+        SobelEdgeDetectionCPU::SobelEdgeDetectionCPU(const ParamType& params)
             : SobelEdgeDetectionComponent(params) {}
 
         SobelEdgeDetectionCPU::SobelEdgeDetectionCPU(float threshold)
-            : SobelEdgeDetectionCPU(SobelEdgeDetectionParameters{ threshold }) {}
+            : SobelEdgeDetectionCPU(ParamType{ threshold }) {}
 
         void SobelEdgeDetectionCPU::applySobelFilter() {
             // Sobel kernels:
@@ -41,7 +40,7 @@ namespace components {
 
             for (PixelIdx i{ 0U }; i < height; ++i) {
                 for (PixelIdx j{ 0U }; j < width; ++j) {
-                    if (outputImage(i, j) < threshold) {
+                    if (outputImage(i, j) < parameters.threshold) {
                         outputImage(i, j) = 0.0f;
                     }
                     outputImage(i, j) = std::min(outputImage(i, j), 1.0f);

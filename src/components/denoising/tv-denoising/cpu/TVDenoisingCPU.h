@@ -2,8 +2,9 @@
 #define TV_DENOISING_CPU_H
 
 #include "TVDenoisingComponent.h"
-#include "TVDenoisingParameters.h"
 #include "types.h"
+#include "Image.h"
+#include "Context.h"
 
 #include <string>
 
@@ -12,7 +13,7 @@ namespace components {
         class TVDenoisingCPU final : public TVDenoisingComponent {
         public:
             TVDenoisingCPU();
-            explicit TVDenoisingCPU(const TVDenoisingParameters& params);
+            explicit TVDenoisingCPU(const ParamType& params);
             explicit TVDenoisingCPU(float strength, float step_size, float tolerance);
 
             inline std::string getName() const override { return "tv-cpu"; }

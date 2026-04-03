@@ -1,13 +1,12 @@
 #include "HoughCircleShapeDetectionGPU.h"
-#include "HoughCircleShapeDetectionParameters.h"
 #include "kernel_sources.h"
 
 namespace components {
     namespace shape_detection {
         HoughCircleShapeDetectionGPU::HoughCircleShapeDetectionGPU()
-            : HoughCircleShapeDetectionGPU(HoughCircleShapeDetectionParameters{}) {}
+            : HoughCircleShapeDetectionGPU(ParamType{}) {}
 
-        HoughCircleShapeDetectionGPU::HoughCircleShapeDetectionGPU(const HoughCircleShapeDetectionParameters& params)
+        HoughCircleShapeDetectionGPU::HoughCircleShapeDetectionGPU(const ParamType& params)
             : HoughCircleShapeDetectionComponent(params)
             , edge_map_buffer()
             , accumulator_buffer()
@@ -24,7 +23,7 @@ namespace components {
             uint32_t num_angle_steps
         )
             : HoughCircleShapeDetectionGPU(
-                HoughCircleShapeDetectionParameters{
+                ParamType{
                     vote_min_threshold,
                     min_radius,
                     max_radius,
@@ -41,9 +40,9 @@ namespace components {
             vote_kernel.setArg(3, sin_table_buffer);
             vote_kernel.setArg(4, static_cast<int>(height));
             vote_kernel.setArg(5, static_cast<int>(width));
-            vote_kernel.setArg(6, min_radius);
-            vote_kernel.setArg(7, max_radius);
-            vote_kernel.setArg(8, num_angle_steps);
+            vote_kernel.setArg(6, parameters.min_radius);
+            vote_kernel.setArg(7, parameters.max_radius);
+            vote_kernel.setArg(8, parameters.num_angle_steps);
 
             queue.enqueueNDRangeKernel(vote_kernel, cl::NullRange, img_size, cl::NullRange);
 
@@ -56,13 +55,13 @@ namespace components {
 
             edge_map_buffer    = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  img_size * sizeof(float) };
             accumulator_buffer = cl::Buffer{ cl_context, CL_MEM_READ_WRITE, num_radii * height * width * sizeof(uint32_t) };
-            cos_table_buffer   = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  num_angle_steps * sizeof(float) };
-            sin_table_buffer   = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  num_angle_steps * sizeof(float) };
+            cos_table_buffer   = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  parameters.num_angle_steps * sizeof(float) };
+            sin_table_buffer   = cl::Buffer{ cl_context, CL_MEM_READ_ONLY,  parameters.num_angle_steps * sizeof(float) };
 
             queue.enqueueWriteBuffer(edge_map_buffer,  CL_FALSE, 0, img_size * sizeof(float),        inputImage.data());
             queue.enqueueFillBuffer(accumulator_buffer, static_cast<uint32_t>(0U), 0, num_radii * height * width * sizeof(uint32_t));
-            queue.enqueueWriteBuffer(cos_table_buffer, CL_FALSE, 0, num_angle_steps * sizeof(float), cos_table.data());
-            queue.enqueueWriteBuffer(sin_table_buffer, CL_FALSE, 0, num_angle_steps * sizeof(float), sin_table.data());
+            queue.enqueueWriteBuffer(cos_table_buffer, CL_FALSE, 0, parameters.num_angle_steps * sizeof(float), cos_table.data());
+            queue.enqueueWriteBuffer(sin_table_buffer, CL_FALSE, 0, parameters.num_angle_steps * sizeof(float), sin_table.data());
         }
     } // shape_detection
 } // components

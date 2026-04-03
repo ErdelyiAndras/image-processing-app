@@ -36,5 +36,6 @@ target_precompile_headers(core PUBLIC
     <memory>
     <stdexcept>
     <string>
+    <variant>
     <vector>
 )

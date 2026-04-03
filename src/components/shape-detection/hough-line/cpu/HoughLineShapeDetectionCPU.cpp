@@ -1,5 +1,4 @@
 #include "HoughLineShapeDetectionCPU.h"
-#include "HoughLineShapeDetectionParameters.h"
 #include "types.h"
 
 #include <cmath>
@@ -7,9 +6,9 @@
 namespace components {
     namespace shape_detection {
         HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU()
-            : HoughLineShapeDetectionCPU(HoughLineShapeDetectionParameters{}) {}
+            : HoughLineShapeDetectionCPU(ParamType{}) {}
 
-        HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU(const HoughLineShapeDetectionParameters& params)
+        HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU(const ParamType& params)
             : HoughLineShapeDetectionComponent(params) {}
 
         HoughLineShapeDetectionCPU::HoughLineShapeDetectionCPU(
@@ -20,7 +19,7 @@ namespace components {
             uint32_t max_line_gap
         )
             : HoughLineShapeDetectionCPU(
-                HoughLineShapeDetectionParameters{
+                ParamType{
                     rho_resolution,
                     theta_resolution,
                     vote_min_threshold,
@@ -38,7 +37,7 @@ namespace components {
 
                     for (uint32_t theta_idx{ 0U }; theta_idx < num_theta_bins; ++theta_idx) {
                         const float rho{ static_cast<float>(j) * cos_table[theta_idx] + static_cast<float>(i) * sin_table[theta_idx] };
-                        const float rho_idx_float{ std::round((rho + rho_max) / rho_resolution) };
+                        const float rho_idx_float{ std::round((rho + rho_max) / parameters.rho_resolution) };
                         if (0.0f <= rho_idx_float && rho_idx_float < static_cast<float>(num_rho_bins)) {
                             const uint32_t rho_idx{ static_cast<uint32_t>(rho_idx_float) };
                             const uint32_t acc_idx{ rho_idx * num_theta_bins + theta_idx };

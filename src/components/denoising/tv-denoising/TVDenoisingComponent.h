@@ -8,23 +8,19 @@
 
 namespace components {
     namespace denoising {
-        class TVDenoisingComponent : public DenoisingComponent {
+        class TVDenoisingComponent : public DenoisingComponent<TVDenoisingParameters> {
         public:
-            explicit TVDenoisingComponent(const TVDenoisingParameters& params);
+            explicit TVDenoisingComponent(const ParamType& params);
 
             virtual ~TVDenoisingComponent() = default;
 
-            inline float getStrength() const { return strength; }
-            inline float getStepSize() const { return step_size; }
-            inline float getTolerance() const { return tolerance; }
+            inline float getStrength()  const { return parameters.strength; }
+            inline float getStepSize()  const { return parameters.step_size; }
+            inline float getTolerance() const { return parameters.tolerance; }
 
             void setParameters(const Parameters& params) override final;
 
         protected:
-            float strength;
-            float step_size;
-            float tolerance;
-
             float step;
             static constexpr float momentum_beta       = components::denoising::momentum_beta;
             static constexpr float loss_smoothing_beta = components::denoising::loss_smoothing_beta;
@@ -38,8 +34,6 @@ namespace components {
             void processContext(const Context& context) override;
 
         private:
-            using ParamType = TVDenoisingParameters;
-
             void applyDenoising() override final;
         };
     } // denoising

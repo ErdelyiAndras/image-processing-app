@@ -1,5 +1,4 @@
 #include "HoughLineShapeDetectionComponent.h"
-#include "HoughLineShapeDetectionParameters.h"
 #include "types.h"
 #include "config.h"
 
@@ -7,19 +6,13 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-#include <typeinfo>
 
 namespace components {
     namespace shape_detection {
         HoughLineShapeDetectionComponent::HoughLineShapeDetectionComponent(
-            const HoughLineShapeDetectionParameters& params
+            const ParamType& params
         )
-            : ShapeDetectionComponent()
-            , rho_resolution(params.rho_resolution)
-            , theta_resolution(params.theta_resolution)
-            , vote_min_threshold(params.vote_min_threshold)
-            , min_line_length(params.min_line_length)
-            , max_line_gap(params.max_line_gap)
+            : ShapeDetectionComponent(params)
             , num_rho_bins(0U)
             , num_theta_bins(static_cast<uint32_t>(std::ceil(pi / params.theta_resolution)))
             , rho_max(0.0f)
@@ -29,16 +22,8 @@ namespace components {
             , sin_table() {}
 
         void HoughLineShapeDetectionComponent::setParameters(const Parameters& params) {
-            const ParamType* shapeDetectionParams{ dynamic_cast<const ParamType*>(&params) };
-            if (!shapeDetectionParams) {
-                throw std::bad_cast{};
-            }
-            rho_resolution     = shapeDetectionParams->rho_resolution;
-            theta_resolution   = shapeDetectionParams->theta_resolution;
-            vote_min_threshold = shapeDetectionParams->vote_min_threshold;
-            min_line_length    = shapeDetectionParams->min_line_length;
-            max_line_gap       = shapeDetectionParams->max_line_gap;
-            num_theta_bins     = static_cast<uint32_t>(std::ceil(pi / theta_resolution));
+            ShapeDetectionComponent::setParameters(params);
+            num_theta_bins = static_cast<uint32_t>(std::ceil(pi / parameters.theta_resolution));
         }
 
         void HoughLineShapeDetectionComponent::nonMaximumSuppression() {
@@ -46,7 +31,7 @@ namespace components {
                 for (uint32_t theta_idx{ 1U }; theta_idx < num_theta_bins - 1; ++theta_idx) {
                     const uint32_t acc_idx{ rho_idx * num_theta_bins + theta_idx };
                     const uint32_t votes{ accumulator[acc_idx] };
-                    if (votes < vote_min_threshold) {
+                    if (votes < parameters.vote_min_threshold) {
                         continue;
                     }
 
@@ -70,8 +55,8 @@ namespace components {
                         continue;
                     }
 
-                    const float rho{ static_cast<float>(rho_idx) * rho_resolution - rho_max };
-                    const float theta{ static_cast<float>(theta_idx) * theta_resolution };
+                    const float rho{ static_cast<float>(rho_idx) * parameters.rho_resolution - rho_max };
+                    const float theta{ static_cast<float>(theta_idx) * parameters.theta_resolution };
                     detected_lines.emplace_back(HoughLine{ rho, theta, votes});
                 }
             }
@@ -128,7 +113,7 @@ namespace components {
                     }
                     else if (run_start != -1) {
                         ++gap_count;
-                        if (gap_count > max_line_gap) {
+                        if (gap_count > parameters.max_line_gap) {
                             const int run_length{ static_cast<int>(k) - run_start - static_cast<int>(gap_count) };
                             if (run_length > static_cast<int>(best_run_length)) {
                                 best_run_start  = run_start;
@@ -150,7 +135,7 @@ namespace components {
                     }
                 }
 
-                if (best_run_length < min_line_length) {
+                if (best_run_length < parameters.min_line_length) {
                     continue;
                 }
 
@@ -198,7 +183,7 @@ namespace components {
         void HoughLineShapeDetectionComponent::processContext(const Context& context) {
             ShapeDetectionComponent::processContext(context);
             rho_max        = std::sqrt(static_cast<float>(height * height + width * width));
-            num_rho_bins   = static_cast<uint32_t>(std::ceil(2 * rho_max / rho_resolution)) + 1U;
+            num_rho_bins   = static_cast<uint32_t>(std::ceil(2 * rho_max / parameters.rho_resolution)) + 1U;
 
             detected_lines.clear();
             accumulator.assign(num_rho_bins * num_theta_bins, 0U);
@@ -206,7 +191,7 @@ namespace components {
             cos_table.resize(num_theta_bins);
             sin_table.resize(num_theta_bins);
             for (uint32_t theta_idx{ 0U }; theta_idx < num_theta_bins; ++theta_idx) {
-                const float theta{ static_cast<float>(theta_idx) * theta_resolution };
+                const float theta{ static_cast<float>(theta_idx) * parameters.theta_resolution };
                 cos_table[theta_idx] = std::cos(theta);
                 sin_table[theta_idx] = std::sin(theta);
             }

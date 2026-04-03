@@ -8,26 +8,19 @@
 
 namespace components {
     namespace denoising {
-        class GaussianBlurComponent : public DenoisingComponent {
+        class GaussianBlurComponent : public DenoisingComponent<GaussianBlurParameters> {
         public:
-            explicit GaussianBlurComponent(const GaussianBlurParameters& params);
+            explicit GaussianBlurComponent(const ParamType& params);
 
             virtual ~GaussianBlurComponent() = default;
 
-            inline int getKernelSize() const { return kernel_size; }
-            inline float getSigma() const { return sigma; }
-
-            void setParameters(const Parameters& params) override final;
+            inline int   getKernelSize() const { return parameters.kernel_size; }
+            inline float getSigma()      const { return parameters.sigma; }
 
         protected:
-            int kernel_size;
-            float sigma;
-
             virtual void computeConvolution(const std::vector<float>& kernel) = 0;
 
         private:
-            using ParamType = GaussianBlurParameters;
-
             void applyDenoising() override final;
         };
     } // denoising

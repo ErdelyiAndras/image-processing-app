@@ -2,7 +2,6 @@
 #define HOUGH_LINE_SHAPE_DETECTION_CPU_H
 
 #include "HoughLineShapeDetectionComponent.h"
-#include "HoughLineShapeDetectionParameters.h"
 #include "Context.h"
 #include "types.h"
 
@@ -14,7 +13,7 @@ namespace components {
         class HoughLineShapeDetectionCPU final : public HoughLineShapeDetectionComponent {
         public:
             HoughLineShapeDetectionCPU();
-            explicit HoughLineShapeDetectionCPU(const HoughLineShapeDetectionParameters& params);
+            explicit HoughLineShapeDetectionCPU(const ParamType& params);
             explicit HoughLineShapeDetectionCPU(
                 float rho_resolution,
                 float theta_resolution,

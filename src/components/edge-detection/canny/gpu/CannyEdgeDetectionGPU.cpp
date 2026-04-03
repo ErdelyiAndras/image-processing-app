@@ -1,5 +1,4 @@
 #include "CannyEdgeDetectionGPU.h"
-#include "CannyEdgeDetectionParameters.h"
 #include "kernel_sources.h"
 #include "types.h"
 
@@ -12,9 +11,9 @@
 namespace components {
     namespace edge_detection {
         CannyEdgeDetectionGPU::CannyEdgeDetectionGPU()
-            : CannyEdgeDetectionGPU(CannyEdgeDetectionParameters{}) {}
+            : CannyEdgeDetectionGPU(ParamType{}) {}
 
-        CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(const CannyEdgeDetectionParameters& params)
+        CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(const ParamType& params)
             : CannyEdgeDetectionComponent(params)
             , grad_mag_buffer()
             , grad_dir_buffer()
@@ -25,7 +24,7 @@ namespace components {
         }
 
         CannyEdgeDetectionGPU::CannyEdgeDetectionGPU(float low_threshold, float high_threshold)
-            : CannyEdgeDetectionGPU(CannyEdgeDetectionParameters{ low_threshold, high_threshold }) {}
+            : CannyEdgeDetectionGPU(ParamType{ low_threshold, high_threshold }) {}
 
         void CannyEdgeDetectionGPU::calculateSobelGradient() {
             cl::Buffer img_buf{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };
@@ -61,8 +60,8 @@ namespace components {
             cl::Kernel thresh_kernel{ program, "canny_double_threshold" };
             thresh_kernel.setArg(0, nms_buffer);
             thresh_kernel.setArg(1, output_buffer);
-            thresh_kernel.setArg(2, low_threshold);
-            thresh_kernel.setArg(3, high_threshold);
+            thresh_kernel.setArg(2, parameters.low_threshold);
+            thresh_kernel.setArg(3, parameters.high_threshold);
             thresh_kernel.setArg(4, strong);
             thresh_kernel.setArg(5, weak);
             thresh_kernel.setArg(6, static_cast<int>(height));

@@ -1,13 +1,12 @@
 #include "HoughLineShapeDetectionGPU.h"
-#include "HoughLineShapeDetectionParameters.h"
 #include "kernel_sources.h"
 
 namespace components {
     namespace shape_detection {
         HoughLineShapeDetectionGPU::HoughLineShapeDetectionGPU()
-            : HoughLineShapeDetectionGPU(HoughLineShapeDetectionParameters{}) {}
+            : HoughLineShapeDetectionGPU(ParamType{}) {}
 
-        HoughLineShapeDetectionGPU::HoughLineShapeDetectionGPU(const HoughLineShapeDetectionParameters& params)
+        HoughLineShapeDetectionGPU::HoughLineShapeDetectionGPU(const ParamType& params)
             : HoughLineShapeDetectionComponent(params)
             , edge_map_buffer()
             , accumulator_buffer()
@@ -24,7 +23,7 @@ namespace components {
             uint32_t max_line_gap
         )
             : HoughLineShapeDetectionGPU(
-                HoughLineShapeDetectionParameters{
+                ParamType{
                     rho_resolution,
                     theta_resolution,
                     vote_min_threshold,
@@ -42,7 +41,7 @@ namespace components {
             vote_kernel.setArg(4, static_cast<int>(height));
             vote_kernel.setArg(5, static_cast<int>(width));
             vote_kernel.setArg(6, rho_max);
-            vote_kernel.setArg(7, rho_resolution);
+            vote_kernel.setArg(7, parameters.rho_resolution);
             vote_kernel.setArg(8, static_cast<int>(num_rho_bins));
             vote_kernel.setArg(9, static_cast<int>(num_theta_bins));
 

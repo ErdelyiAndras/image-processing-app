@@ -15,7 +15,6 @@ target_link_libraries(edge_detection PUBLIC
 )
 
 target_sources(edge_detection PRIVATE
-    EdgeDetectionComponent.cpp
     $<TARGET_OBJECTS:sobel>
     $<TARGET_OBJECTS:sobel_cpu>
     $<TARGET_OBJECTS:sobel_gpu>

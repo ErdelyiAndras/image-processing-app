@@ -1,21 +1,14 @@
 #include "HoughCircleShapeDetectionComponent.h"
-#include "HoughCircleShapeDetectionParameters.h"
 #include "HoughCircle.h"
 
 #include <vector>
 #include <algorithm>
 #include <cmath>
-#include <typeinfo>
 
 namespace components {
     namespace shape_detection {
-        HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent(const HoughCircleShapeDetectionParameters& params)
-            : ShapeDetectionComponent()
-            , vote_min_threshold(params.vote_min_threshold)
-            , min_radius(params.min_radius)
-            , max_radius(params.max_radius)
-            , min_dist(params.min_dist)
-            , num_angle_steps(params.num_angle_steps)
+        HoughCircleShapeDetectionComponent::HoughCircleShapeDetectionComponent(const ParamType& params)
+            : ShapeDetectionComponent(params)
             , num_radii(params.max_radius - params.min_radius + 1U)
             , detected_circles()
             , accumulator()
@@ -23,16 +16,8 @@ namespace components {
             , sin_table() {}
 
         void HoughCircleShapeDetectionComponent::setParameters(const Parameters& params) {
-            const ParamType* shapeDetectionParams{ dynamic_cast<const ParamType*>(&params) };
-            if (!shapeDetectionParams) {
-                throw std::bad_cast{};
-            }
-            vote_min_threshold = shapeDetectionParams->vote_min_threshold;
-            min_radius         = shapeDetectionParams->min_radius;
-            max_radius         = shapeDetectionParams->max_radius;
-            min_dist           = shapeDetectionParams->min_dist;
-            num_angle_steps    = shapeDetectionParams->num_angle_steps;
-            num_radii          = max_radius - min_radius + 1U;
+            ShapeDetectionComponent::setParameters(params);
+            num_radii = parameters.max_radius - parameters.min_radius + 1U;
         }
 
         void HoughCircleShapeDetectionComponent::nonMaximumSuppression() {
@@ -46,7 +31,7 @@ namespace components {
                             accumulator[(r_idx * height + cy) * width + cx]
                         };
 
-                        if (votes < vote_min_threshold) {
+                        if (votes < parameters.vote_min_threshold) {
                             continue;
                         }
 
@@ -75,7 +60,7 @@ namespace components {
                         }
 
                         detected_circles.emplace_back(
-                            HoughCircle{ cx, cy, static_cast<PixelIdx>(r_idx + min_radius), votes}
+                            HoughCircle{ cx, cy, static_cast<PixelIdx>(r_idx + parameters.min_radius), votes}
                         );
                     }
                 }
@@ -90,7 +75,7 @@ namespace components {
             );
 
             std::vector<HoughCircle> valid_circles;
-            const float min_dist_sq{ min_dist * min_dist };
+            const float min_dist_sq{ parameters.min_dist * parameters.min_dist };
 
             for (const HoughCircle& candidate : detected_circles) {
                 bool too_close{ false };
@@ -151,10 +136,10 @@ namespace components {
             detected_circles.clear();
             accumulator.assign(num_radii * height * width, 0U);
 
-            cos_table.resize(num_angle_steps);
-            sin_table.resize(num_angle_steps);
-            for (uint32_t angle_idx{ 0U }; angle_idx < num_angle_steps; ++angle_idx) {
-                const float angle{ static_cast<float>(angle_idx) * 2.0f * pi / static_cast<float>(num_angle_steps) };
+            cos_table.resize(parameters.num_angle_steps);
+            sin_table.resize(parameters.num_angle_steps);
+            for (uint32_t angle_idx{ 0U }; angle_idx < parameters.num_angle_steps; ++angle_idx) {
+                const float angle{ static_cast<float>(angle_idx) * 2.0f * pi / static_cast<float>(parameters.num_angle_steps) };
                 cos_table[angle_idx] = std::cos(angle);
                 sin_table[angle_idx] = std::sin(angle);
             }
