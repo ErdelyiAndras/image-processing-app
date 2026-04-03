@@ -23,6 +23,7 @@
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <array>
 
 class ComponentDescriptor {
 public:
@@ -104,7 +105,10 @@ class ComponentRegistry {
 public:
     ComponentRegistry() = delete;
 
-    using DescriptorList = std::vector<std::unique_ptr<ComponentDescriptor>>;
+    using DescriptorList = std::array<
+        std::unique_ptr<ComponentDescriptor>,
+        static_cast<size_t>(ComponentType::ComponentTypeCount)
+    >;
 
     static const DescriptorList& all() {
         static const DescriptorList entries{ buildRegistry() };
@@ -112,9 +116,10 @@ public:
     }
 
     static const ComponentDescriptor& get(ComponentType type) {
-        for (const auto& d : all()) {
-            if (d->type() == type) {
-                return *d;
+        if (static_cast<size_t>(type) < all().size()) {
+            const auto& desc{ all()[static_cast<size_t>(type)] };
+            if (desc) {
+                return *desc;
             }
         }
         throw std::invalid_argument{ "ComponentRegistry::get: unknown ComponentType" };
@@ -146,51 +151,75 @@ private:
         using namespace components::edge_detection;
         using namespace components::shape_detection;
 
-        DescriptorList e;
+        DescriptorList descriptorList;
 
-        e.push_back(std::make_unique<ProcessingDescriptor<TVDenoisingCPU, TVParams>>(
-            ComponentType::TVDenoisingCPU, "TV Denoising (CPU)", Category::Denoising));
+        initializeDescriptorList<TVDenoisingCPU, TVParams>(
+            descriptorList, ComponentType::TVDenoisingCPU, "TV Denoising (CPU)", Category::Denoising
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<TVDenoisingGPU, TVParams>>(
-            ComponentType::TVDenoisingGPU, "TV Denoising (GPU)", Category::Denoising));
+        initializeDescriptorList<TVDenoisingGPU, TVParams>(
+            descriptorList, ComponentType::TVDenoisingGPU, "TV Denoising (GPU)", Category::Denoising
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<GaussianBlurCPU, GaussParams>>(
-            ComponentType::GaussianBlurCPU, "Gaussian Blur (CPU)", Category::Denoising));
+        initializeDescriptorList<GaussianBlurCPU, GaussParams>(
+            descriptorList, ComponentType::GaussianBlurCPU, "Gaussian Blur (CPU)", Category::Denoising
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<GaussianBlurGPU, GaussParams>>(
-            ComponentType::GaussianBlurGPU, "Gaussian Blur (GPU)", Category::Denoising));
+        initializeDescriptorList<GaussianBlurGPU, GaussParams>(
+            descriptorList, ComponentType::GaussianBlurGPU, "Gaussian Blur (GPU)", Category::Denoising
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<SobelEdgeDetectionCPU, SobelParams>>(
-            ComponentType::SobelCPU, "Sobel Edge Detection (CPU)", Category::EdgeDetection));
+        initializeDescriptorList<SobelEdgeDetectionCPU, SobelParams>(
+            descriptorList, ComponentType::SobelCPU, "Sobel Edge Detection (CPU)", Category::EdgeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<SobelEdgeDetectionGPU, SobelParams>>(
-            ComponentType::SobelGPU, "Sobel Edge Detection (GPU)", Category::EdgeDetection));
+        initializeDescriptorList<SobelEdgeDetectionGPU, SobelParams>(
+            descriptorList, ComponentType::SobelGPU, "Sobel Edge Detection (GPU)", Category::EdgeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<CannyEdgeDetectionCPU, CannyParams>>(
-            ComponentType::CannyCPU, "Canny Edge Detection (CPU)", Category::EdgeDetection));
+        initializeDescriptorList<CannyEdgeDetectionCPU, CannyParams>(
+            descriptorList, ComponentType::CannyCPU, "Canny Edge Detection (CPU)", Category::EdgeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<CannyEdgeDetectionGPU, CannyParams>>(
-            ComponentType::CannyGPU, "Canny Edge Detection (GPU)", Category::EdgeDetection));
+        initializeDescriptorList<CannyEdgeDetectionGPU, CannyParams>(
+            descriptorList, ComponentType::CannyGPU, "Canny Edge Detection (GPU)", Category::EdgeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<HoughLineShapeDetectionCPU, HoughLParams>>(
-            ComponentType::HoughLineCPU, "Hough Line Detection (CPU)", Category::ShapeDetection));
+        initializeDescriptorList<HoughLineShapeDetectionCPU, HoughLParams>(
+            descriptorList, ComponentType::HoughLineCPU, "Hough Line Detection (CPU)", Category::ShapeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<HoughLineShapeDetectionGPU, HoughLParams>>(
-            ComponentType::HoughLineGPU, "Hough Line Detection (GPU)", Category::ShapeDetection));
+        initializeDescriptorList<HoughLineShapeDetectionGPU, HoughLParams>(
+            descriptorList, ComponentType::HoughLineGPU, "Hough Line Detection (GPU)", Category::ShapeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<HoughCircleShapeDetectionCPU, HoughCParams>>(
-            ComponentType::HoughCircleCPU, "Hough Circle Detection (CPU)", Category::ShapeDetection));
+        initializeDescriptorList<HoughCircleShapeDetectionCPU, HoughCParams>(
+            descriptorList, ComponentType::HoughCircleCPU, "Hough Circle Detection (CPU)", Category::ShapeDetection
+        );
 
-        e.push_back(std::make_unique<ProcessingDescriptor<HoughCircleShapeDetectionGPU, HoughCParams>>(
-            ComponentType::HoughCircleGPU, "Hough Circle Detection (GPU)", Category::ShapeDetection));
+        initializeDescriptorList<HoughCircleShapeDetectionGPU, HoughCParams>(
+            descriptorList, ComponentType::HoughCircleGPU, "Hough Circle Detection (GPU)", Category::ShapeDetection
+        );
 
-        e.push_back(std::make_unique<MergeDescriptor<pipeline::CombineEdgeMap>>(
-            ComponentType::CombineEdgeMap, "Combine Edge Map"));
+        initializeDescriptorList<pipeline::CombineEdgeMap>(
+            descriptorList, ComponentType::CombineEdgeMap, "Combine Edge Map"
+        );
 
-        e.push_back(std::make_unique<MergeDescriptor<pipeline::CombineShapeMap>>(
-            ComponentType::CombineShapeMap, "Combine Shape Map"));
+        initializeDescriptorList<pipeline::CombineShapeMap>(
+            descriptorList, ComponentType::CombineShapeMap, "Combine Shape Map"
+        );
 
-        return e;
+        return descriptorList;
+    }
+
+    template <typename ComponentT, typename ParamsT>
+    static void initializeDescriptorList(DescriptorList& list, ComponentType type, const char* name, Category cat) {
+        list[static_cast<size_t>(type)] = std::make_unique<ProcessingDescriptor<ComponentT, ParamsT>>(type, name, cat);
+    }
+
+    template <typename MergeT>
+    static void initializeDescriptorList(DescriptorList& list, ComponentType type, const char* name) {
+        list[static_cast<size_t>(type)] = std::make_unique<MergeDescriptor<MergeT>>(type, name);
     }
 };
 

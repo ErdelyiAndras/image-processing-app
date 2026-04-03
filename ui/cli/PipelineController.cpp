@@ -1,6 +1,8 @@
 #include "PipelineController.h"
 #include "ParameterPrompter.h"
 #include "ComponentRegistry.h"
+#include "PipelineModel.h"
+#include "ParameterValidator.h"
 
 #include <iomanip>
 #include <iostream>
@@ -62,21 +64,29 @@ void PipelineController::addNode() {
 
     const ComponentDescriptor& desc{ *components[static_cast<size_t>(comp - 1)] };
 
-    NodeParams params{ std::monostate{} };
-    if (desc.hasParams()) {
-        std::cout << "\n  Parameters (press Enter to accept default):\n";
-        params = ParameterPrompter::prompt(desc.defaultParams());
-    }
-
     std::cout << "\n";
     const std::string name{ Terminal::readString("Node name", desc.displayName()) };
 
-    try {
-        const NodeId id{ model.addNode(desc, std::move(params), name) };
-        std::cout << "\n  Node " << id << " added: ["
-                  << desc.displayName() << "] \"" << name << "\"\n";
-    } catch (const std::exception& e) {
-        std::cout << "\n  Error: " << e.what() << "\n";
+    if (desc.hasParams()) {
+        std::cout << "\n  Parameters (press Enter to accept default):\n";
+    }
+    NodeParams current{ desc.hasParams() ? desc.defaultParams() : std::monostate{} };
+    while (true) {
+        NodeParams candidate{ ParameterPrompter::prompt(current) };
+
+        try {
+            PipelineModel::AddNodeResult result{ model.addNode(desc, candidate, name) };
+            if (result.validation.ok()) {
+                std::cout << "\n  Node " << *result.id << " added: ["
+                          << desc.displayName() << "] \"" << name << "\"\n";
+                break;
+            }
+            ParameterPrompter::printErrors(result.validation);
+            current = std::move(candidate);
+        } catch (const std::exception& e) {
+            std::cout << "\n  Error: " << e.what() << "\n";
+            break;
+        }
     }
 }
 
@@ -182,13 +192,22 @@ void PipelineController::configureNode() {
     ParameterPrompter::print(info.params);
     std::cout << "\n  New parameters (press Enter to keep current value):\n";
 
-    NodeParams newParams{ ParameterPrompter::prompt(info.params) };
+    NodeParams current{ info.params };
+    while (true) {
+        NodeParams candidate{ ParameterPrompter::prompt(current) };
 
-    try {
-        model.configureNode(id, std::move(newParams));
-        std::cout << "\n  Parameters updated.\n";
-    } catch (const std::exception& e) {
-        std::cout << "  Error: " << e.what() << "\n";
+        try {
+            ParameterValidator::ValidationResult result{ model.configureNode(id, candidate) };
+            if (result.ok()) {
+                std::cout << "\n  Parameters updated.\n";
+                break;
+            }
+            ParameterPrompter::printErrors(result);
+            current = std::move(candidate);
+        } catch (const std::exception& e) {
+            std::cout << "  Error: " << e.what() << "\n";
+            break;
+        }
     }
 }
 

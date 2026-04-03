@@ -3,8 +3,10 @@
 
 #include "NodeTypes.h"
 #include "ComponentRegistry.h"
+#include "ParameterValidator.h"
 #include "Pipeline.h"
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -26,9 +28,15 @@ public:
     const NodeInfo&                             node(NodeId id)  const { return nodeInfo.at(id); }
     const std::vector<pipeline::Connection>&    getConnections() const { return pipeline.getConnections(); }
 
-    NodeId addNode(const ComponentDescriptor& desc, NodeParams params, const std::string& name);
-    void   removeNode(NodeId id);
-    void   configureNode(NodeId id, NodeParams newParams);
+    struct AddNodeResult {
+        ParameterValidator::ValidationResult validation;
+        std::optional<NodeId> id;
+    };
+
+    AddNodeResult addNode(const ComponentDescriptor& desc, NodeParams params, const std::string& name);
+    void          removeNode(NodeId id);
+
+    ParameterValidator::ValidationResult configureNode(NodeId id, NodeParams newParams);
 
     void connect   (NodeId from, NodeId to);
     void disconnect(NodeId from, NodeId to);
@@ -45,6 +53,8 @@ private:
     std::unordered_map<NodeId, NodeInfo> nodeInfo;
     std::string                          inputPath;
     std::string                          outputPath;
+
+    static ParameterValidator::ValidationResult validateParams(const NodeParams& params);
 };
 
 #endif // PIPELINE_MODEL_H

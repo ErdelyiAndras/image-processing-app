@@ -11,9 +11,14 @@ PipelineModel::PipelineModel(std::string inputPath, std::string outputPath)
     : inputPath(std::move(inputPath))
     , outputPath(std::move(outputPath)) {}
 
-NodeId PipelineModel::addNode(
+PipelineModel::AddNodeResult PipelineModel::addNode(
     const ComponentDescriptor& desc, NodeParams params, const std::string& name
 ) {
+    ParameterValidator::ValidationResult validation{ validateParams(params) };
+    if (!validation.ok()) {
+        return AddNodeResult{ std::move(validation), std::nullopt };
+    }
+
     NodeId id;
     if (desc.isMerge()) {
         id = pipeline.addNode(desc.makeMerge());
@@ -21,7 +26,7 @@ NodeId PipelineModel::addNode(
         id = pipeline.addNode(desc.makeComponent(params));
     }
     nodeInfo.insert_or_assign(id, NodeInfo{ desc.type(), name, std::move(params) });
-    return id;
+    return AddNodeResult{ std::move(validation), id };
 }
 
 void PipelineModel::removeNode(NodeId id) {
@@ -29,7 +34,12 @@ void PipelineModel::removeNode(NodeId id) {
     nodeInfo.erase(id);
 }
 
-void PipelineModel::configureNode(NodeId id, NodeParams newParams) {
+ParameterValidator::ValidationResult PipelineModel::configureNode(NodeId id, NodeParams newParams) {
+    ParameterValidator::ValidationResult result{ validateParams(newParams) };
+    if (!result.ok()) {
+        return result;
+    }
+
     std::visit([&](const auto& p) {
         using T = std::decay_t<decltype(p)>;
         if constexpr (!std::is_same_v<T, std::monostate>) {
@@ -37,6 +47,7 @@ void PipelineModel::configureNode(NodeId id, NodeParams newParams) {
         }
     }, newParams);
     nodeInfo.at(id).params = std::move(newParams);
+    return result;
 }
 
 void PipelineModel::connect(NodeId from, NodeId to) {
@@ -68,4 +79,15 @@ PipelineModel::RunResult PipelineModel::execute() {
     const float elapsed{ std::chrono::duration<float>(end - start).count() };
 
     return RunResult{ std::move(outputs), elapsed };
+}
+
+ParameterValidator::ValidationResult PipelineModel::validateParams(const NodeParams& params) {
+    return std::visit([](const auto& p) {
+        using T = std::decay_t<decltype(p)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+            return ParameterValidator::ValidationResult{};
+        } else {
+            return ParameterValidator::validate(p);
+        }
+    }, params);
 }

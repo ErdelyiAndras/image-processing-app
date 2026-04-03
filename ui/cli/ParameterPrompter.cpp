@@ -12,7 +12,7 @@ NodeParams ParameterPrompter::prompt(const NodeParams& current) {
         if constexpr (std::is_same_v<T, std::monostate>) {
             return std::monostate{};
         } else {
-            return promptLoop(p);
+            return createCandidate(p);
         }
     }, current);
 }

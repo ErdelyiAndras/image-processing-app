@@ -15,6 +15,8 @@ public:
 
     static void print(const NodeParams& params);
 
+    static void printErrors(const ParameterValidator::ValidationResult& result);
+
 private:
     static void printImpl(const TVParams&     p);
     static void printImpl(const GaussParams&  p);
@@ -29,24 +31,6 @@ private:
     static CannyParams  createCandidate(const CannyParams&  current);
     static HoughLParams createCandidate(const HoughLParams& current);
     static HoughCParams createCandidate(const HoughCParams& current);
-
-    static void printErrors(const ParameterValidator::ValidationResult& result);
-
-    template <typename T>
-    static T promptLoop(const T& initial) {
-        T current{ initial };
-        while (true) {
-            const T candidate{ createCandidate(current) };
-            const ParameterValidator::ValidationResult result{
-                ParameterValidator::validate(candidate)
-            };
-            if (result.ok()) {
-                return candidate;
-            }
-            printErrors(result);
-            current = candidate;
-        }
-    }
 
     template <typename T>
     static void printField(const char* label, T value) {

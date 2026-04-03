@@ -30,7 +30,7 @@ using NodeParams = std::variant<
     HoughCParams
 >;
 
-enum class ComponentType {
+enum class ComponentType : uint8_t {
     TVDenoisingCPU,
     TVDenoisingGPU,
     GaussianBlurCPU,
@@ -44,7 +44,8 @@ enum class ComponentType {
     HoughCircleCPU,
     HoughCircleGPU,
     CombineEdgeMap,
-    CombineShapeMap
+    CombineShapeMap,
+    ComponentTypeCount
 };
 
 enum class Category : uint8_t {
