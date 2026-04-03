@@ -2,6 +2,8 @@
 #include "NodeTypes.h"
 #include "Terminal.h"
 
+#include <iostream>
+#include <string>
 #include <type_traits>
 
 NodeParams ParameterPrompter::prompt(const NodeParams& current) {
@@ -24,6 +26,17 @@ void ParameterPrompter::print(const NodeParams& params) {
             printImpl(p);
         }
     }, params);
+}
+
+void ParameterPrompter::printErrors(const ParameterValidator::ValidationResult& result) {
+    std::cout << "\n  Validation failed:\n";
+    for (const auto& [field, errors] : result) {
+        std::cout << "    " << field << ":\n";
+        for (const std::string& message : errors) {
+            std::cout << "      - " << message << "\n";
+        }
+    }
+    std::cout << "  Please correct the highlighted fields.\n\n";
 }
 
 void ParameterPrompter::printImpl(const TVParams& p) {

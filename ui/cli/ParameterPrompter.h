@@ -30,6 +30,8 @@ private:
     static HoughLParams createCandidate(const HoughLParams& current);
     static HoughCParams createCandidate(const HoughCParams& current);
 
+    static void printErrors(const ParameterValidator::ValidationResult& result);
+
     template <typename T>
     static T promptLoop(const T& initial) {
         T current{ initial };
@@ -38,10 +40,10 @@ private:
             const ParameterValidator::ValidationResult result{
                 ParameterValidator::validate(candidate)
             };
-            if (result.ok) {
+            if (result.ok()) {
                 return candidate;
             }
-            ParameterValidator::printErrors(result);
+            printErrors(result);
             current = candidate;
         }
     }
