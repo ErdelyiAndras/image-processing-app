@@ -244,7 +244,7 @@ void PipelineController::run() {
                 makeName("edge"), ext
             );
             ctx.getShapeMap().save(
-                makeName("map"), ext
+                makeName("shape"), ext
             );
             std::cout << "    [sink " << id << "] "
                       << makeName("output") << ext << "\n";
