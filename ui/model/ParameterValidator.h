@@ -29,7 +29,7 @@ public:
         }
 
         void addError(std::string field, std::string message) {
-            errors[field].push_back(std::move(message));
+            errors[std::move(field)].push_back(std::move(message));
         }
     private:
         ErrorMap errors;
