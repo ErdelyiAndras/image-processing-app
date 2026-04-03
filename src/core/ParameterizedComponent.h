@@ -13,7 +13,8 @@ namespace components {
         using ParamType = T;
 
         explicit ParameterizedComponent(const ParamType& params)
-            : parameters(params) {}
+            : Component()
+            , parameters(params) {}
 
         virtual ~ParameterizedComponent() = default;
 
