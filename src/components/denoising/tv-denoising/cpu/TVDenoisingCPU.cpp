@@ -1,10 +1,9 @@
 #include "TVDenoisingCPU.h"
-
+#include "TVDenoisingParameters.h"
 #include "types.h"
 #include "config.h"
 
 #include <cmath>
-#include <algorithm>
 
 namespace components {
     namespace denoising {

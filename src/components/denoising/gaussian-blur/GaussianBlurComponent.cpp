@@ -1,8 +1,9 @@
 #include "GaussianBlurComponent.h"
 #include "DenoisingComponent.h"
 
-#include <vector>
 #include <cmath>
+#include <cstddef>
+#include <vector>
 
 namespace components {
     namespace denoising {

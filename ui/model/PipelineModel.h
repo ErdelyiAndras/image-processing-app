@@ -1,11 +1,14 @@
 #ifndef PIPELINE_MODEL_H
 #define PIPELINE_MODEL_H
 
-#include "NodeTypes.h"
 #include "ComponentRegistry.h"
+#include "Context.h"
+#include "NodeTypes.h"
 #include "ParameterValidator.h"
 #include "Pipeline.h"
+#include "types.h"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <unordered_map>

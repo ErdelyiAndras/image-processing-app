@@ -1,10 +1,11 @@
 #ifndef TV_DENOISING_COMPONENT_H
 #define TV_DENOISING_COMPONENT_H
 
-#include "denoising-config.h"
 #include "DenoisingComponent.h"
 #include "TVDenoisingParameters.h"
-#include "types.h"
+#include "denoising-config.h"
+
+#include <cstdint>
 
 namespace components {
     namespace denoising {

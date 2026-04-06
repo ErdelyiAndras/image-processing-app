@@ -1,5 +1,7 @@
 #include "HoughCircleShapeDetectionCPU.h"
-#include "config.h"
+#include "HoughCircleShapeDetectionParameters.h"
+#include "Image.h"
+#include "types.h"
 
 #include <cmath>
 #include <vector>

@@ -2,8 +2,9 @@
 #define PIPELINE_CONTROLLER_H
 
 #include "PipelineModel.h"
-#include "Terminal.h"
+#include "types.h"
 
+#include <cstddef>
 #include <string>
 
 class PipelineController {

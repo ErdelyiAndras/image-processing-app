@@ -5,6 +5,9 @@
 #include <iostream>
 #include <string>
 #include <type_traits>
+#include <utility>
+#include <variant>
+#include <vector>
 
 NodeParams ParameterPrompter::prompt(const NodeParams& current) {
     return std::visit([](const auto& p) -> NodeParams {

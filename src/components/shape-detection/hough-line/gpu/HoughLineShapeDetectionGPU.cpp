@@ -1,5 +1,10 @@
 #include "HoughLineShapeDetectionGPU.h"
+#include "HoughLineShapeDetectionParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
+
+#include <CL/cl.h>
+#include <vector>
 
 namespace components {
     namespace shape_detection {

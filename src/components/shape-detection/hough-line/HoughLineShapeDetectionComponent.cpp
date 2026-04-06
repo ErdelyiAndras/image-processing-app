@@ -1,11 +1,13 @@
 #include "HoughLineShapeDetectionComponent.h"
-#include "types.h"
+#include "Image.h"
 #include "config.h"
+#include "types.h"
 
-#include <cmath>
-#include <vector>
 #include <algorithm>
-#include <iostream>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
 
 namespace components {
     namespace shape_detection {

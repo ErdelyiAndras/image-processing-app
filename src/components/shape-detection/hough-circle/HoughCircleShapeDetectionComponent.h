@@ -3,10 +3,9 @@
 
 #include "ShapeDetectionComponent.h"
 #include "HoughCircleShapeDetectionParameters.h"
-#include "Context.h"
-#include "types.h"
 #include "HoughCircle.h"
 
+#include <cstdint>
 #include <vector>
 
 namespace components {

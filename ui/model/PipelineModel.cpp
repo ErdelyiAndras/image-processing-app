@@ -1,11 +1,12 @@
 #include "PipelineModel.h"
-
-#include "Image.h"
+#include "Component.h"
 #include "Context.h"
+#include "Image.h"
 
-#include <algorithm>
 #include <chrono>
 #include <stdexcept>
+#include <type_traits>
+#include <variant>
 
 PipelineModel::PipelineModel(std::string inputPath, std::string outputPath)
     : inputPath(std::move(inputPath))

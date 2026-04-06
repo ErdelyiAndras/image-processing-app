@@ -1,5 +1,6 @@
 #include "SobelEdgeDetectionCPU.h"
-
+#include "SobelEdgeDetectionParameters.h"
+#include "Image.h"
 #include "types.h"
 
 #include <algorithm>

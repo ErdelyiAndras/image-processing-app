@@ -2,10 +2,9 @@
 #define TV_DENOISING_CPU_H
 
 #include "TVDenoisingComponent.h"
-#include "types.h"
 #include "Image.h"
-#include "Context.h"
 
+#include <cstdint>
 #include <string>
 
 namespace components {

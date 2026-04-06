@@ -2,10 +2,8 @@
 #define HOUGH_LINE_SHAPE_DETECTION_CPU_H
 
 #include "HoughLineShapeDetectionComponent.h"
-#include "Context.h"
-#include "types.h"
 
-#include <vector>
+#include <cstdint>
 #include <string>
 
 namespace components {

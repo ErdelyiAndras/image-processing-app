@@ -1,11 +1,23 @@
 #include "PipelineController.h"
-#include "ParameterPrompter.h"
 #include "ComponentRegistry.h"
-#include "PipelineModel.h"
+#include "Context.h"
+#include "Image.h"
+#include "NodeTypes.h"
+#include "ParameterPrompter.h"
 #include "ParameterValidator.h"
+#include "PipelineModel.h"
+#include "Terminal.h"
 
+#include <algorithm>
+#include <cstdint>
+#include <exception>
 #include <iomanip>
 #include <iostream>
+#include <optional>
+#include <unordered_map>
+#include <utility>
+#include <variant>
+#include <vector>
 
 PipelineController::PipelineController(std::string inputPath, std::string outputPath)
     : model(std::move(inputPath), std::move(outputPath)) {}

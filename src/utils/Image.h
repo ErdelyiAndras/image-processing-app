@@ -2,8 +2,10 @@
 #define IMAGE_H
 
 #include <string>
-#include <stdexcept>
 #include <vector>
+#include <cstdint>
+#include <stddef.h>
+#include <utility>
 
 #include "types.h"
 #include "Color.h"

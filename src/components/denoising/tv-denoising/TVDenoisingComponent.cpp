@@ -1,7 +1,6 @@
 #include "TVDenoisingComponent.h"
 #include "DenoisingComponent.h"
-#include "Parameters.h"
-#include "types.h"
+#include "Image.h"
 #include "config.h"
 
 #include <iostream>

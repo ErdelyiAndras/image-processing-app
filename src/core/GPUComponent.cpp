@@ -1,7 +1,11 @@
 #include "GPUComponent.h"
 #include "kernel_sources.h"
+#include "oclutils.h"
 
+#include <CL/cl.h>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 cl::Program GPUComponent::utils_program;
 cl::Context GPUComponent::s_context;

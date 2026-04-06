@@ -3,11 +3,9 @@
 
 #include "HoughCircleShapeDetectionComponent.h"
 #include "GPUComponent.h"
-#include "Context.h"
-#include "types.h"
 
-#include <vector>
 #include <CL/opencl.hpp>
+#include <cstdint>
 #include <string>
 
 namespace components {

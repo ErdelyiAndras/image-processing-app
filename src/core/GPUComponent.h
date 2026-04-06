@@ -2,12 +2,9 @@
 #define GPU_COMPONENT_H
 
 #include <CL/opencl.hpp>
-#include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "types.h"
-#include "oclutils.h"
 
 class GPUComponent {
 public:

@@ -8,9 +8,10 @@
 #include "types.h"
 
 #include <algorithm>
-#include <cstring>
-#include <vector>
 #include <cmath>
+#include <cstring>
+#include <stdexcept>
+#include <vector>
 
 Image::Image(PixelIdx rows, PixelIdx cols) : rows(rows), cols(cols), image(nullptr) {
     if (rows == 0 || cols == 0) {

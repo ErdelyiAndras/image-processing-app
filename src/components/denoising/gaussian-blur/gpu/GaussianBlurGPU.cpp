@@ -1,9 +1,10 @@
 #include "GaussianBlurGPU.h"
+#include "GaussianBlurParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
 
-#include <CL/opencl.h>
-
-#include <cmath>
+#include <CL/cl.h>
+#include <CL/opencl.hpp>
 #include <vector>
 
 namespace components {

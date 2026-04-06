@@ -1,9 +1,13 @@
 #include "HoughCircleShapeDetectionComponent.h"
 #include "HoughCircle.h"
+#include "Image.h"
+#include "config.h"
+#include "types.h"
 
-#include <vector>
 #include <algorithm>
 #include <cmath>
+#include <utility>
+#include <vector>
 
 namespace components {
     namespace shape_detection {

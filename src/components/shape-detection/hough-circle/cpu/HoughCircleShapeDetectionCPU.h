@@ -2,10 +2,8 @@
 #define HOUGH_CIRCLE_SHAPE_DETECTION_CPU_H
 
 #include "HoughCircleShapeDetectionComponent.h"
-#include "Context.h"
-#include "types.h"
 
-#include <vector>
+#include <cstdint>
 #include <string>
 
 namespace components {

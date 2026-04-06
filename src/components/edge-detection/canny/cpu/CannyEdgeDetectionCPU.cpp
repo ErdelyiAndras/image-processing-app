@@ -1,9 +1,10 @@
 #include "CannyEdgeDetectionCPU.h"
-
+#include "CannyEdgeDetectionParameters.h"
 #include "types.h"
 #include "config.h"
 
 #include <cmath>
+#include <cstdint>
 #include <iostream>
 
 namespace components {

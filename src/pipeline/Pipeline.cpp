@@ -1,9 +1,12 @@
 #include "Pipeline.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <queue>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include <algorithm>
 
 namespace pipeline {
     NodeId Pipeline::addNode(std::unique_ptr<components::Component> component) {

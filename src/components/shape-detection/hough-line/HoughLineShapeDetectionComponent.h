@@ -4,11 +4,11 @@
 #include "ShapeDetectionComponent.h"
 #include "HoughLineShapeDetectionParameters.h"
 #include "HoughLine.h"
-#include "Context.h"
 #include "types.h"
 
-#include <vector>
+#include <cstdint>
 #include <utility>
+#include <vector>
 
 namespace components {
     namespace shape_detection {

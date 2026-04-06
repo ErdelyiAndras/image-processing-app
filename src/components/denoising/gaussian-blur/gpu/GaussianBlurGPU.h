@@ -4,7 +4,6 @@
 #include "GaussianBlurComponent.h"
 #include "GPUComponent.h"
 
-#include <vector>
 #include <string>
 
 namespace components {

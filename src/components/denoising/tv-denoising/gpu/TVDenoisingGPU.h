@@ -4,7 +4,9 @@
 #include "TVDenoisingComponent.h"
 #include "GPUComponent.h"
 
+#include <cstdint>
 #include <string>
+#include <CL/opencl.hpp>
 
 namespace components {
     namespace denoising {

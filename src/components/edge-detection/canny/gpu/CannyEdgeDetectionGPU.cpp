@@ -1,12 +1,12 @@
 #include "CannyEdgeDetectionGPU.h"
+#include "CannyEdgeDetectionParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
-#include "types.h"
 
-#include <CL/opencl.h>
-
+#include <CL/cl.h>
+#include <cstdint>
 #include <iostream>
 #include <utility>
-#include <vector>
 
 namespace components {
     namespace edge_detection {

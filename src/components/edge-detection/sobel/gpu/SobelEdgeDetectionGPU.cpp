@@ -1,7 +1,10 @@
 #include "SobelEdgeDetectionGPU.h"
+#include "SobelEdgeDetectionParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
 
-#include <CL/opencl.h>
+#include <CL/cl.h>
+#include <CL/opencl.hpp>
 
 namespace components {
     namespace edge_detection {

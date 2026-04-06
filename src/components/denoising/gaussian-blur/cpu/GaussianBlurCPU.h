@@ -3,7 +3,6 @@
 
 #include "GaussianBlurComponent.h"
 
-#include <vector>
 #include <string>
 
 namespace components {

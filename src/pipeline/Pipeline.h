@@ -3,17 +3,18 @@
 
 #include "Component.h"
 #include "Context.h"
-#include "types.h"
 #include "MergeStrategy.h"
+#include "types.h"
 
-#include <vector>
-#include <memory>
-#include <typeinfo>
-#include <variant>
 #include <cassert>
-#include <unordered_map>
+#include <cstdint>
+#include <memory>
 #include <string>
+#include <typeinfo>
+#include <unordered_map>
 #include <utility>
+#include <variant>
+#include <vector>
 
 namespace pipeline {
 

@@ -1,5 +1,10 @@
 #include "HoughCircleShapeDetectionGPU.h"
+#include "HoughCircleShapeDetectionParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
+
+#include <CL/cl.h>
+#include <vector>
 
 namespace components {
     namespace shape_detection {

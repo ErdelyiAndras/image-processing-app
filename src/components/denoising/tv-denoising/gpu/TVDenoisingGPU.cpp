@@ -1,9 +1,11 @@
 #include "TVDenoisingGPU.h"
+#include "TVDenoisingParameters.h"
+#include "Image.h"
 #include "kernel_sources.h"
 #include "config.h"
 #include "ocl-sum-utils.h"
 
-#include <CL/opencl.h>
+#include <CL/cl.h>
 
 namespace components {
     namespace denoising {

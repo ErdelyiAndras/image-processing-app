@@ -1,10 +1,11 @@
 #include "GaussianBlurCPU.h"
-
+#include "GaussianBlurParameters.h"
+#include "Image.h"
 #include "types.h"
 
-#include <cmath>
-#include <vector>
 #include <algorithm>
+#include <cstddef>
+#include <vector>
 
 namespace components {
     namespace denoising {
