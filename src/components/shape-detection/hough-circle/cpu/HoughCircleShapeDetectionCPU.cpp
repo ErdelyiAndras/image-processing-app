@@ -4,6 +4,7 @@
 #include "types.h"
 
 #include <cmath>
+#include <cstdint>
 #include <vector>
 
 namespace components {
@@ -15,11 +16,11 @@ namespace components {
             : HoughCircleShapeDetectionComponent(params) {}
 
         HoughCircleShapeDetectionCPU::HoughCircleShapeDetectionCPU(
-            uint32_t vote_min_threshold,
-            uint32_t min_radius,
-            uint32_t max_radius,
-            float    min_dist,
-            uint32_t num_angle_steps
+            int   vote_min_threshold,
+            int   min_radius,
+            int   max_radius,
+            float min_dist,
+            int   num_angle_steps
         )
             : HoughCircleShapeDetectionCPU(
                 ParamType{
@@ -38,10 +39,10 @@ namespace components {
                         continue;
                     }
 
-                    for (PixelIdx r{ parameters.min_radius }; r <= parameters.max_radius; ++r) {
-                        const uint32_t r_idx{ r - parameters.min_radius };
+                    for (PixelIdx r{ static_cast<uint32_t>(parameters.min_radius) }; r <= static_cast<uint32_t>(parameters.max_radius); ++r) {
+                        const uint32_t r_idx{ r - static_cast<uint32_t>(parameters.min_radius) };
 
-                        for (uint32_t a{ 0U }; a < parameters.num_angle_steps; ++a) {
+                        for (uint32_t a{ 0U }; a < static_cast<uint32_t>(parameters.num_angle_steps); ++a) {
                             const int cx{
                                 static_cast<int>(px) - static_cast<int>(std::round(static_cast<float>(r) * cos_table[a]))
                             };

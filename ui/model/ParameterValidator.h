@@ -96,22 +96,28 @@ public:
         if (p.theta_resolution > pi) {
             r.addError("Theta resolution", "must be <= pi (180 deg)");
         }
-        if (p.vote_min_threshold < 1U) {
+        if (p.vote_min_threshold < 1) {
             r.addError("Vote threshold", "must be >= 1");
         }
-        if (p.min_line_length < 1U) {
+        if (p.min_line_length < 1) {
             r.addError("Min line length", "must be >= 1");
+        }
+        if (p.max_line_gap < 0) {
+            r.addError("Max line gap", "must be >= 0");
         }
         return r;
     }
 
     static ValidationResult validate(const HoughCParams& p) {
         ValidationResult r;
-        if (p.vote_min_threshold < 1U) {
+        if (p.vote_min_threshold < 1) {
             r.addError("Vote threshold", "must be >= 1");
         }
-        if (p.min_radius < 1U) {
+        if (p.min_radius < 1) {
             r.addError("Min radius", "must be >= 1");
+        }
+        if (p.max_radius < 1) {
+            r.addError("Max radius", "must be >= 1");
         }
         if (p.max_radius < p.min_radius) {
             r.addError("Max radius", "must be >= min radius");
@@ -119,7 +125,7 @@ public:
         if (p.min_dist <= 0.0f) {
             r.addError("Min distance", "must be > 0");
         }
-        if (p.num_angle_steps < 4U) {
+        if (p.num_angle_steps < 4) {
             r.addError("Angle steps", "must be >= 4");
         }
         return r;

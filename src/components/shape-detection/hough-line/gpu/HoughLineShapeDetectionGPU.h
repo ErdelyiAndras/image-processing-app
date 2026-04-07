@@ -5,7 +5,6 @@
 #include "GPUComponent.h"
 
 #include <CL/opencl.hpp>
-#include <cstdint>
 #include <string>
 
 namespace components {
@@ -17,9 +16,9 @@ namespace components {
             explicit HoughLineShapeDetectionGPU(
                 float rho_resolution,
                 float theta_resolution,
-                uint32_t vote_min_threshold,
-                uint32_t min_line_length,
-                uint32_t max_line_gap
+                int   vote_min_threshold,
+                int   min_line_length,
+                int   max_line_gap
             );
 
             inline std::string getName() const override final { return "hough-line-gpu"; }

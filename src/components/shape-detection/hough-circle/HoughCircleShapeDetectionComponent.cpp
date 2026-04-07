@@ -6,6 +6,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <utility>
 #include <vector>
 
@@ -21,7 +23,7 @@ namespace components {
 
         void HoughCircleShapeDetectionComponent::setParameters(const Parameters& params) {
             ShapeDetectionComponent::setParameters(params);
-            num_radii = parameters.max_radius - parameters.min_radius + 1U;
+            num_radii = static_cast<uint32_t>(parameters.max_radius - parameters.min_radius) + 1U;
         }
 
         void HoughCircleShapeDetectionComponent::nonMaximumSuppression() {
@@ -35,7 +37,7 @@ namespace components {
                             accumulator[(r_idx * height + cy) * width + cx]
                         };
 
-                        if (votes < parameters.vote_min_threshold) {
+                        if (votes < static_cast<uint32_t>(parameters.vote_min_threshold)) {
                             continue;
                         }
 
@@ -64,7 +66,7 @@ namespace components {
                         }
 
                         detected_circles.emplace_back(
-                            HoughCircle{ cx, cy, static_cast<PixelIdx>(r_idx + parameters.min_radius), votes}
+                            HoughCircle{ cx, cy, r_idx + static_cast<PixelIdx>(parameters.min_radius), votes}
                         );
                     }
                 }
@@ -140,9 +142,9 @@ namespace components {
             detected_circles.clear();
             accumulator.assign(num_radii * height * width, 0U);
 
-            cos_table.resize(parameters.num_angle_steps);
-            sin_table.resize(parameters.num_angle_steps);
-            for (uint32_t angle_idx{ 0U }; angle_idx < parameters.num_angle_steps; ++angle_idx) {
+            cos_table.resize(static_cast<size_t>(parameters.num_angle_steps));
+            sin_table.resize(static_cast<size_t>(parameters.num_angle_steps));
+            for (uint32_t angle_idx{ 0U }; angle_idx < static_cast<uint32_t>(parameters.num_angle_steps); ++angle_idx) {
                 const float angle{ static_cast<float>(angle_idx) * 2.0f * pi / static_cast<float>(parameters.num_angle_steps) };
                 cos_table[angle_idx] = std::cos(angle);
                 sin_table[angle_idx] = std::sin(angle);

@@ -33,7 +33,7 @@ namespace components {
                 for (uint32_t theta_idx{ 1U }; theta_idx < num_theta_bins - 1; ++theta_idx) {
                     const uint32_t acc_idx{ rho_idx * num_theta_bins + theta_idx };
                     const uint32_t votes{ accumulator[acc_idx] };
-                    if (votes < parameters.vote_min_threshold) {
+                    if (votes < static_cast<uint32_t>(parameters.vote_min_threshold)) {
                         continue;
                     }
 
@@ -115,7 +115,7 @@ namespace components {
                     }
                     else if (run_start != -1) {
                         ++gap_count;
-                        if (gap_count > parameters.max_line_gap) {
+                        if (gap_count > static_cast<uint32_t>(parameters.max_line_gap)) {
                             const int run_length{ static_cast<int>(k) - run_start - static_cast<int>(gap_count) };
                             if (run_length > static_cast<int>(best_run_length)) {
                                 best_run_start  = run_start;
@@ -137,7 +137,7 @@ namespace components {
                     }
                 }
 
-                if (best_run_length < parameters.min_line_length) {
+                if (best_run_length < static_cast<uint32_t>(parameters.min_line_length)) {
                     continue;
                 }
 

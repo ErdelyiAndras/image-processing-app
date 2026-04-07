@@ -18,11 +18,11 @@ namespace components {
 
             virtual ~HoughLineShapeDetectionComponent() = default;
 
-            inline float getRhoResolution()       const { return parameters.rho_resolution; }
-            inline float getThetaResolution()     const { return parameters.theta_resolution; }
-            inline uint32_t getVoteMinThreshold() const { return parameters.vote_min_threshold; }
-            inline uint32_t getMinLineLength()    const { return parameters.min_line_length; }
-            inline uint32_t getMaxLineGap()       const { return parameters.max_line_gap; }
+            inline float getRhoResolution()    const { return parameters.rho_resolution; }
+            inline float getThetaResolution()  const { return parameters.theta_resolution; }
+            inline int   getVoteMinThreshold() const { return parameters.vote_min_threshold; }
+            inline int   getMinLineLength()    const { return parameters.min_line_length; }
+            inline int   getMaxLineGap()       const { return parameters.max_line_gap; }
 
             void setParameters(const Parameters& params) override final;
 

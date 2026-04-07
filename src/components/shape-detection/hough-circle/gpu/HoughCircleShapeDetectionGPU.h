@@ -5,7 +5,6 @@
 #include "GPUComponent.h"
 
 #include <CL/opencl.hpp>
-#include <cstdint>
 #include <string>
 
 namespace components {
@@ -15,11 +14,11 @@ namespace components {
             HoughCircleShapeDetectionGPU();
             explicit HoughCircleShapeDetectionGPU(const ParamType& params);
             explicit HoughCircleShapeDetectionGPU(
-                uint32_t vote_min_threshold,
-                uint32_t min_radius,
-                uint32_t max_radius,
-                float    min_dist,
-                uint32_t num_angle_steps
+                int   vote_min_threshold,
+                int   min_radius,
+                int   max_radius,
+                float min_dist,
+                int   num_angle_steps
             );
 
             inline std::string getName() const override { return "hough-circle-gpu"; }

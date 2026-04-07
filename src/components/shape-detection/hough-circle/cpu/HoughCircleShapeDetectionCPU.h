@@ -3,7 +3,6 @@
 
 #include "HoughCircleShapeDetectionComponent.h"
 
-#include <cstdint>
 #include <string>
 
 namespace components {
@@ -13,11 +12,11 @@ namespace components {
             HoughCircleShapeDetectionCPU();
             explicit HoughCircleShapeDetectionCPU(const ParamType& params);
             explicit HoughCircleShapeDetectionCPU(
-                uint32_t vote_min_threshold,
-                uint32_t min_radius,
-                uint32_t max_radius,
-                float    min_dist,
-                uint32_t num_angle_steps
+                int   vote_min_threshold,
+                int   min_radius,
+                int   max_radius,
+                float min_dist,
+                int   num_angle_steps
             );
 
             inline std::string getName() const override { return "hough-circle-cpu"; }

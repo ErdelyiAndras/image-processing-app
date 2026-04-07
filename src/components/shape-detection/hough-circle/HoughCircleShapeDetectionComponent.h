@@ -16,11 +16,11 @@ namespace components {
 
             virtual ~HoughCircleShapeDetectionComponent() = default;
 
-            inline uint32_t getVoteMinThreshold() const { return parameters.vote_min_threshold; }
-            inline uint32_t getMinRadius()        const { return parameters.min_radius; }
-            inline uint32_t getMaxRadius()        const { return parameters.max_radius; }
-            inline float    getMinDist()          const { return parameters.min_dist; }
-            inline uint32_t getNumAngleSteps()    const { return parameters.num_angle_steps; }
+            inline int   getVoteMinThreshold() const { return parameters.vote_min_threshold; }
+            inline int   getMinRadius()        const { return parameters.min_radius; }
+            inline int   getMaxRadius()        const { return parameters.max_radius; }
+            inline float getMinDist()          const { return parameters.min_dist; }
+            inline int   getNumAngleSteps()    const { return parameters.num_angle_steps; }
 
             void setParameters(const Parameters& params) override final;
 

@@ -5,9 +5,9 @@ __kernel void hough_circle_vote(
     __global const float* sin_table,
     int rows,
     int cols,
-    uint min_radius,
-    uint max_radius,
-    uint num_angle_steps
+    int min_radius,
+    int max_radius,
+    int num_angle_steps
 ) {
     const int idx = get_global_id(0);
     const int py = idx / cols;

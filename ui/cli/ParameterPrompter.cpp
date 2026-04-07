@@ -110,18 +110,18 @@ HoughLParams ParameterPrompter::createCandidate(const HoughLParams& current) {
     return HoughLParams{
         Terminal::readFloat("Rho resolution",   current.rho_resolution),
         Terminal::readFloat("Theta resolution", current.theta_resolution),
-        static_cast<uint32_t>(Terminal::readInt("Vote threshold",  static_cast<int>(current.vote_min_threshold))),
-        static_cast<uint32_t>(Terminal::readInt("Min line length", static_cast<int>(current.min_line_length))),
-        static_cast<uint32_t>(Terminal::readInt("Max line gap",    static_cast<int>(current.max_line_gap)))
+        Terminal::readInt  ("Vote threshold",   current.vote_min_threshold),
+        Terminal::readInt  ("Min line length",  current.min_line_length),
+        Terminal::readInt  ("Max line gap",     current.max_line_gap)
     };
 }
 
 HoughCParams ParameterPrompter::createCandidate(const HoughCParams& current) {
     return HoughCParams{
-        static_cast<uint32_t>(Terminal::readInt("Vote threshold", static_cast<int>(current.vote_min_threshold))),
-        static_cast<uint32_t>(Terminal::readInt("Min radius",     static_cast<int>(current.min_radius))),
-        static_cast<uint32_t>(Terminal::readInt("Max radius",     static_cast<int>(current.max_radius))),
+        Terminal::readInt  ("Vote threshold", current.vote_min_threshold),
+        Terminal::readInt  ("Min radius",     current.min_radius),
+        Terminal::readInt  ("Max radius",     current.max_radius),
         Terminal::readFloat("Min distance",   current.min_dist),
-        static_cast<uint32_t>(Terminal::readInt("Angle steps",    static_cast<int>(current.num_angle_steps)))
+        Terminal::readInt  ("Angle steps",    current.num_angle_steps)
     };
 }
