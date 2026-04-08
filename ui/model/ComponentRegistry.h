@@ -1,29 +1,29 @@
 #ifndef COMPONENT_REGISTRY_H
 #define COMPONENT_REGISTRY_H
 
-#include "NodeTypes.h"
 #include "Component.h"
 #include "MergeStrategy.h"
+#include "NodeTypes.h"
 
-#include "TVDenoisingCPU.h"
-#include "TVDenoisingGPU.h"
 #include "GaussianBlurCPU.h"
 #include "GaussianBlurGPU.h"
-#include "SobelEdgeDetectionCPU.h"
-#include "SobelEdgeDetectionGPU.h"
+#include "TVDenoisingCPU.h"
+#include "TVDenoisingGPU.h"
 #include "CannyEdgeDetectionCPU.h"
 #include "CannyEdgeDetectionGPU.h"
-#include "HoughLineShapeDetectionCPU.h"
-#include "HoughLineShapeDetectionGPU.h"
+#include "SobelEdgeDetectionCPU.h"
+#include "SobelEdgeDetectionGPU.h"
 #include "HoughCircleShapeDetectionCPU.h"
 #include "HoughCircleShapeDetectionGPU.h"
+#include "HoughLineShapeDetectionCPU.h"
+#include "HoughLineShapeDetectionGPU.h"
 #include "CombineEdgeMap.h"
 #include "CombineShapeMap.h"
 
+#include <array>
 #include <memory>
 #include <stdexcept>
 #include <vector>
-#include <array>
 
 class ComponentDescriptor {
 public:
@@ -117,7 +117,7 @@ public:
 
     static const ComponentDescriptor& get(ComponentType type) {
         if (static_cast<size_t>(type) < all().size()) {
-            const auto& desc{ all()[static_cast<size_t>(type)] };
+            const std::unique_ptr<ComponentDescriptor>& desc{ all()[static_cast<size_t>(type)] };
             if (desc) {
                 return *desc;
             }
@@ -127,7 +127,7 @@ public:
 
     static std::vector<const ComponentDescriptor*> byCategory(Category cat) {
         std::vector<const ComponentDescriptor*> result;
-        for (const auto& d : all()) {
+        for (const std::unique_ptr<ComponentDescriptor>& d : all()) {
             if (d->category() == cat) {
                 result.push_back(d.get());
             }

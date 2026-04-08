@@ -9,7 +9,7 @@
 
 class PipelineController {
 public:
-    explicit PipelineController(std::string inputPath = "", std::string outputPath = "");
+    explicit PipelineController(std::string input_path = "", std::string output_path = "");
 
     const std::string& getInputPath()  const { return model.getInputPath();  }
     const std::string& getOutputPath() const { return model.getOutputPath(); }

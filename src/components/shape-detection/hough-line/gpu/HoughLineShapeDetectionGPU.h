@@ -1,8 +1,8 @@
 #ifndef HOUGH_LINE_SHAPE_DETECTION_GPU_H
 #define HOUGH_LINE_SHAPE_DETECTION_GPU_H
 
-#include "HoughLineShapeDetectionComponent.h"
 #include "GPUComponent.h"
+#include "HoughLineShapeDetectionComponent.h"
 
 #include <CL/opencl.hpp>
 #include <string>

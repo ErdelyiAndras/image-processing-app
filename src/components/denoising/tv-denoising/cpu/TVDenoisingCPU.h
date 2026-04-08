@@ -1,8 +1,8 @@
 #ifndef TV_DENOISING_CPU_H
 #define TV_DENOISING_CPU_H
 
-#include "TVDenoisingComponent.h"
 #include "Image.h"
+#include "TVDenoisingComponent.h"
 
 #include <cstdint>
 #include <string>

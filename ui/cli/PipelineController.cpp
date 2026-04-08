@@ -1,26 +1,30 @@
 #include "PipelineController.h"
+
 #include "ComponentRegistry.h"
-#include "Context.h"
 #include "Image.h"
 #include "NodeTypes.h"
 #include "ParameterPrompter.h"
 #include "ParameterValidator.h"
+#include "Pipeline.h"
 #include "PipelineModel.h"
 #include "Terminal.h"
+#include "types.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <iomanip>
 #include <iostream>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
-PipelineController::PipelineController(std::string inputPath, std::string outputPath)
-    : model(std::move(inputPath), std::move(outputPath)) {}
+PipelineController::PipelineController(std::string input_path, std::string output_path)
+    : model(std::move(input_path), std::move(output_path)) {}
 
 void PipelineController::setInput() {
     Terminal::header("Set Input Image");
@@ -60,10 +64,10 @@ void PipelineController::addNode() {
         return;
     }
 
-    const Category chosenCategory{ static_cast<Category>(cat - 1) };
-    const std::vector<const ComponentDescriptor*> components{ ComponentRegistry::byCategory(chosenCategory) };
+    const Category chosen_category{ static_cast<Category>(cat - 1) };
+    const std::vector<const ComponentDescriptor*> components{ ComponentRegistry::byCategory(chosen_category) };
 
-    std::cout << "\n  " << ComponentRegistry::categoryName(chosenCategory) << ":\n";
+    std::cout << "\n  " << ComponentRegistry::categoryName(chosen_category) << ":\n";
     for (size_t i{ 0 }; i < components.size(); ++i) {
         std::cout << "    " << (i + 1) << ". " << components[i]->displayName() << "\n";
     }
@@ -133,7 +137,8 @@ void PipelineController::connectNodes() {
     }
 
     std::cout << "\n";
-    NodeId from, to;
+    NodeId from;
+    NodeId to;
     if (!askNodeId("From node ID", from)) {
         return;
     }
@@ -160,7 +165,8 @@ void PipelineController::disconnectNodes() {
     }
 
     std::cout << "\n";
-    NodeId from, to;
+    NodeId from;
+    NodeId to;
     if (!askNodeId("From node ID", from)) {
         return;
     }
@@ -209,7 +215,7 @@ void PipelineController::configureNode() {
         NodeParams candidate{ ParameterPrompter::prompt(current) };
 
         try {
-            ParameterValidator::ValidationResult result{ model.configureNode(id, candidate) };
+            const ParameterValidator::ValidationResult result{ model.configureNode(id, candidate) };
             if (result.ok()) {
                 std::cout << "\n  Parameters updated.\n";
                 break;
@@ -242,43 +248,47 @@ void PipelineController::run() {
         std::cout << "  Loading: " << model.getInputPath() << "\n";
         std::cout << "  Executing pipeline...\n";
 
-        auto result{ model.execute() };
+        PipelineModel::RunResult result{ model.execute() };
 
         std::cout << "  Done in " << std::fixed << std::setprecision(3)
                   << result.elapsedSeconds << " s\n\n";
         std::cout << "  Saving " << result.outputs.size() << " output(s):\n";
 
-        const std::string& outputPath{ model.getOutputPath() };
-        const size_t dotPos{ outputPath.find_last_of('.') };
+        const std::string& output_path{ model.getOutputPath() };
+        const size_t dot_pos{ output_path.find_last_of('.') };
         const std::string base{
-            (dotPos == std::string::npos) ? outputPath : outputPath.substr(0, dotPos)
+            (dot_pos == std::string::npos) ? output_path : output_path.substr(0, dot_pos)
         };
         const std::string ext{
-            (dotPos == std::string::npos) ? std::string{ ".png" } : outputPath.substr(dotPos)
+            (dot_pos == std::string::npos) ? std::string{ ".png" } : output_path.substr(dot_pos)
         };
 
         for (auto& [id, ctx] : result.outputs) {
             const std::string label{ ctx.getAppliedComponents() };
             const std::string current_base{ base + "_" + std::to_string(id) };
 
-            const auto makeName{ [&](const char* suffix) {
-                return current_base + "_" + suffix + "_" + label;
+            const auto make_name{ [&](const char* suffix) {
+                return std::string(current_base)
+                    .append("_")
+                    .append(suffix)
+                    .append("_")
+                    .append(label);
             } };
 
             ctx.save(
-                makeName("output"), ext
+                make_name("output"), ext
             );
             ctx.getProcessedImage().save(
-                makeName("processed"), ext
+                make_name("processed"), ext
             );
             ctx.getEdgeMap().save(
-                makeName("edge"), ext
+                make_name("edge"), ext
             );
             ctx.getShapeMap().save(
-                makeName("shape"), ext
+                make_name("shape"), ext
             );
             std::cout << "    [sink " << id << "] "
-                      << makeName("output") << ext << "\n";
+                      << make_name("output") << ext << "\n";
         }
 
     } catch (const std::exception& e) {
@@ -287,10 +297,10 @@ void PipelineController::run() {
 }
 
 bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const {
-    static constexpr int cancelValue{ -1 };
+    static constexpr int cancel_value{ -1 };
     while (true) {
-        const int v{ Terminal::readNodeId(prompt, cancelValue) };
-        if (v == cancelValue) {
+        const int v{ Terminal::readNodeId(prompt, cancel_value) };
+        if (v == cancel_value) {
             return false;
         }
         if (v >= 0) {
@@ -336,7 +346,7 @@ void PipelineController::printNodeTable() const {
 }
 
 void PipelineController::printConnectionList() const {
-    const auto& connections{ model.getConnections() };
+    const std::vector<pipeline::Connection>& connections{ model.getConnections() };
     if (connections.empty()) {
         std::cout << "  (no connections)\n";
         return;

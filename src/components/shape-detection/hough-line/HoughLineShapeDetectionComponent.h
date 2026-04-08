@@ -1,9 +1,9 @@
 #ifndef HOUGH_LINE_SHAPE_DETECTION_COMPONENT_H
 #define HOUGH_LINE_SHAPE_DETECTION_COMPONENT_H
 
-#include "ShapeDetectionComponent.h"
-#include "HoughLineShapeDetectionParameters.h"
 #include "HoughLine.h"
+#include "HoughLineShapeDetectionParameters.h"
+#include "ShapeDetectionComponent.h"
 #include "types.h"
 
 #include <cstdint>
@@ -44,9 +44,15 @@ namespace components {
             virtual void processContext(const Context& context) override;
 
         private:
-            using Pixel     = std::pair<PixelIdx, PixelIdx>;
+            using Pixel = std::pair<PixelIdx, PixelIdx>;
 
             void applyShapeDetection() override final;
+
+            bool isLocalMax(uint32_t rho_idx, uint32_t theta_idx, uint32_t votes) const;
+
+            std::vector<Pixel> getLinePixels(const HoughLine& line) const;
+            bool lineSegmentExtraction(const std::vector<Pixel>& line_pixels, HoughLine& line) const;
+            void drawLine(const HoughLine& line);
         };
     } // shape_detection
 } // components

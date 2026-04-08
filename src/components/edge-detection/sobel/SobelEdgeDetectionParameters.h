@@ -1,8 +1,8 @@
 #ifndef SOBEL_EDGE_DETECTION_PARAMETERS_H
 #define SOBEL_EDGE_DETECTION_PARAMETERS_H
 
-#include "Parameters.h"
 #include "edge-detection-config.h"
+#include "Parameters.h"
 
 namespace components {
     namespace edge_detection {

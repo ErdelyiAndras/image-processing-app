@@ -1,12 +1,12 @@
 #ifndef TV_DENOISING_GPU_H
 #define TV_DENOISING_GPU_H
 
-#include "TVDenoisingComponent.h"
 #include "GPUComponent.h"
+#include "TVDenoisingComponent.h"
 
+#include <CL/opencl.hpp>
 #include <cstdint>
 #include <string>
-#include <CL/opencl.hpp>
 
 namespace components {
     namespace denoising {

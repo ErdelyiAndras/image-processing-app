@@ -1,12 +1,22 @@
 #include "Pipeline.h"
 
+#include "Component.h"
+#include "Context.h"
+#include "MergeStrategy.h"
+#include "types.h"
+
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <queue>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace pipeline {
     NodeId Pipeline::addNode(std::unique_ptr<components::Component> component) {
@@ -34,8 +44,8 @@ namespace pipeline {
             };
         }
 
-        std::vector<NodeId>::iterator succIt{ std::find(nodes[from].successors.begin(), nodes[from].successors.end(), to) };
-        if (succIt != nodes[from].successors.end()) {
+        const std::vector<NodeId>::iterator succ_it{ std::find(nodes[from].successors.begin(), nodes[from].successors.end(), to) };
+        if (succ_it != nodes[from].successors.end()) {
             throw std::invalid_argument{
                 "Pipeline::connect: nodes " + std::to_string(from) + " and " + std::to_string(to) +
                 " are already connected"
@@ -45,7 +55,7 @@ namespace pipeline {
         isValid = false;
         nodes[from].successors.push_back(to);
         nodes[to].predecessors.push_back(from);
-        connections.emplace_back(Connection{ from, to });
+        connections.emplace_back(from, to);
     }
 
     void Pipeline::removeNode(NodeId id) {
@@ -87,8 +97,8 @@ namespace pipeline {
         assertNodeExists(to, __func__);
 
         std::vector<NodeId>& succs{ nodes[from].successors };
-        const std::vector<NodeId>::iterator succIt{ std::find(succs.begin(), succs.end(), to) };
-        if (succIt == succs.end()) {
+        const std::vector<NodeId>::iterator succ_it{ std::find(succs.begin(), succs.end(), to) };
+        if (succ_it == succs.end()) {
             throw std::invalid_argument{
                 "Pipeline::disconnect: no connection from node " + std::to_string(from) +
                 " to node " + std::to_string(to)
@@ -97,11 +107,11 @@ namespace pipeline {
 
         isValid = false;
 
-        succs.erase(succIt);
+        succs.erase(succ_it);
 
         std::vector<NodeId>& preds{ nodes[to].predecessors };
-        const std::vector<NodeId>::iterator predIt{ std::find(preds.begin(), preds.end(), from) };
-        preds.erase(predIt);
+        const std::vector<NodeId>::iterator pred_it{ std::find(preds.begin(), preds.end(), from) };
+        preds.erase(pred_it);
 
         connections.erase(
             std::remove_if(connections.begin(), connections.end(),
@@ -115,26 +125,29 @@ namespace pipeline {
 
     components::Component& Pipeline::getComponent(NodeId nodeId) const {
         assertNodeExists(nodeId, __func__);
-        const ProcessingNode* procNode{ std::get_if<ProcessingNode>(&nodes[nodeId].data) };
-        if (!procNode || !procNode->component) {
+        const ProcessingNode* proc_node{ std::get_if<ProcessingNode>(&nodes[nodeId].data) };
+        if (proc_node == nullptr || !proc_node->component) {
             throw std::invalid_argument{
                 "Pipeline::getComponent: node id " + std::to_string(nodeId) + " has no component"
             };
         }
-        return *procNode->component;
+        return *proc_node->component;
     }
 
     std::string Pipeline::getComponentName(NodeId nodeId) const {
         assertNodeExists(nodeId, __func__);
         if (std::holds_alternative<ProcessingNode>(nodes[nodeId].data)) {
-            const ProcessingNode& procNode{ std::get<ProcessingNode>(nodes[nodeId].data) };
-            assert(procNode.component);
-            return procNode.component->getName();
-        } else {
-            const MergeNode& mergeNode{ std::get<MergeNode>(nodes[nodeId].data) };
-            assert(mergeNode.mergeStrategy);
-            return mergeNode.mergeStrategy->getName();
+            const ProcessingNode& proc_node{ std::get<ProcessingNode>(nodes[nodeId].data) };
+            assert(proc_node.component);
+            return proc_node.component->getName();
         }
+        if (std::holds_alternative<MergeNode>(nodes[nodeId].data)) {
+            const MergeNode& merge_node{ std::get<MergeNode>(nodes[nodeId].data) };
+            assert(merge_node.mergeStrategy);
+            return merge_node.mergeStrategy->getName();
+        }
+
+        throw std::logic_error{ "Pipeline::getComponentName: invalid node data variant" };
     }
 
     bool Pipeline::hasCycle() const {
@@ -194,19 +207,19 @@ namespace pipeline {
     }
 
     void Pipeline::computeTopologicalOrder() {
-        std::vector<uint32_t> inDegree(nodes.size(), 0U);
+        std::vector<uint32_t> in_degree(nodes.size(), 0U);
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
             if (nodes[id].removed) {
                 continue;
             }
             for (const NodeId succ : nodes[id].successors) {
-                ++inDegree[succ];
+                ++in_degree[succ];
             }
         }
 
         std::queue<NodeId> q;
         for (NodeId id{ 0U }; id < static_cast<NodeId>(nodes.size()); ++id) {
-            if (!nodes[id].removed && inDegree[id] == 0U) {
+            if (!nodes[id].removed && in_degree[id] == 0U) {
                 q.push(id);
             }
         }
@@ -219,7 +232,7 @@ namespace pipeline {
             q.pop();
             topologicalOrder.push_back(id);
             for (const NodeId succ : nodes[id].successors) {
-                if (--inDegree[succ] == 0U) {
+                if (--in_degree[succ] == 0U) {
                     q.push(succ);
                 }
             }
@@ -265,23 +278,23 @@ namespace pipeline {
         for (const NodeId id : topologicalOrder) {
             const Node& node{ nodes[id] };
 
-            std::unordered_map<NodeId, std::vector<components::Context>>::iterator it{ pending.find(id) };
+            const std::unordered_map<NodeId, std::vector<components::Context>>::iterator it{ pending.find(id) };
             assert(it != pending.end() && !it->second.empty());
 
-            components::Context nodeCtx{ std::visit(NodeMerger{ it->second }, node.data) };
+            components::Context node_context{ std::visit(NodeMerger{ it->second }, node.data) };
             pending.erase(it);
 
-            std::visit(NodeProcessor{ nodeCtx }, node.data);
+            std::visit(NodeProcessor{ node_context }, node.data);
 
             if (node.successors.empty()) {
-                results.emplace(id, std::move(nodeCtx));
+                results.emplace(id, std::move(node_context));
             } else {
                 for (size_t i{ 0U }; i < node.successors.size(); ++i) {
                     const NodeId succ{ node.successors[i] };
                     if (i + 1U < node.successors.size()) {
-                        pending[succ].push_back(nodeCtx);
+                        pending[succ].push_back(node_context);
                     } else {
-                        pending[succ].push_back(std::move(nodeCtx));
+                        pending[succ].push_back(std::move(node_context));
                     }
                 }
             }

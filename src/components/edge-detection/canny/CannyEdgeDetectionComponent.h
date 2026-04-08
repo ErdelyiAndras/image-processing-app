@@ -1,9 +1,9 @@
 #ifndef CANNY_EDGE_DETECTION_COMPONENT_H
 #define CANNY_EDGE_DETECTION_COMPONENT_H
 
-#include "edge-detection-config.h"
-#include "EdgeDetectionComponent.h"
 #include "CannyEdgeDetectionParameters.h"
+#include "EdgeDetectionComponent.h"
+#include "edge-detection-config.h"
 
 namespace components {
     namespace edge_detection {

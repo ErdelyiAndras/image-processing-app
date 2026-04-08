@@ -1,8 +1,8 @@
 #ifndef SHAPE_DETECTION_COMPONENT_H
 #define SHAPE_DETECTION_COMPONENT_H
 
-#include "ParameterizedComponent.h"
 #include "Context.h"
+#include "ParameterizedComponent.h"
 
 namespace components {
     namespace shape_detection {

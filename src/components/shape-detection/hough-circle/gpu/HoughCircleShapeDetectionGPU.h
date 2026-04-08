@@ -1,8 +1,8 @@
 #ifndef HOUGH_CIRCLE_SHAPE_DETECTION_GPU_H
 #define HOUGH_CIRCLE_SHAPE_DETECTION_GPU_H
 
-#include "HoughCircleShapeDetectionComponent.h"
 #include "GPUComponent.h"
+#include "HoughCircleShapeDetectionComponent.h"
 
 #include <CL/opencl.hpp>
 #include <string>

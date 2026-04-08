@@ -1,11 +1,20 @@
 #include "PipelineModel.h"
+
 #include "Component.h"
+#include "ComponentRegistry.h"
 #include "Context.h"
 #include "Image.h"
+#include "NodeTypes.h"
+#include "ParameterValidator.h"
+#include "types.h"
 
 #include <chrono>
+#include <optional>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
+#include <unordered_map>
+#include <utility>
 #include <variant>
 
 PipelineModel::PipelineModel(std::string inputPath, std::string outputPath)
@@ -71,10 +80,10 @@ PipelineModel::RunResult PipelineModel::execute() {
     }
 
     Image image{ inputPath };
-    components::Context context{ image };
+    const components::Context context{ image };
 
     const auto start  { std::chrono::high_resolution_clock::now() };
-          auto outputs{ pipeline.execute(context) };
+    std::unordered_map<NodeId, components::Context> outputs{ pipeline.execute(context) };
     const auto end    { std::chrono::high_resolution_clock::now() };
 
     const float elapsed{ std::chrono::duration<float>(end - start).count() };

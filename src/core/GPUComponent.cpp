@@ -1,11 +1,13 @@
 #include "GPUComponent.h"
+
 #include "kernel_sources.h"
 #include "oclutils.h"
 
 #include <CL/cl.h>
+#include <CL/opencl.hpp>
 #include <iostream>
 #include <stdexcept>
-#include <string>
+#include <vector>
 
 cl::Program GPUComponent::utils_program;
 cl::Context GPUComponent::s_context;
@@ -20,7 +22,7 @@ bool GPUComponent::ensureInitialized() {
 
     if (!oclCreateContextBy(s_context)) {
         if (ENABLE_LOGGING) {
-            std::cerr << "Failed to create shared OpenCL context" << std::endl;
+            std::cerr << "Failed to create shared OpenCL context" << "\n";
         }
         return false;
     }
@@ -34,9 +36,9 @@ bool GPUComponent::ensureInitialized() {
     } catch (const cl::Error& error) {
         oclPrintError(error);
         if (ENABLE_LOGGING) {
-            std::cerr << "Build Status: "   << utils_program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(s_devices[0])  << std::endl;
-            std::cerr << "Build Options:\t" << utils_program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(s_devices[0]) << std::endl;
-            std::cerr << "Build Log:\t "    << utils_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(s_devices[0])     << std::endl;
+            std::cerr << "Build Status: "   << utils_program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(s_devices[0])  << "\n";
+            std::cerr << "Build Options:\t" << utils_program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(s_devices[0]) << "\n";
+            std::cerr << "Build Log:\t "    << utils_program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(s_devices[0])     << "\n";
         }
         throw std::runtime_error("Failed to build OpenCL utils program");
     }
@@ -61,9 +63,9 @@ void GPUComponent::initOpenCL(const char* kernel_source) {
     catch (const cl::Error& error) {
         oclPrintError(error);
         if (ENABLE_LOGGING) {
-            std::cerr << "Build Status: "   << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(s_devices[0])  << std::endl;
-            std::cerr << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(s_devices[0]) << std::endl;
-            std::cerr << "Build Log:\t "    << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(s_devices[0])     << std::endl;
+            std::cerr << "Build Status: "   << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(s_devices[0])  << "\n";
+            std::cerr << "Build Options:\t" << program.getBuildInfo<CL_PROGRAM_BUILD_OPTIONS>(s_devices[0]) << "\n";
+            std::cerr << "Build Log:\t "    << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(s_devices[0])     << "\n";
         }
         throw std::runtime_error("Failed to build OpenCL program");
     }

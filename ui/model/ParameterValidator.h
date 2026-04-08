@@ -4,9 +4,9 @@
 #include "NodeTypes.h"
 #include "config.h"
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 class ParameterValidator {
 public:

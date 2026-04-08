@@ -1,8 +1,8 @@
 #ifndef EDGE_DETECTION_COMPONENT_H
 #define EDGE_DETECTION_COMPONENT_H
 
-#include "ParameterizedComponent.h"
 #include "Context.h"
+#include "ParameterizedComponent.h"
 
 namespace components {
     namespace edge_detection {

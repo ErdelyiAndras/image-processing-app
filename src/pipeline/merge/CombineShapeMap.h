@@ -1,9 +1,9 @@
 #ifndef COMBINE_SHAPE_MAP_H
 #define COMBINE_SHAPE_MAP_H
 
-#include "MergeStrategy.h"
 #include "Context.h"
 #include "Image.h"
+#include "MergeStrategy.h"
 #include "types.h"
 
 #include <algorithm>

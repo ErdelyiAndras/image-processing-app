@@ -1,5 +1,6 @@
 #include "GaussianBlurCPU.h"
-#include "GaussianBlurParameters.h"
+
+#include "GaussianBlurComponent.h"
 #include "Image.h"
 #include "types.h"
 
@@ -7,34 +8,36 @@
 #include <cstddef>
 #include <vector>
 
-namespace components {
-    namespace denoising {
-        GaussianBlurCPU::GaussianBlurCPU()
-            : GaussianBlurCPU(ParamType{}) {}
+namespace components::denoising {
+    GaussianBlurCPU::GaussianBlurCPU()
+        : GaussianBlurCPU(ParamType{}) {}
 
-        GaussianBlurCPU::GaussianBlurCPU(const ParamType& params)
-            : GaussianBlurComponent(params) {}
+    GaussianBlurCPU::GaussianBlurCPU(const ParamType& params)
+        : GaussianBlurComponent(params) {}
 
-        GaussianBlurCPU::GaussianBlurCPU(int kernel_size, float sigma)
-            : GaussianBlurCPU(ParamType{ kernel_size, sigma }) {}
+    GaussianBlurCPU::GaussianBlurCPU(int kernel_size, float sigma)
+        : GaussianBlurCPU(ParamType{ kernel_size, sigma }) {}
 
-        void GaussianBlurCPU::computeConvolution(const std::vector<float>& kernel) {
-            const int half{ parameters.kernel_size / 2 };
+    void GaussianBlurCPU::computeConvolution(const std::vector<float>& kernel) {
+        const int half{ parameters.kernel_size / 2 };
 
-            for (PixelIdx i{ 0U }; i < height; ++i) {
-                for (PixelIdx j{ 0U }; j < width; ++j) {
-                    float val{ 0.0f };
-                    for (int ki{ -half }; ki <= half; ++ki) {
-                        for (int kj{ -half }; kj <= half; ++kj) {
-                            int ni{ std::clamp(static_cast<int>(i) + ki, 0, static_cast<int>(height) - 1) };
-                            int nj{ std::clamp(static_cast<int>(j) + kj, 0, static_cast<int>(width) - 1) };
-                            val += inputImage(static_cast<PixelIdx>(ni), static_cast<PixelIdx>(nj))
-                                * kernel[static_cast<size_t>((ki + half) * parameters.kernel_size + (kj + half))];
-                        }
+        for (PixelIdx i{ 0U }; i < height; ++i) {
+            for (PixelIdx j{ 0U }; j < width; ++j) {
+                float val{ 0.0f };
+                for (int ki{ -half }; ki <= half; ++ki) {
+                    for (int kj{ -half }; kj <= half; ++kj) {
+                        const int ni{ std::clamp(static_cast<int>(i) + ki, 0, static_cast<int>(height) - 1) };
+                        const int nj{ std::clamp(static_cast<int>(j) + kj, 0, static_cast<int>(width) - 1) };
+                        val += inputImage(
+                            static_cast<PixelIdx>(ni),
+                            static_cast<PixelIdx>(nj)) * kernel[
+                                static_cast<size_t>((ki + half) * parameters.kernel_size) +
+                                static_cast<size_t>(kj + half)
+                            ];
                     }
-                    outputImage(i, j) = val;
                 }
+                outputImage(i, j) = val;
             }
         }
-    } // denoising
-} // components
+    }
+} // namespace components::denoising

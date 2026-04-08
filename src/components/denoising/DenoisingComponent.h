@@ -1,8 +1,8 @@
 #ifndef DENOISING_COMPONENT_H
 #define DENOISING_COMPONENT_H
 
-#include "ParameterizedComponent.h"
 #include "Context.h"
+#include "ParameterizedComponent.h"
 
 namespace components {
     namespace denoising {

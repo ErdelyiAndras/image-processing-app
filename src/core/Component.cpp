@@ -1,11 +1,11 @@
 #include "Component.h"
 
+#include "Context.h"
+
 namespace components {
     Component::Component()
         : height(0U)
-        , width(0U)
-        , inputImage()
-        , outputImage() {}
+        , width(0U) {}
 
     void Component::process(Context& context) {
         processContext(context);
@@ -19,4 +19,4 @@ namespace components {
         height = inputImage.getRows();
         width  = inputImage.getCols();
     }
-} // components
+} // namespace components

@@ -1,9 +1,10 @@
 #ifndef HOUGH_CIRCLE_SHAPE_DETECTION_COMPONENT_H
 #define HOUGH_CIRCLE_SHAPE_DETECTION_COMPONENT_H
 
-#include "ShapeDetectionComponent.h"
-#include "HoughCircleShapeDetectionParameters.h"
 #include "HoughCircle.h"
+#include "HoughCircleShapeDetectionParameters.h"
+#include "ShapeDetectionComponent.h"
+#include "types.h"
 
 #include <cstdint>
 #include <vector>
@@ -42,6 +43,10 @@ namespace components {
         private:
             void applyShapeDetection() override final;
 
+            bool isCircleTooClose(const HoughCircle& circle, const std::vector<HoughCircle>& valid_circles) const;
+            void drawCircle(const HoughCircle& circle);
+
+            bool isLocalMax(uint32_t r_idx, PixelIdx cx, PixelIdx cy, uint32_t votes) const;
             void plot(int x, int y);
         };
     } // shape_detection

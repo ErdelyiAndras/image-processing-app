@@ -1,8 +1,8 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include "Image.h"
 #include "Color.h"
+#include "Image.h"
 
 #include <string>
 #include <vector>

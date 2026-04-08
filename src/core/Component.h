@@ -2,9 +2,9 @@
 #define COMPONENT_H
 
 #include "Context.h"
+#include "Image.h"
 #include "Parameters.h"
 #include "types.h"
-#include "Image.h"
 
 #include <string>
 

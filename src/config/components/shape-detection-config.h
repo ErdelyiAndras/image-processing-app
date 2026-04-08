@@ -2,7 +2,6 @@
 #define SHAPE_DETECTION_CONFIG_H
 
 #include "config.h"
-#include "types.h"
 
 namespace components {
     namespace shape_detection {

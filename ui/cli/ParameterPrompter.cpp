@@ -1,21 +1,21 @@
 #include "ParameterPrompter.h"
+
 #include "NodeTypes.h"
+#include "ParameterValidator.h"
 #include "Terminal.h"
 
 #include <iostream>
 #include <string>
 #include <type_traits>
-#include <utility>
 #include <variant>
-#include <vector>
 
 NodeParams ParameterPrompter::prompt(const NodeParams& current) {
-    return std::visit([](const auto& p) -> NodeParams {
+    return std::visit([](const auto& p) {
         using T = std::decay_t<decltype(p)>;
         if constexpr (std::is_same_v<T, std::monostate>) {
-            return std::monostate{};
+            return NodeParams{ std::monostate{} };
         } else {
-            return createCandidate(p);
+            return NodeParams{ createCandidate(p) };
         }
     }, current);
 }

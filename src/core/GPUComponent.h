@@ -1,10 +1,10 @@
 #ifndef GPU_COMPONENT_H
 #define GPU_COMPONENT_H
 
+#include "types.h"
+
 #include <CL/opencl.hpp>
 #include <vector>
-
-#include "types.h"
 
 class GPUComponent {
 public:

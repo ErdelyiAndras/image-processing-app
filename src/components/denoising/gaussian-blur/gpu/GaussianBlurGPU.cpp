@@ -1,5 +1,7 @@
 #include "GaussianBlurGPU.h"
-#include "GaussianBlurParameters.h"
+
+#include "Context.h"
+#include "GaussianBlurComponent.h"
 #include "Image.h"
 #include "kernel_sources.h"
 
@@ -7,44 +9,42 @@
 #include <CL/opencl.hpp>
 #include <vector>
 
-namespace components {
-    namespace denoising {
-        GaussianBlurGPU::GaussianBlurGPU()
-            : GaussianBlurGPU(ParamType{}) {}
+namespace components::denoising {
+    GaussianBlurGPU::GaussianBlurGPU()
+        : GaussianBlurGPU(ParamType{}) {}
 
-        GaussianBlurGPU::GaussianBlurGPU(const ParamType& params)
-            : GaussianBlurComponent(params) {
-            initOpenCL(GAUSSIAN_BLUR_KERNEL_SOURCE);
-        }
+    GaussianBlurGPU::GaussianBlurGPU(const ParamType& params)
+        : GaussianBlurComponent(params) {
+        initOpenCL(GAUSSIAN_BLUR_KERNEL_SOURCE);
+    }
 
-        GaussianBlurGPU::GaussianBlurGPU(int kernel_size, float sigma)
-            : GaussianBlurGPU(ParamType{ kernel_size, sigma }) {}
+    GaussianBlurGPU::GaussianBlurGPU(int kernel_size, float sigma)
+        : GaussianBlurGPU(ParamType{ kernel_size, sigma }) {}
 
-        void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {
-            cl::Buffer img_buf{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };
-            queue.enqueueWriteBuffer(img_buf, CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
+    void GaussianBlurGPU::computeConvolution(const std::vector<float>& kernel) {
+        const cl::Buffer img_buf{ cl_context, CL_MEM_READ_ONLY, img_size * sizeof(float) };
+        queue.enqueueWriteBuffer(img_buf, CL_FALSE, 0, img_size * sizeof(float), inputImage.data());
 
-            cl::Buffer out_buf{ cl_context, CL_MEM_WRITE_ONLY, img_size * sizeof(float) };
+        const cl::Buffer out_buf{ cl_context, CL_MEM_WRITE_ONLY, img_size * sizeof(float) };
 
-            cl::Buffer kernel_buf{ cl_context, CL_MEM_READ_ONLY, kernel.size() * sizeof(float) };
-            queue.enqueueWriteBuffer(kernel_buf, CL_FALSE, 0, kernel.size() * sizeof(float), kernel.data());
+        const cl::Buffer kernel_buf{ cl_context, CL_MEM_READ_ONLY, kernel.size() * sizeof(float) };
+        queue.enqueueWriteBuffer(kernel_buf, CL_FALSE, 0, kernel.size() * sizeof(float), kernel.data());
 
-            cl::Kernel gpu_kernel{ program, "gaussian_blur" };
-            gpu_kernel.setArg(0, img_buf);
-            gpu_kernel.setArg(1, out_buf);
-            gpu_kernel.setArg(2, kernel_buf);
-            gpu_kernel.setArg(3, static_cast<int>(height));
-            gpu_kernel.setArg(4, static_cast<int>(width));
-            gpu_kernel.setArg(5, parameters.kernel_size);
+        cl::Kernel gpu_kernel{ program, "gaussian_blur" };
+        gpu_kernel.setArg(0, img_buf);
+        gpu_kernel.setArg(1, out_buf);
+        gpu_kernel.setArg(2, kernel_buf);
+        gpu_kernel.setArg(3, static_cast<int>(height));
+        gpu_kernel.setArg(4, static_cast<int>(width));
+        gpu_kernel.setArg(5, parameters.kernel_size);
 
-            queue.enqueueNDRangeKernel(gpu_kernel, cl::NullRange, img_size, cl::NullRange);
+        queue.enqueueNDRangeKernel(gpu_kernel, cl::NullRange, img_size, cl::NullRange);
 
-            queue.enqueueReadBuffer(out_buf, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
-        }
+        queue.enqueueReadBuffer(out_buf, CL_TRUE, 0, img_size * sizeof(float), outputImage.data());
+    }
 
-        void GaussianBlurGPU::processContext(const Context& context) {
-            GaussianBlurComponent::processContext(context);
-            img_size = height * width;
-        }
-    } // denoising
-} // components
+    void GaussianBlurGPU::processContext(const Context& context) {
+        GaussianBlurComponent::processContext(context);
+        img_size = height * width;
+    }
+} // namespace components::denoising

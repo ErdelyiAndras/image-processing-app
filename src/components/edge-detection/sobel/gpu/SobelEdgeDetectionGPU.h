@@ -1,8 +1,8 @@
 #ifndef SOBEL_EDGE_DETECTION_GPU_H
 #define SOBEL_EDGE_DETECTION_GPU_H
 
-#include "SobelEdgeDetectionComponent.h"
 #include "GPUComponent.h"
+#include "SobelEdgeDetectionComponent.h"
 
 #include <string>
 

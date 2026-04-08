@@ -3,12 +3,12 @@
 
 #include "types.h"
 
-#include "TVDenoisingParameters.h"
 #include "GaussianBlurParameters.h"
-#include "SobelEdgeDetectionParameters.h"
+#include "TVDenoisingParameters.h"
 #include "CannyEdgeDetectionParameters.h"
-#include "HoughLineShapeDetectionParameters.h"
+#include "SobelEdgeDetectionParameters.h"
 #include "HoughCircleShapeDetectionParameters.h"
+#include "HoughLineShapeDetectionParameters.h"
 
 #include <string>
 #include <variant>

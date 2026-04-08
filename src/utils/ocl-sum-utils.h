@@ -1,9 +1,10 @@
 #ifndef OCL_SUM_UTILS_H
 #define OCL_SUM_UTILS_H
 
+#include "types.h"
+
 #include <CL/opencl.hpp>
 #include <string>
-#include "types.h"
 
 template <typename T>
 struct SumKernelInfo;
