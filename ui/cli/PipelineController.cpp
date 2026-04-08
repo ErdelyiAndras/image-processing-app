@@ -31,21 +31,21 @@ void PipelineController::setInput() {
     const std::string path{ Terminal::readString("Image path", model.getInputPath()) };
     if (!path.empty()) {
         model.setInputPath(path);
-        std::cout << "\n  Input set to: " << model.getInputPath() << "\n";
+        std::cout << "\n" << Terminal::indent << "Input set to: " << model.getInputPath() << "\n";
     } else {
-        std::cout << "  No change.\n";
+        std::cout << Terminal::indent << "No change.\n";
     }
 }
 
 void PipelineController::setOutput() {
     Terminal::header("Set Output Path");
-    std::cout << "  Include extension, e.g. output/result.png\n\n";
+    std::cout << Terminal::indent << "Include extension, e.g. output/result.png\n\n";
     const std::string path{ Terminal::readString("Output path", model.getOutputPath()) };
     if (!path.empty()) {
         model.setOutputPath(path);
-        std::cout << "\n  Output set to: " << model.getOutputPath() << "\n";
+        std::cout << "\n" << Terminal::indent << "Output set to: " << model.getOutputPath() << "\n";
     } else {
-        std::cout << "  No change.\n";
+        std::cout << Terminal::indent << "No change.\n";
     }
 }
 
@@ -53,11 +53,11 @@ void PipelineController::addNode() {
     Terminal::header("Add Node");
 
     for (uint8_t i{ 0U }; i < static_cast<uint8_t>(Category::CategoryCount); ++i) {
-        std::cout << "  " << (i + 1) << ". "
+        std::cout << Terminal::indent << (i + 1) << ". "
                   << ComponentRegistry::categoryName(static_cast<Category>(i))
                   << "\n";
     }
-    std::cout << "  0. Cancel\n\n";
+    std::cout << Terminal::indent << "0. Cancel\n\n";
 
     const int cat{ Terminal::readChoice(0, static_cast<int>(Category::CategoryCount)) };
     if (cat == 0) {
@@ -67,11 +67,11 @@ void PipelineController::addNode() {
     const Category chosen_category{ static_cast<Category>(cat - 1) };
     const std::vector<const ComponentDescriptor*> components{ ComponentRegistry::byCategory(chosen_category) };
 
-    std::cout << "\n  " << ComponentRegistry::categoryName(chosen_category) << ":\n";
+    std::cout << "\n" << Terminal::indent << ComponentRegistry::categoryName(chosen_category) << ":\n";
     for (size_t i{ 0 }; i < components.size(); ++i) {
-        std::cout << "    " << (i + 1) << ". " << components[i]->displayName() << "\n";
+        std::cout << Terminal::indent << Terminal::indent << (i + 1) << ". " << components[i]->displayName() << "\n";
     }
-    std::cout << "    0. Cancel\n\n";
+    std::cout << Terminal::indent << Terminal::indent << "0. Cancel\n\n";
 
     const int comp{ Terminal::readChoice(0, static_cast<int>(components.size())) };
     if (comp == 0) {
@@ -84,7 +84,7 @@ void PipelineController::addNode() {
     const std::string name{ Terminal::readString("Node name", desc.displayName()) };
 
     if (desc.hasParams()) {
-        std::cout << "\n  Parameters (press Enter to accept default):\n";
+        std::cout << "\n" << Terminal::indent << "Parameters (press Enter to accept default):\n";
     }
     NodeParams current{ desc.hasParams() ? desc.defaultParams() : std::monostate{} };
     while (true) {
@@ -93,14 +93,14 @@ void PipelineController::addNode() {
         try {
             PipelineModel::AddNodeResult result{ model.addNode(desc, candidate, name) };
             if (result.validation.ok()) {
-                std::cout << "\n  Node " << *result.id << " added: ["
+                std::cout << "\n" << Terminal::indent << "Node " << *result.id << " added: ["
                           << desc.displayName() << "] \"" << name << "\"\n";
                 break;
             }
             ParameterPrompter::printErrors(result.validation);
             current = std::move(candidate);
         } catch (const std::exception& e) {
-            std::cout << "\n  Error: " << e.what() << "\n";
+            std::cout << "\n" << Terminal::indent << "Error: " << e.what() << "\n";
             break;
         }
     }
@@ -122,9 +122,9 @@ void PipelineController::removeNode() {
     try {
         const std::string name{ model.node(id).displayName };
         model.removeNode(id);
-        std::cout << "  Node " << id << " (\"" << name << "\") removed.\n";
+        std::cout << Terminal::indent << "Node " << id << " (\"" << name << "\") removed.\n";
     } catch (const std::exception& e) {
-        std::cout << "  Error: " << e.what() << "\n";
+        std::cout << Terminal::indent << "Error: " << e.what() << "\n";
     }
 }
 
@@ -132,7 +132,7 @@ void PipelineController::connectNodes() {
     Terminal::header("Connect Nodes");
     printNodeTable();
     if (model.nodeCount() < 2) {
-        std::cout << "  Need at least two nodes to connect.\n";
+        std::cout << Terminal::indent << "Need at least two nodes to connect.\n";
         return;
     }
 
@@ -148,12 +148,12 @@ void PipelineController::connectNodes() {
 
     try {
         model.connect(from, to);
-        std::cout << "  Connected: "
+        std::cout << Terminal::indent << "Connected: "
                   << from << " [" << model.node(from).displayName << "]"
                   << "  -->  "
                   << to   << " [" << model.node(to).displayName   << "]\n";
     } catch (const std::exception& e) {
-        std::cout << "  Error: " << e.what() << "\n";
+        std::cout << Terminal::indent << "Error: " << e.what() << "\n";
     }
 }
 
@@ -176,9 +176,9 @@ void PipelineController::disconnectNodes() {
 
     try {
         model.disconnect(from, to);
-        std::cout << "  Disconnected: " << from << " --> " << to << "\n";
+        std::cout << Terminal::indent << "Disconnected: " << from << " --> " << to << "\n";
     } catch (const std::exception& e) {
-        std::cout << "  Error: " << e.what() << "\n";
+        std::cout << Terminal::indent << "Error: " << e.what() << "\n";
     }
 }
 
@@ -199,16 +199,16 @@ void PipelineController::configureNode() {
     const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
 
     if (!desc.hasParams()) {
-        std::cout << "  [" << desc.displayName()
+        std::cout << Terminal::indent << "[" << desc.displayName()
                   << "] has no configurable parameters.\n";
         return;
     }
 
-    std::cout << "\n  Node " << id << ": [" << desc.displayName()
+    std::cout << "\n" << Terminal::indent << "Node " << id << ": [" << desc.displayName()
               << "] \"" << info.displayName << "\"\n"
-              << "  Current parameters:\n";
+              << Terminal::indent << "Current parameters:\n";
     ParameterPrompter::print(info.params);
-    std::cout << "\n  New parameters (press Enter to keep current value):\n";
+    std::cout << "\n" << Terminal::indent << "New parameters (press Enter to keep current value):\n";
 
     NodeParams current{ info.params };
     while (true) {
@@ -217,13 +217,13 @@ void PipelineController::configureNode() {
         try {
             const ParameterValidator::ValidationResult result{ model.configureNode(id, candidate) };
             if (result.ok()) {
-                std::cout << "\n  Parameters updated.\n";
+                std::cout << "\n" << Terminal::indent << "Parameters updated.\n";
                 break;
             }
             ParameterPrompter::printErrors(result);
             current = std::move(candidate);
         } catch (const std::exception& e) {
-            std::cout << "  Error: " << e.what() << "\n";
+            std::cout << Terminal::indent<< "Error: " << e.what() << "\n";
             break;
         }
     }
@@ -233,11 +233,11 @@ void PipelineController::listPipeline() const {
     Terminal::header("Pipeline Overview");
     const std::string& in{ model.getInputPath() };
     const std::string& out{ model.getOutputPath() };
-    std::cout << "  Input  : " << (in.empty()  ? "(not set)" : in)  << "\n";
-    std::cout << "  Output : " << (out.empty() ? "(not set)" : out) << "\n\n";
-    std::cout << "  Nodes:\n";
+    std::cout << Terminal::indent << "Input  : " << (in.empty()  ? "(not set)" : in)  << "\n";
+    std::cout << Terminal::indent << "Output : " << (out.empty() ? "(not set)" : out) << "\n\n";
+    std::cout << Terminal::indent << "Nodes:\n";
     printNodeTable();
-    std::cout << "\n  Connections:\n";
+    std::cout << "\n" << Terminal::indent << "Connections:\n";
     printConnectionList();
 }
 
@@ -245,14 +245,14 @@ void PipelineController::run() {
     Terminal::header("Run Pipeline");
 
     try {
-        std::cout << "  Loading: " << model.getInputPath() << "\n";
-        std::cout << "  Executing pipeline...\n";
+        std::cout << Terminal::indent << "Loading: " << model.getInputPath() << "\n";
+        std::cout << Terminal::indent << "Executing pipeline...\n";
 
         PipelineModel::RunResult result{ model.execute() };
 
-        std::cout << "  Done in " << std::fixed << std::setprecision(3)
+        std::cout << Terminal::indent << "Done in " << std::fixed << std::setprecision(3)
                   << result.elapsedSeconds << " s\n\n";
-        std::cout << "  Saving " << result.outputs.size() << " output(s):\n";
+        std::cout << Terminal::indent << "Saving " << result.outputs.size() << " output(s):\n";
 
         const std::string& output_path{ model.getOutputPath() };
         const size_t dot_pos{ output_path.find_last_of('.') };
@@ -287,12 +287,12 @@ void PipelineController::run() {
             ctx.getShapeMap().save(
                 make_name("shape"), ext
             );
-            std::cout << "    [sink " << id << "] "
+            std::cout << Terminal::indent << Terminal::indent << "[sink " << id << "] "
                       << make_name("output") << ext << "\n";
         }
 
     } catch (const std::exception& e) {
-        std::cout << "  Error: " << e.what() << "\n";
+        std::cout << Terminal::indent << "Error: " << e.what() << "\n";
     }
 }
 
@@ -309,22 +309,22 @@ bool PipelineController::askNodeId(const std::string& prompt, NodeId& out) const
                 out = id;
                 return true;
             }
-            std::cout << "  Node " << v << " does not exist. Try again.\n";
+            std::cout << Terminal::indent << "Node " << v << " does not exist. Try again.\n";
         } else {
-            std::cout << "  Invalid ID.\n";
+            std::cout << Terminal::indent << "Invalid ID.\n";
         }
     }
 }
 
 void PipelineController::printNodeTable() const {
     if (model.nodeCount() == 0) {
-        std::cout << "  (no nodes)\n";
+        std::cout << Terminal::indent << "(no nodes)\n";
         return;
     }
 
-    std::cout << "  " << std::left
-              << std::setw(5)  << "ID"
-              << std::setw(32) << "Type"
+    std::cout << Terminal::indent << std::left
+              << std::setw(Terminal::id_col_width)   << "ID"
+              << std::setw(Terminal::type_col_width) << "Type"
               << "Name\n";
     Terminal::separator();
 
@@ -338,9 +338,9 @@ void PipelineController::printNodeTable() const {
     for (const NodeId id : ids) {
         const NodeInfo& info{ model.node(id) };
         const ComponentDescriptor& desc{ ComponentRegistry::get(info.type) };
-        std::cout << "  " << std::left
-                  << std::setw(5)  << id
-                  << std::setw(32) << desc.displayName()
+        std::cout << Terminal::indent << std::left
+                  << std::setw(Terminal::id_col_width)   << id
+                  << std::setw(Terminal::type_col_width) << desc.displayName()
                   << info.displayName << "\n";
     }
 }
@@ -348,11 +348,11 @@ void PipelineController::printNodeTable() const {
 void PipelineController::printConnectionList() const {
     const std::vector<pipeline::Connection>& connections{ model.getConnections() };
     if (connections.empty()) {
-        std::cout << "  (no connections)\n";
+        std::cout << Terminal::indent << "(no connections)\n";
         return;
     }
     for (const auto& [from, to] : connections) {
-        std::cout << "  " << from << " [" << model.node(from).displayName << "]"
+        std::cout << Terminal::indent << from << " [" << model.node(from).displayName << "]"
                   << "  -->  "
                   << to   << " [" << model.node(to).displayName   << "]\n";
     }

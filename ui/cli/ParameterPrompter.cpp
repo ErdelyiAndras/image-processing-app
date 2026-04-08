@@ -24,7 +24,7 @@ void ParameterPrompter::print(const NodeParams& params) {
     std::visit([](const auto& p) {
         using T = std::decay_t<decltype(p)>;
         if constexpr (std::is_same_v<T, std::monostate>) {
-            std::cout << "  (no configurable parameters)\n";
+            std::cout << Terminal::indent << "(no configurable parameters)\n";
         } else {
             printImpl(p);
         }
@@ -32,14 +32,15 @@ void ParameterPrompter::print(const NodeParams& params) {
 }
 
 void ParameterPrompter::printErrors(const ParameterValidator::ValidationResult& result) {
-    std::cout << "\n  Validation failed:\n";
+    std::cout << "\n" << Terminal::indent << "Validation failed:\n";
     for (const auto& [field, errors] : result) {
-        std::cout << "    " << field << ":\n";
+        std::cout << Terminal::indent << Terminal::indent << field << ":\n";
         for (const std::string& message : errors) {
-            std::cout << "      - " << message << "\n";
+            std::cout << Terminal::indent << Terminal::indent << Terminal::indent
+                      << "- " << message << "\n";
         }
     }
-    std::cout << "  Please correct the highlighted fields.\n\n";
+    std::cout << Terminal::indent << "Please correct the highlighted fields.\n\n";
 }
 
 void ParameterPrompter::printImpl(const TVParams& p) {

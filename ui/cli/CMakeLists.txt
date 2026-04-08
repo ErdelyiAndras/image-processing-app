@@ -1,6 +1,7 @@
 add_library(cli STATIC
     ParameterPrompter.cpp
     PipelineController.cpp
+    Terminal.cpp
 )
 
 target_include_directories(cli PUBLIC

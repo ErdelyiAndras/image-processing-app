@@ -29,13 +29,20 @@ foreach(OCL_INCLUDE_DIR ${OCL_INCLUDE_DIRS})
 endforeach()
 
 target_precompile_headers(core PUBLIC
+    <CL/cl.h>
     <CL/opencl.hpp>
     <algorithm>
     <cmath>
+    <cstddef>
     <cstdint>
+    <iomanip>
+    <iostream>
     <memory>
+    <optional>
     <stdexcept>
     <string>
+    <unordered_map>
+    <utility>
     <variant>
     <vector>
 )

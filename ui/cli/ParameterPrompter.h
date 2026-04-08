@@ -3,6 +3,7 @@
 
 #include "NodeTypes.h"
 #include "ParameterValidator.h"
+#include "Terminal.h"
 
 #include <iomanip>
 #include <iostream>
@@ -34,8 +35,7 @@ private:
 
     template <typename T>
     static void printField(const char* label, T value) {
-        constexpr static int label_width{ 17 };
-        std::cout << "  " << std::setw(label_width) << std::left
+        std::cout << Terminal::indent << std::setw(Terminal::label_field_width) << std::left
                   << label << ": " << value << "\n";
     }
 };

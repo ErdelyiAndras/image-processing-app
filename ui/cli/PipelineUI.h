@@ -29,8 +29,8 @@ public:
                 case 7:  m_controller.configureNode();   break;
                 case 8:  m_controller.listPipeline();    break;
                 case 9:  m_controller.run();             break;
-                case 0:  std::cout << "\n  Goodbye.\n";  break;
-                default: std::cout << "  Invalid choice.\n"; break;
+                case 0:  std::cout << "\n" << Terminal::indent << "Goodbye.\n";  break;
+                default: std::cout << Terminal::indent << "Invalid choice.\n"; break;
             }
 
             std::cout << "\n";
@@ -42,19 +42,19 @@ private:
 
     void displayMainMenu() const {
         Terminal::header("Image Processing Pipeline Builder");
-        std::cout << "  Input  : " << (m_controller.getInputPath().empty()  ? "(not set)" : m_controller.getInputPath())  << "\n"
-                  << "  Output : " << (m_controller.getOutputPath().empty() ? "(not set)" : m_controller.getOutputPath()) << "\n"
-                  << "  Nodes  : " << m_controller.nodeCount() << "\n\n"
-                  << "  1. Set input image\n"
-                  << "  2. Set output path\n"
-                  << "  3. Add node\n"
-                  << "  4. Remove node\n"
-                  << "  5. Connect nodes\n"
-                  << "  6. Disconnect nodes\n"
-                  << "  7. Configure node\n"
-                  << "  8. List pipeline\n"
-                  << "  9. Run pipeline\n"
-                  << "  0. Exit\n\n";
+        std::cout << Terminal::indent << "Input  : " << (m_controller.getInputPath().empty()  ? "(not set)" : m_controller.getInputPath())  << "\n"
+                  << Terminal::indent << "Output : " << (m_controller.getOutputPath().empty() ? "(not set)" : m_controller.getOutputPath()) << "\n"
+                  << Terminal::indent << "Nodes  : " << m_controller.nodeCount() << "\n\n"
+                  << Terminal::indent << "1. Set input image\n"
+                  << Terminal::indent << "2. Set output path\n"
+                  << Terminal::indent << "3. Add node\n"
+                  << Terminal::indent << "4. Remove node\n"
+                  << Terminal::indent << "5. Connect nodes\n"
+                  << Terminal::indent << "6. Disconnect nodes\n"
+                  << Terminal::indent << "7. Configure node\n"
+                  << Terminal::indent << "8. List pipeline\n"
+                  << Terminal::indent << "9. Run pipeline\n"
+                  << Terminal::indent << "0. Exit\n\n";
     }
 };
 
