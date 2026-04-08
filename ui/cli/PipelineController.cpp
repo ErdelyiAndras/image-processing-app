@@ -223,7 +223,7 @@ void PipelineController::configureNode() {
             ParameterPrompter::printErrors(result);
             current = std::move(candidate);
         } catch (const std::exception& e) {
-            std::cout << Terminal::indent<< "Error: " << e.what() << "\n";
+            std::cout << Terminal::indent << "Error: " << e.what() << "\n";
             break;
         }
     }
