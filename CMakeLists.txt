@@ -22,7 +22,7 @@ set(IS_RELEASE_AND_MSVC        "$<AND:${IS_RELEASE},${IS_MSVC}>")
 set(IS_RELEASE_AND_CLANG_CL    "$<AND:${IS_RELEASE},${IS_CLANG_CL}>")
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY
-    "$<IF:$<CXX_COMPILER_ID:Clang>,MultiThreadedDLL,$<IF:$<CONFIG:Release>,MultiThreadedDLL,MultiThreadedDebugDLL>>"
+    "$<IF:${IS_RELEASE},MultiThreaded,MultiThreadedDebugDLL>"
 )
 
 find_program(CLANG_TIDY_EXE NAMES clang-tidy)
@@ -203,6 +203,11 @@ add_subdirectory(ui)
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE image_processing_lib cli)
+
+target_link_options(${PROJECT_NAME} PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC,Clang>:/DELAYLOAD:OpenCL.dll>
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE delayimp)
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 

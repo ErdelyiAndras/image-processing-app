@@ -19,6 +19,7 @@ target_link_libraries(core PUBLIC
 target_compile_definitions(core PUBLIC
     CL_HPP_ENABLE_EXCEPTIONS
     CL_HPP_TARGET_OPENCL_VERSION=200
+    CL_TARGET_OPENCL_VERSION=200
 )
 
 get_target_property(OCL_INCLUDE_DIRS OpenCL::HeadersCpp INTERFACE_INCLUDE_DIRECTORIES)
