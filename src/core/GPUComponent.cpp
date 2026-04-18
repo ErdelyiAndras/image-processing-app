@@ -8,6 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <windows.h>
 
 cl::Program GPUComponent::utils_program;
 cl::Context GPUComponent::s_context;
@@ -15,9 +16,27 @@ cl::CommandQueue GPUComponent::s_queue;
 std::vector<cl::Device> GPUComponent::s_devices;
 bool GPUComponent::s_is_initialized = false;
 
+bool GPUComponent::isOpenCLAvailable() {
+    __try {
+        cl_uint num_platforms = 0;
+        clGetPlatformIDs(0, nullptr, &num_platforms);
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
 bool GPUComponent::ensureInitialized() {
     if (s_is_initialized) {
         return true;
+    }
+
+    if (!isOpenCLAvailable()) {
+        if (ENABLE_LOGGING) {
+            std::cerr << "OpenCL is not available" << "\n";
+        }
+        return false;
     }
 
     if (!oclCreateContextBy(s_context)) {

@@ -26,6 +26,7 @@ private:
     static std::vector<cl::Device> s_devices;
     static bool s_is_initialized;
 
+    static bool isOpenCLAvailable();
     static bool ensureInitialized();
 };
 
