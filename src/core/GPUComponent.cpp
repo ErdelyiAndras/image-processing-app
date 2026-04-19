@@ -4,11 +4,12 @@
 #include "oclutils.h"
 
 #include <CL/cl.h>
+#include <CL/cl_platform.h>
 #include <CL/opencl.hpp>
+#include <excpt.h>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <windows.h>
 
 cl::Program GPUComponent::utils_program;
 cl::Context GPUComponent::s_context;
@@ -18,7 +19,7 @@ bool GPUComponent::s_is_initialized = false;
 
 bool GPUComponent::isOpenCLAvailable() {
     __try {
-        cl_uint num_platforms = 0;
+        cl_uint num_platforms{ 0U };
         clGetPlatformIDs(0, nullptr, &num_platforms);
         return true;
     }

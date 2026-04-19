@@ -14,6 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <optional>
@@ -23,15 +24,16 @@
 #include <variant>
 #include <vector>
 
-PipelineController::PipelineController(std::string input_path, std::string output_path)
-    : model(std::move(input_path), std::move(output_path)) {}
-
 void PipelineController::setInput() {
     Terminal::header("Set Input Image");
     const std::string path{ Terminal::readString("Image path", model.getInputPath()) };
     if (!path.empty()) {
-        model.setInputPath(path);
-        std::cout << "\n" << Terminal::indent << "Input set to: " << model.getInputPath() << "\n";
+        try {
+            model.setInputPath(path);
+            std::cout << "\n" << Terminal::indent << "Input set to: " << model.getInputPath() << "\n";
+        } catch (const std::exception& e) {
+            std::cout << "\n" << Terminal::indent << "Error: " << e.what() << "\n";
+        }
     } else {
         std::cout << Terminal::indent << "No change.\n";
     }
@@ -42,8 +44,12 @@ void PipelineController::setOutput() {
     std::cout << Terminal::indent << "Include extension, e.g. output/result.png\n\n";
     const std::string path{ Terminal::readString("Output path", model.getOutputPath()) };
     if (!path.empty()) {
-        model.setOutputPath(path);
-        std::cout << "\n" << Terminal::indent << "Output set to: " << model.getOutputPath() << "\n";
+        try {
+            model.setOutputPath(path);
+            std::cout << "\n" << Terminal::indent << "Output set to: " << model.getOutputPath() << "\n";
+        } catch (const std::exception& e) {
+            std::cout << "\n" << Terminal::indent << "Error: " << e.what() << "\n";
+        }
     } else {
         std::cout << Terminal::indent << "No change.\n";
     }
@@ -231,8 +237,8 @@ void PipelineController::configureNode() {
 
 void PipelineController::listPipeline() const {
     Terminal::header("Pipeline Overview");
-    const std::string& in{ model.getInputPath() };
-    const std::string& out{ model.getOutputPath() };
+    const std::string in { model.getInputPath() };
+    const std::string out{ model.getOutputPath() };
     std::cout << Terminal::indent << "Input  : " << (in.empty()  ? "(not set)" : in)  << "\n";
     std::cout << Terminal::indent << "Output : " << (out.empty() ? "(not set)" : out) << "\n\n";
     std::cout << Terminal::indent << "Nodes:\n";
@@ -254,18 +260,15 @@ void PipelineController::run() {
                   << result.elapsedSeconds << " s\n\n";
         std::cout << Terminal::indent << "Saving " << result.outputs.size() << " output(s):\n";
 
-        const std::string& output_path{ model.getOutputPath() };
-        const size_t dot_pos{ output_path.find_last_of('.') };
-        const std::string base{
-            (dot_pos == std::string::npos) ? output_path : output_path.substr(0, dot_pos)
-        };
-        const std::string ext{
-            (dot_pos == std::string::npos) ? std::string{ ".png" } : output_path.substr(dot_pos)
-        };
+        const std::string output_path{ model.getOutputPath() };
+        const std::filesystem::path output{ output_path };
+        const std::filesystem::path parent{ output.parent_path() };
+        const std::filesystem::path base_path{ parent.empty() ? output.stem() : (parent / output.stem()) };
+        const std::string ext{ output.extension().string() };
 
         for (auto& [id, ctx] : result.outputs) {
             const std::string label{ ctx.getAppliedComponents() };
-            const std::string current_base{ base + "_" + std::to_string(id) };
+            const std::string current_base{ base_path.string() + "_" + std::to_string(id) };
 
             const auto make_name{ [&](const char* suffix) {
                 return std::string(current_base)
@@ -275,20 +278,26 @@ void PipelineController::run() {
                     .append(label);
             } };
 
-            ctx.save(
-                make_name("output"), ext
-            );
-            ctx.getProcessedImage().save(
-                make_name("processed"), ext
-            );
-            ctx.getEdgeMap().save(
-                make_name("edge"), ext
-            );
-            ctx.getShapeMap().save(
-                make_name("shape"), ext
-            );
+            const bool saved_output{
+                ctx.save(make_name("output"), ext)
+            };
+            const bool saved_processed{
+                ctx.getProcessedImage().save(make_name("processed"), ext)
+            };
+            const bool saved_edge{
+                ctx.getEdgeMap().save(make_name("edge"), ext)
+            };
+            const bool saved_shape{
+                ctx.getShapeMap().save(make_name("shape"), ext)
+            };
+
             std::cout << Terminal::indent << Terminal::indent << "[sink " << id << "] "
-                      << make_name("output") << ext << "\n";
+                      << make_name("output") << ext;
+
+            if (!(saved_output && saved_processed && saved_edge && saved_shape)) {
+                std::cout << " (warning: one or more files failed to save)";
+            }
+            std::cout << "\n";
         }
 
     } catch (const std::exception& e) {

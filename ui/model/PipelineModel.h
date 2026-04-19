@@ -9,6 +9,7 @@
 #include "types.h"
 
 #include <cstddef>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -17,12 +18,11 @@
 
 class PipelineModel {
 public:
-    explicit PipelineModel(std::string inputPath = "", std::string outputPath = "");
+    std::string getInputPath () const { return inputPath.string(); }
+    std::string getOutputPath() const { return outputPath.string(); }
 
-    const std::string& getInputPath()  const { return inputPath; }
-    const std::string& getOutputPath() const { return outputPath; }
-    void setInputPath (std::string path)  { inputPath  = std::move(path); }
-    void setOutputPath(std::string path) { outputPath = std::move(path); }
+    void setInputPath (const std::string& path);
+    void setOutputPath(const std::string& path);
 
     size_t nodeCount()        const { return nodeInfo.size(); }
     bool   hasNode(NodeId id) const { return nodeInfo.count(id) > 0; }
@@ -54,10 +54,13 @@ public:
 private:
     pipeline::Pipeline                   pipeline;
     std::unordered_map<NodeId, NodeInfo> nodeInfo;
-    std::string                          inputPath;
-    std::string                          outputPath;
+    std::filesystem::path                inputPath;
+    std::filesystem::path                outputPath;
 
     static ParameterValidator::ValidationResult validateParams(const NodeParams& params);
+
+    static void validateInputPath (const std::filesystem::path& path);
+    static void validateOutputPath(const std::filesystem::path& path);
 };
 
 #endif // PIPELINE_MODEL_H

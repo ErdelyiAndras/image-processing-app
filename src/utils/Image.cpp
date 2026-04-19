@@ -10,6 +10,7 @@
 #include "types.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -176,25 +177,25 @@ bool Image::saveComposite(
     return saveUsingFormat(name, ext, rgb_data, static_cast<int>(cols), static_cast<int>(rows), 3);
 }
 
+bool Image::isSupportedSaveExtension(std::string ext) {
+    to_lowercase(ext);
+    return ext == ".png" || ext == ".jpg" || ext == ".jpeg";
+}
+
 bool Image::saveUsingFormat(
     const std::string& name,
-    const std::string& ext,
+    std::string ext,
     const std::vector<uint8_t>& output,
     int cols,
     int rows,
     int channels
 ) {
+    to_lowercase(ext);
     if (ext == ".png") {
         return stbi_write_png((name + ext).c_str(), cols, rows, channels, output.data(), cols * channels) != 0;
     }
     if (ext == ".jpg" || ext == ".jpeg") {
         return stbi_write_jpg((name + ext).c_str(), cols, rows, channels, output.data(), 95) != 0;
-    }
-    if (ext == ".bmp") {
-        return stbi_write_bmp((name + ext).c_str(), cols, rows, channels, output.data()) != 0;
-    }
-    if (ext == ".tga") {
-        return stbi_write_tga((name + ext).c_str(), cols, rows, channels, output.data()) != 0;
     }
     return false;
 }
@@ -210,4 +211,10 @@ uint8_t Image::blend(uint8_t base, uint8_t overlay, float t) {
             (t * static_cast<float>(overlay))
         )
     );
+}
+
+void Image::to_lowercase(std::string& str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char ch) {
+        return static_cast<char>(std::tolower(ch));
+    });
 }

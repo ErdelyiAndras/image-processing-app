@@ -9,6 +9,7 @@
 #include "types.h"
 
 #include <chrono>
+#include <filesystem>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -17,9 +18,17 @@
 #include <utility>
 #include <variant>
 
-PipelineModel::PipelineModel(std::string inputPath, std::string outputPath)
-    : inputPath(std::move(inputPath))
-    , outputPath(std::move(outputPath)) {}
+void PipelineModel::setInputPath(const std::string& path) {
+    std::filesystem::path path_obj{ path };
+    validateInputPath(path_obj);
+    inputPath = std::move(path_obj);
+}
+
+void PipelineModel::setOutputPath(const std::string& path) {
+    std::filesystem::path path_obj{ path };
+    validateOutputPath(path_obj);
+    outputPath = std::move(path_obj);
+}
 
 PipelineModel::AddNodeResult PipelineModel::addNode(
     const ComponentDescriptor& desc, NodeParams params, const std::string& name
@@ -79,7 +88,7 @@ PipelineModel::RunResult PipelineModel::execute() {
         throw std::runtime_error{ "Pipeline has no nodes." };
     }
 
-    Image image{ inputPath };
+    Image image{ inputPath.string() };
     const components::Context context{ image };
 
     const auto start  { std::chrono::high_resolution_clock::now() };
@@ -100,4 +109,38 @@ ParameterValidator::ValidationResult PipelineModel::validateParams(const NodePar
             return ParameterValidator::validate(p);
         }
     }, params);
+}
+
+void PipelineModel::validateInputPath(const std::filesystem::path& path) {
+    if (path.empty()) {
+        throw std::invalid_argument{ "Input path cannot be empty." };
+    }
+    if (!path.has_filename() || path.filename().empty()) {
+        throw std::invalid_argument{ "Input path must include a file name." };
+    }
+    if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path)) {
+        throw std::invalid_argument{ "Input path does not point to an existing file: " + path.string() };
+    }
+
+}
+
+void PipelineModel::validateOutputPath(const std::filesystem::path& path) {
+    if (path.empty()) {
+        throw std::invalid_argument{ "Output path cannot be empty." };
+    }
+    if (!path.has_filename() || path.filename().empty()) {
+        throw std::invalid_argument{ "Output path must include a file name." };
+    }
+    if (!path.has_extension()) {
+        throw std::invalid_argument{ "Output path must include a file extension." };
+    }
+    const std::string ext{ path.extension().string() };
+    if (!Image::isSupportedSaveExtension(ext)) {
+        throw std::invalid_argument{
+            "Unsupported output extension: " + ext + " (expected .png, .jpg, or .jpeg)."
+        };
+    }
+    if (!path.parent_path().empty() && !std::filesystem::exists(path.parent_path())) {
+        throw std::invalid_argument{ "Output path's parent directory does not exist: " + path.parent_path().string() };
+    }
 }

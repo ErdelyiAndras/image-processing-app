@@ -49,6 +49,8 @@ public:
         const std::vector<std::pair<const Image* const, Color>>& overlays
     );
 
+    static bool isSupportedSaveExtension(std::string ext);
+
 private:
     PixelIdx rows;
     PixelIdx cols;
@@ -58,7 +60,7 @@ private:
 
     static bool saveUsingFormat(
         const std::string& name,
-        const std::string& ext,
+        std::string ext,
         const std::vector<uint8_t>& output,
         int cols,
         int rows,
@@ -67,6 +69,8 @@ private:
 
     static uint8_t toUint8(PixelValue value);
     static uint8_t blend(uint8_t base, uint8_t overlay, float t);
+
+    static void to_lowercase(std::string& str);
 };
 
 #endif // IMAGE_H

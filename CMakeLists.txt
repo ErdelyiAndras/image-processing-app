@@ -22,7 +22,7 @@ set(IS_RELEASE_AND_MSVC        "$<AND:${IS_RELEASE},${IS_MSVC}>")
 set(IS_RELEASE_AND_CLANG_CL    "$<AND:${IS_RELEASE},${IS_CLANG_CL}>")
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY
-    "$<IF:${IS_RELEASE},MultiThreaded,MultiThreadedDebugDLL>"
+    "$<IF:${IS_RELEASE},MultiThreaded,$<IF:${IS_CLANG_CL},MultiThreadedDLL,MultiThreadedDebugDLL>>"
 )
 
 find_program(CLANG_TIDY_EXE NAMES clang-tidy)

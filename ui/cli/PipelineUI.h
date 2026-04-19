@@ -9,9 +9,6 @@
 
 class PipelineUI {
 public:
-    explicit PipelineUI(std::string inputPath = "", std::string outputPath = "")
-        : m_controller(std::move(inputPath), std::move(outputPath)) {}
-
     void run() {
         int option;
         do {
@@ -20,15 +17,15 @@ public:
             std::cout << "\nChosen: " << option << "\n";
 
             switch (option) {
-                case 1:  m_controller.setInput();        break;
-                case 2:  m_controller.setOutput();       break;
-                case 3:  m_controller.addNode();         break;
-                case 4:  m_controller.removeNode();      break;
-                case 5:  m_controller.connectNodes();    break;
-                case 6:  m_controller.disconnectNodes(); break;
-                case 7:  m_controller.configureNode();   break;
-                case 8:  m_controller.listPipeline();    break;
-                case 9:  m_controller.run();             break;
+                case 1:  controller.setInput();        break;
+                case 2:  controller.setOutput();       break;
+                case 3:  controller.addNode();         break;
+                case 4:  controller.removeNode();      break;
+                case 5:  controller.connectNodes();    break;
+                case 6:  controller.disconnectNodes(); break;
+                case 7:  controller.configureNode();   break;
+                case 8:  controller.listPipeline();    break;
+                case 9:  controller.run();             break;
                 case 0:  std::cout << "\n" << Terminal::indent << "Goodbye.\n";  break;
                 default: std::cout << Terminal::indent << "Invalid choice.\n"; break;
             }
@@ -38,13 +35,13 @@ public:
     }
 
 private:
-    PipelineController m_controller;
+    PipelineController controller;
 
     void displayMainMenu() const {
         Terminal::header("Image Processing Pipeline Builder");
-        std::cout << Terminal::indent << "Input  : " << (m_controller.getInputPath().empty()  ? "(not set)" : m_controller.getInputPath())  << "\n"
-                  << Terminal::indent << "Output : " << (m_controller.getOutputPath().empty() ? "(not set)" : m_controller.getOutputPath()) << "\n"
-                  << Terminal::indent << "Nodes  : " << m_controller.nodeCount() << "\n\n"
+        std::cout << Terminal::indent << "Input  : " << (controller.getInputPath().empty()  ? "(not set)" : controller.getInputPath())  << "\n"
+                  << Terminal::indent << "Output : " << (controller.getOutputPath().empty() ? "(not set)" : controller.getOutputPath()) << "\n"
+                  << Terminal::indent << "Nodes  : " << controller.nodeCount() << "\n\n"
                   << Terminal::indent << "1. Set input image\n"
                   << Terminal::indent << "2. Set output path\n"
                   << Terminal::indent << "3. Add node\n"

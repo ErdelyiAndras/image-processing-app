@@ -2,14 +2,10 @@
 
 #include <exception>
 #include <iostream>
-#include <string>
 
-int main(int argc, char** argv) {
+int main() {
     try {
-        const std::string input_path  = (argc > 1) ? argv[1] : "";
-        const std::string output_path = (argc > 2) ? argv[2] : "";
-
-        PipelineUI ui(input_path, output_path);
+        PipelineUI ui;
         ui.run();
     }
     catch (const std::exception& ex) {
