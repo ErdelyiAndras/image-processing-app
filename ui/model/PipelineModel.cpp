@@ -115,7 +115,7 @@ void PipelineModel::validateInputPath(const std::filesystem::path& path) {
     if (path.empty()) {
         throw std::invalid_argument{ "Input path cannot be empty." };
     }
-    if (!path.has_filename() || path.filename().empty()) {
+    if (!path.has_filename()) {
         throw std::invalid_argument{ "Input path must include a file name." };
     }
     if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path)) {
@@ -128,7 +128,7 @@ void PipelineModel::validateOutputPath(const std::filesystem::path& path) {
     if (path.empty()) {
         throw std::invalid_argument{ "Output path cannot be empty." };
     }
-    if (!path.has_filename() || path.filename().empty()) {
+    if (!path.has_filename()) {
         throw std::invalid_argument{ "Output path must include a file name." };
     }
     if (!path.has_extension()) {
