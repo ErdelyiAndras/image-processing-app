@@ -169,7 +169,7 @@ namespace pipeline {
             if (std::holds_alternative<ProcessingNode>(nodes[id].data) && nodes[id].predecessors.size() > 1U) {
                 return true;
             }
-            if (std::holds_alternative<MergeNode>(nodes[id].data) && nodes[id].predecessors.empty()) {
+            if (std::holds_alternative<MergeNode>(nodes[id].data) && nodes[id].predecessors.size() <= 1U) {
                 return true;
             }
         }
