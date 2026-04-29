@@ -23,13 +23,17 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
-                "CMAKE_CXX_COMPILER":   "clang-cl"
+                "CMAKE_CXX_COMPILER":   "clang-cl",
+                "CMAKE_C_COMPILER":     "clang-cl"
             }
         },
         {
             "name": "msvc",
             "inherits": ["base", "generator-msvc"],
-            "binaryDir": "${sourceDir}/build-msvc"
+            "binaryDir": "${sourceDir}/build-msvc",
+            "cacheVariables": {
+                "BUILD_TESTS": "ON"
+            }
         },
         {
             "name": "clang-cl-debug",
@@ -54,23 +58,41 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "WarningsAsErrors"
             }
+        },
+        {
+            "name": "clang-cl-tests",
+            "inherits": ["base", "generator-ninja-clang-cl"],
+            "binaryDir": "${sourceDir}/build-clang-cl-tests",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Tests",
+                "BUILD_TESTS": "ON"
+            }
         }
     ],
     "buildPresets": [
         {
             "name": "msvc-debug",
             "configurePreset": "msvc",
-            "configuration": "Debug"
+            "configuration": "Debug",
+            "targets": ["image-processing-app"]
         },
         {
             "name": "msvc-release",
             "configurePreset": "msvc",
-            "configuration": "Release"
+            "configuration": "Release",
+            "targets": ["image-processing-app"]
         },
         {
             "name": "msvc-warnings-as-errors",
             "configurePreset": "msvc",
-            "configuration": "WarningsAsErrors"
+            "configuration": "WarningsAsErrors",
+            "targets": ["image-processing-app"]
+        },
+        {
+            "name": "msvc-tests",
+            "configurePreset": "msvc",
+            "configuration": "Tests",
+            "targets": ["image-processing-app-tests"]
         },
         {
             "name": "clang-cl-debug",
@@ -83,6 +105,11 @@
         {
             "name": "clang-cl-warnings-as-errors",
             "configurePreset": "clang-cl-warnings-as-errors"
+        },
+        {
+            "name": "clang-cl-tests",
+            "configurePreset": "clang-cl-tests",
+            "targets": ["image-processing-app-tests"]
         }
     ]
 }

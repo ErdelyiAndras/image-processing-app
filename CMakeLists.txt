@@ -5,13 +5,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;WarningsAsErrors" CACHE STRING "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;WarningsAsErrors;Tests" CACHE STRING "" FORCE)
 
 set(CMAKE_CXX_FLAGS_WARNINGSASERRORS             "${CMAKE_CXX_FLAGS_DEBUG}"             CACHE STRING "" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS_WARNINGSASERRORS      "${CMAKE_EXE_LINKER_FLAGS_DEBUG}"      CACHE STRING "" FORCE)
 set(CMAKE_SHARED_LINKER_FLAGS_WARNINGSASERRORS   "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"   CACHE STRING "" FORCE)
 
-set(IS_DEBUG_LIKE      "$<OR:$<CONFIG:Debug>,$<CONFIG:WarningsAsErrors>>")
+set(CMAKE_CXX_FLAGS_TESTS             "${CMAKE_CXX_FLAGS_DEBUG}"             CACHE STRING "" FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_TESTS      "${CMAKE_EXE_LINKER_FLAGS_DEBUG}"      CACHE STRING "" FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS_TESTS   "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"   CACHE STRING "" FORCE)
+
+set(IS_DEBUG_LIKE      "$<OR:$<CONFIG:Debug>,$<CONFIG:WarningsAsErrors>,$<CONFIG:Tests>>")
 set(IS_RELEASE         "$<CONFIG:Release>")
 set(IS_MSVC            "$<CXX_COMPILER_ID:MSVC>")
 set(IS_CLANG_CL        "$<CXX_COMPILER_ID:Clang>")
@@ -200,6 +204,11 @@ endif()
 
 add_subdirectory(src)
 add_subdirectory(ui)
+
+option(BUILD_TESTS "Build test suites" OFF)
+if(BUILD_TESTS)
+    add_subdirectory(tests tests-build)
+endif()
 
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE image_processing_lib cli)
