@@ -68,6 +68,7 @@ target_include_directories(image-processing-app-tests PRIVATE
 
 target_compile_definitions(image-processing-app-tests PRIVATE
     "REFERENCE_IMAGES_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/components/reference-images\""
+    "INPUT_IMAGES_DIR=\"${CMAKE_SOURCE_DIR}/reference-images\""
 )
 
 target_link_options(image-processing-app-tests PRIVATE

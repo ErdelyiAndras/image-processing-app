@@ -19,15 +19,16 @@ namespace test {
     static constexpr float tolerance{ 1.0f / 255.0f };
 
     static const std::filesystem::path reference_image_dir{ REFERENCE_IMAGES_DIR };
+    static const std::filesystem::path input_image_dir{ INPUT_IMAGES_DIR };
 
     static std::vector<std::string> findImageSets() {
         std::vector<std::string> sets;
-        if (!std::filesystem::exists(test::reference_image_dir)) {
+        if (!std::filesystem::exists(test::input_image_dir)) {
             return sets;
         }
-        for (const auto& entry : std::filesystem::directory_iterator(test::reference_image_dir)) {
-            if (entry.is_directory() && std::filesystem::exists(entry.path() / "input.png")) {
-                sets.push_back(entry.path().filename().string());
+        for (const auto& entry : std::filesystem::directory_iterator(test::input_image_dir)) {
+            if (entry.is_regular_file() && entry.path().extension() == ".png") {
+                sets.push_back(entry.path().stem().string());
             }
         }
         return sets;
@@ -48,6 +49,7 @@ namespace test {
         const std::filesystem::path ref_path{ test::reference_image_dir / set_name / (component_name + ".png") };
 
         if (!std::filesystem::exists(ref_path)) {
+            std::filesystem::create_directories(test::reference_image_dir / set_name);
             const std::string base{ (test::reference_image_dir / set_name / component_name).generic_string() };
             ASSERT_TRUE(out_image.save(base, ".png")) << "Failed to write reference image: " << ref_path;
             GTEST_SKIP() << "Generated new reference image: " << ref_path << "  - re-run the test suite to enable comparison.";
@@ -77,7 +79,7 @@ TEST(ComponentRegressionTest, GaussianBlurCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::denoising::GaussianBlurCPU component{};
         components::Context ctx{ input };
@@ -96,7 +98,7 @@ TEST(ComponentRegressionTest, TVDenoisingCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::denoising::TVDenoisingCPU component{};
         components::Context ctx{ input };
@@ -115,7 +117,7 @@ TEST(ComponentRegressionTest, SobelEdgeDetectionCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::Context ctx{ input };
 
@@ -144,7 +146,7 @@ TEST(ComponentRegressionTest, CannyEdgeDetectionCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::Context ctx{ input };
 
@@ -173,7 +175,7 @@ TEST(ComponentRegressionTest, HoughLineShapeDetectionCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::Context ctx{ input };
 
@@ -213,7 +215,7 @@ TEST(ComponentRegressionTest, HoughCircleShapeDetectionCPU) {
     for (const std::string& set_name : sets) {
         SCOPED_TRACE("image set: " + set_name);
 
-        Image input{ (test::reference_image_dir / set_name / "input.png").string() };
+        Image input{ (test::input_image_dir / (set_name + ".png")).string() };
 
         components::Context ctx{ input };
 

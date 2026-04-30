@@ -32,7 +32,8 @@
             "inherits": ["base", "generator-msvc"],
             "binaryDir": "${sourceDir}/build-msvc",
             "cacheVariables": {
-                "BUILD_TESTS": "ON"
+                "BUILD_TESTS": "ON",
+                "BUILD_BENCHMARKS": "ON"
             }
         },
         {
@@ -67,6 +68,15 @@
                 "CMAKE_BUILD_TYPE": "Tests",
                 "BUILD_TESTS": "ON"
             }
+        },
+        {
+            "name": "clang-cl-benchmark",
+            "inherits": ["base", "generator-ninja-clang-cl"],
+            "binaryDir": "${sourceDir}/build-clang-cl-benchmark",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_BENCHMARKS": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -95,6 +105,12 @@
             "targets": ["image-processing-app-tests"]
         },
         {
+            "name": "msvc-benchmark",
+            "configurePreset": "msvc",
+            "configuration": "Release",
+            "targets": ["image-processing-app-benchmark"]
+        },
+        {
             "name": "clang-cl-debug",
             "configurePreset": "clang-cl-debug"
         },
@@ -110,6 +126,11 @@
             "name": "clang-cl-tests",
             "configurePreset": "clang-cl-tests",
             "targets": ["image-processing-app-tests"]
+        },
+        {
+            "name": "clang-cl-benchmark",
+            "configurePreset": "clang-cl-benchmark",
+            "targets": ["image-processing-app-benchmark"]
         }
     ]
 }

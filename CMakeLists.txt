@@ -210,6 +210,11 @@ if(BUILD_TESTS)
     add_subdirectory(tests tests-build)
 endif()
 
+option(BUILD_BENCHMARKS "Build benchmark suite" OFF)
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmark benchmark-build)
+endif()
+
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE image_processing_lib cli)
 

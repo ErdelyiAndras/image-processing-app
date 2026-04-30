@@ -24,6 +24,7 @@ target_link_libraries(component_tests PRIVATE delayimp)
 
 target_compile_definitions(component_tests PRIVATE
     "REFERENCE_IMAGES_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/reference-images\""
+    "INPUT_IMAGES_DIR=\"${CMAKE_SOURCE_DIR}/reference-images\""
 )
 
 include(GoogleTest)
